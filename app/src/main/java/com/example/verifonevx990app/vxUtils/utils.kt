@@ -475,10 +475,25 @@ object ConnectionTimeStamps {
            }*/
     }
 
-    fun getStamp(): String = if (stamp.isNotEmpty()) stamp else "~~~~"
+    fun getStamp(): String {
+        val stamp=  if (stamp.isNotEmpty()) stamp else "~~~~"
+        val otherInfo= getOtherInfo()
+        return stamp+otherInfo
+
+    }
+
 
     fun getOtherInfo(): String {
-        return "~${VerifoneApp.networkStrength}~${VerifoneApp.batteryStrength}~${VerifoneApp.imeiNo}~${VerifoneApp.simNo}~${VerifoneApp.operatorName}~~~~"
+        return try {
+            val imei = VFService.vfDeviceService?.deviceInfo?.imei
+            val batteryStrength = VFService.vfDeviceService?.deviceInfo?.batteryLevel
+            val simNo = VFService.vfDeviceService?.deviceInfo?.iccid
+            Log.e("[1] iemi,battry,simNo", "$imei ,${batteryStrength} -----> ${simNo}  ")
+            "~${VerifoneApp.networkStrength}~${batteryStrength}~${imei}~${simNo}~${VerifoneApp.operatorName}"
+        } catch (ex: java.lang.Exception) {
+            Log.e("[2]iemi,battry,simNo", "${VerifoneApp.imeiNo} ,${VerifoneApp.batteryStrength} -----> ${VerifoneApp.simNo}  ")
+            "~${VerifoneApp.networkStrength}~${VerifoneApp.batteryStrength}~${VerifoneApp.imeiNo}~${VerifoneApp.simNo}~${VerifoneApp.operatorName}"
+        }
     }
 
 }
@@ -1326,14 +1341,14 @@ fun convertStr2Nibble2Str(data: String): String {
 }
 
 fun getCurrentDate(): String{
-    val sdf = SimpleDateFormat("YYYYMMdd")
+    val sdf = SimpleDateFormat("yyyyMMdd")
     val d = Date()
     val currDt = sdf.format(d)
 
     return currDt
 }
 fun getCurrentDateforMag(): String{
-    val sdf = SimpleDateFormat("YYMM")
+    val sdf = SimpleDateFormat("yyMM")
     val d = Date()
     val currDt = sdf.format(d)
 

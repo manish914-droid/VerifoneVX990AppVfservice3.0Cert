@@ -1056,6 +1056,7 @@ class VFTransactionActivity : BaseActivity() {
                     emiCustomerDetails = data.getParcelableExtra<EmiCustomerDetails>("emi")
                     var cardProcessedData: CardProcessedDataModal =
                         data.getSerializableExtra("cardprocess") as CardProcessedDataModal
+                    globalCardProcessedModel = cardProcessedData
                     when (globalCardProcessedModel.getReadCardType()) {
                         DetectCardType.MAG_CARD_TYPE -> {
                             // for Mag

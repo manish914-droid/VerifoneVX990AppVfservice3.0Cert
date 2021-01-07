@@ -200,19 +200,6 @@ class EmiActivity : BaseActivity(), IBenefitTable, View.OnClickListener {
 
                     }
 
-                    alertBoxWithAction(null, null,
-                            getString(R.string.emis),
-                            getString(R.string.no_emi),
-                            false,
-                            getString(R.string.positive_button_ok),
-                            { alertPositiveCallback ->
-                                if (alertPositiveCallback) {
-                                    startActivity(Intent(this@EmiActivity, MainActivity::class.java).apply {
-                                        flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                    })
-                                }
-                            },
-                            {})
 
                 }
 

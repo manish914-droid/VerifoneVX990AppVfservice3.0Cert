@@ -16,15 +16,15 @@ android {
         }
     }
     buildTypes {
-       /* release {
-          //  debuggable false
-          //  minifyEnabled false
+        release {
+           debuggable false
+           minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
-        }*/
+        }
 
         debug {
-            debuggable true
+            debuggable false
             minifyEnabled false
 
         }
@@ -36,7 +36,7 @@ android {
         targetSdkVersion 29
         versionCode 1
         buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
-        buildConfigField "long", "REVISION_ID", "201023"
+        buildConfigField "long", "REVISION_ID", "210106"
         versionName "01.01.10"
         multiDexEnabled true
 

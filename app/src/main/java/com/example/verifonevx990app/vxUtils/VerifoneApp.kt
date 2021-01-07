@@ -173,7 +173,7 @@ class VerifoneApp : Application() {
         }
 
         UserProvider.refresh()
-      //  setNetworkStrength()
+        setNetworkStrength()
 
     }
 

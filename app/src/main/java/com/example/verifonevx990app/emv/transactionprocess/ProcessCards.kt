@@ -25,7 +25,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class ProcessCard(var activity: Activity, var handler: Handler, var cardProcessedDataModal: CardProcessedDataModal, transactionalAmount: Long, var transactionCallback: (CardProcessedDataModal) -> Unit) {
-  //  private var iemv: IEMV? = VFService.vfIEMV
+    //  private var iemv: IEMV? = VFService.vfIEMV
 
     //  private val cardProcessedDataModal: CardProcessedDataModal by lazy { CardProcessedDataModal() }
 
@@ -169,24 +169,17 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                                 )
                                             } else {
                                                 if (cardProcessedDataModal.getTransType() == TransactionType.SALE.type) {
-                                                    (activity as VFTransactionActivity).checkEmiInstaEmi(
-                                                        cardProcessedDataModal
-                                                    ) {
+                                                    (activity as VFTransactionActivity).checkEmiInstaEmi(cardProcessedDataModal) {
                                                         cardProcessedDataModal = it
                                                         if (cardProcessedDataModal.getTransType() == TransactionType.EMI_SALE.type) {
 
                                                         } else {
-                                                            processSwipeCardWithPINorWithoutPIN(
-                                                                isPin,
-                                                                cardProcessedDataModal
-                                                            )
+                                                            processSwipeCardWithPINorWithoutPIN(isPin, cardProcessedDataModal)
                                                         }
 
                                                     }
                                                 } else if (cardProcessedDataModal.getTransType() == TransactionType.EMI_SALE.type) {
-                                                    (activity as VFTransactionActivity).checkEmiBankEmi(
-                                                        cardProcessedDataModal
-                                                    ) {
+                                                    (activity as VFTransactionActivity).checkEmiBankEmi(cardProcessedDataModal) {
                                                     }
 
                                                 } else {
@@ -198,29 +191,21 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                             }
                                         } else {
                                             if (cardProcessedDataModal.getTransType() == TransactionType.SALE.type) {
-                                                (activity as VFTransactionActivity).checkEmiInstaEmi(
-                                                    cardProcessedDataModal
-                                                ) {
+                                                (activity as VFTransactionActivity).checkEmiInstaEmi(cardProcessedDataModal) {
                                                     cardProcessedDataModal = it
                                                     if (cardProcessedDataModal.getTransType() == TransactionType.EMI_SALE.type) {
+                                                        processSwipeCardWithPINorWithoutPIN(isPin, cardProcessedDataModal)
 
                                                     } else {
-                                                        processSwipeCardWithPINorWithoutPIN(
-                                                            isPin, cardProcessedDataModal
-                                                        )
+                                                        processSwipeCardWithPINorWithoutPIN(isPin, cardProcessedDataModal)
                                                     }
                                                 }
                                             } else if (cardProcessedDataModal.getTransType() == TransactionType.EMI_SALE.type) {
-                                                (activity as VFTransactionActivity).checkEmiBankEmi(
-                                                    cardProcessedDataModal
-                                                ) {
+                                                (activity as VFTransactionActivity).checkEmiBankEmi(cardProcessedDataModal) {
                                                     //   iemv?.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed)
                                                 }
                                             } else {
-                                                processSwipeCardWithPINorWithoutPIN(
-                                                    isPin,
-                                                    cardProcessedDataModal
-                                                )
+                                                processSwipeCardWithPINorWithoutPIN(isPin, cardProcessedDataModal)
                                             }
                                         }
                                     }
@@ -337,6 +322,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                         cardProcessedDataModal.setPosEntryMode(PosEntryModeType.EMV_POS_ENTRY_FALL_MAGPIN.posEntry.toString())
                                     else
                                         cardProcessedDataModal.setPosEntryMode(PosEntryModeType.POS_ENTRY_SWIPED_NO4DBC_PIN.posEntry.toString())
+
                                     cardProcessedDataModal.setApplicationPanSequenceValue("00")
                                     transactionCallback(cardProcessedDataModal)
 
@@ -379,14 +365,14 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                         println("Transactionamount is calling"+transactionalAmount.toString()+"Handler is"+handler)
                         if (transactionalAmount != null) {
                             DoEmv(activity, handler, cardProcessedDataModal, ConstIPBOC.startEMV.intent.VALUE_cardType_smart_card, transactionalAmount) { cardProcessedDataModal ->
-                            /*    if (cardProcessedDataModal.getFallbackType() != EFallbackCode.EMV_fallback.fallBackCode) {
-                                    println("Contact is calling in fallback")
-                                    iemv?.stopCheckCard()
-                                    detectCard(cardProcessedDataModal.getTransactionAmount(), cardProcessedDataModal.getFallbackType())
-                                } else {
-                                    println("Contact is calling in fallback1")
-                                    transactionCallback(cardProcessedDataModal)
-                                }*/
+                                /*    if (cardProcessedDataModal.getFallbackType() != EFallbackCode.EMV_fallback.fallBackCode) {
+                                        println("Contact is calling in fallback")
+                                        iemv?.stopCheckCard()
+                                        detectCard(cardProcessedDataModal.getTransactionAmount(), cardProcessedDataModal.getFallbackType())
+                                    } else {
+                                        println("Contact is calling in fallback1")
+                                        transactionCallback(cardProcessedDataModal)
+                                    }*/
                                 transactionCallback(cardProcessedDataModal)
                             }
                         }
@@ -542,8 +528,8 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                 //EMV Fallback case when we insert card from other side then chip side:-
                                 iemv?.stopCheckCard()
                                 (activity as VFTransactionActivity).handleEMVFallbackFromError(activity.getString(
-                                        R.string.fallback
-                                    ), activity.getString(R.string.please_use_another_option), false) {
+                                    R.string.fallback
+                                ), activity.getString(R.string.please_use_another_option), false) {
                                     cardProcessedDataModal.setFallbackType(EFallbackCode.EMV_fallback.fallBackCode)
                                     detectCard(cardProcessedDataModal.getTransactionAmount() ?: 0, error)
                                 }
