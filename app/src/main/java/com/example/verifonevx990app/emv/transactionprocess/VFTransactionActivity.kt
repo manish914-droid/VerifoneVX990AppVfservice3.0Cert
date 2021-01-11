@@ -78,7 +78,7 @@ class VFTransactionActivity : BaseActivity() {
     private val tv_card_number_heading by lazy { findViewById<BHTextView>(R.id.tv_card_number_heading) }
     private val tv_insert_card by lazy { findViewById<BHTextView>(R.id.tv_insert_card) }
 
-
+//onCreate called 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_transaction)
