@@ -46,10 +46,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_toolbar.*
 import kotlinx.android.synthetic.main.main_drawer.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.io.File
 
 class MainActivity : BaseActivity(), IFragmentRequest,
@@ -344,10 +341,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                             VFService.showToast(getString(R.string.app_update_downloaded_successfully_please_install_updates))
                             if (!TextUtils.isEmpty(fileUri.toString())) {
                                 startActivity(Intent(Intent.ACTION_VIEW).apply {
-                                    setDataAndType(
-                                        fileUri,
-                                        "application/vnd.android.package-archive"
-                                    )
+                                    setDataAndType(fileUri, "application/vnd.android.package-archive")
                                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                 })
                             } else {
@@ -1202,8 +1196,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
                         //Batch and Roc Increment for Settlement:-
 
-                        val settlement_roc =
-                            AppPreference.getIntData(PrefConstant.SETTLEMENT_ROC_INCREMENT.keyName.toString()) + 1
+                        val settlement_roc = AppPreference.getIntData(PrefConstant.SETTLEMENT_ROC_INCREMENT.keyName.toString()) + 1
 
                         AppPreference.setIntData(
                             PrefConstant.SETTLEMENT_ROC_INCREMENT.keyName.toString(), settlement_roc
@@ -1244,14 +1237,11 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                                             isAppUpdateAvailableData?.split("|") as MutableList<String>
                                         if (dataList.size > 1) {
                                             onBackPressed()
-                                            writeAppVersionNameInFile(this@MainActivity)
+                                            writeAppRevisionIDInFile(this@MainActivity)
                                             when (dataList[0]) {
                                                 AppUpdate.MANDATORY_APP_UPDATE.updateCode -> {
                                                     if (terminalParameterTable?.reservedValues?.length == 20 &&
-                                                        terminalParameterTable.reservedValues.endsWith(
-                                                            "1"
-                                                        )
-                                                    )
+                                                        terminalParameterTable.reservedValues.endsWith("1"))
                                                         startFTPAppUpdate(
                                                             dataList[2],
                                                             dataList[3].toInt(),
@@ -1371,7 +1361,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                                                 isAppUpdateAvailableData?.split("|") as MutableList<String>
                                             if (dataList.size > 1) {
                                                 onBackPressed()
-                                                writeAppVersionNameInFile(this@MainActivity)
+                                                writeAppRevisionIDInFile(this@MainActivity)
                                                 when (dataList[0]) {
                                                     AppUpdate.MANDATORY_APP_UPDATE.updateCode -> {
                                                         if (terminalParameterTable?.reservedValues?.length == 20 &&

@@ -40,6 +40,7 @@ class DashboardFragment : Fragment() {
     private var iFragmentRequest: IFragmentRequest?= null
     private val itemList = mutableListOf<EDashboardItem>()
     private val mAdapter by lazy { DashboardAdapter(itemList,iFragmentRequest) }
+    private var counter = 0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_dashboard, container, false).apply { initUI(this) }
@@ -119,55 +120,40 @@ class DashboardFragment : Fragment() {
         iFragmentRequest = null
     }
 
-    //Below method only executed when the app is updated to newer version and there is mismatch
-    // in previous store version in file and new app version:-
+    /*Below method only executed when the app is updated to newer version and
+    previous store version in file < new app updated version:- */
     private fun sendConfirmationToHost() {
         try {
             context?.let {
-                readAppVersionNameFromFile(it) { fileStoredAppVersionName ->
-                    if (!TextUtils.isEmpty(fileStoredAppVersionName)) {
-                        if (fileStoredAppVersionName < BuildConfig.VERSION_NAME) {
+                getRevisionIDFromFile(it) { isRevisionIDSame ->
+                        if (isRevisionIDSame) {
                             sendConfirmation()
-                        }
                     }
                 }
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
+            VFService.showToast(getString(R.string.confirmation_app_update_failed))
         }
     }
 
     //Sync App Confirmation to Host:-
     private fun sendConfirmation() {
-        val appUpdateConfirmationISOData =
-            SendAppUpdateConfirmationPacket().createAppUpdateConfirmationPacket()
+        val appUpdateConfirmationISOData = SendAppUpdateConfirmationPacket().createAppUpdateConfirmationPacket()
         val isoByteArray = appUpdateConfirmationISOData.generateIsoByteRequest()
         (activity as MainActivity).showProgress(getString(R.string.please_wait))
         SyncAppUpdateConfirmation(isoByteArray) { syncStatus ->
             GlobalScope.launch(Dispatchers.Main) {
                 (activity as MainActivity).hideProgress()
                 if (syncStatus) {
-                    (activity as MainActivity).alertBoxWithAction(null,
-                        null,
-                        getString(R.string.app_update_confirmation),
-                        getString(R.string.app_updated_successfully),
-                        false,
-                        getString(R.string.positive_button_ok),
-                        {
-                            context?.let { it1 ->
-                                writeAppVersionNameInFile(it1)
-                            }
-                        },
-                        {})
+                    context?.let { it1 ->
+                        writeAppRevisionIDInFile(it1)
+                    }
                 } else {
-                    (activity as MainActivity).alertBoxWithAction(null,
-                        null,
-                        getString(R.string.app_update_confirmation),
-                        getString(R.string.click_on_ok_button_to_confirm_app_update),
-                        true,
-                        getString(R.string.yes),
-                        { sendConfirmation() },
-                        {})
+                    counter += 1
+                    if(counter<2) {
+                        sendConfirmation()
+                    }
                 }
             }
         }

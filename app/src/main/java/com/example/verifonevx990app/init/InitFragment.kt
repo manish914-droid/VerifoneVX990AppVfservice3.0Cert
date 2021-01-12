@@ -35,10 +35,7 @@ class InitFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.ma_bnv)
-        AppPreference.saveBoolean(
-            PrefConstant.INIT_AFTER_SETTLE_BATCH_SUCCESS.keyName.toString(),
-            true
-        )
+        AppPreference.saveBoolean(PrefConstant.INIT_AFTER_SETTLE_BATCH_SUCCESS.keyName.toString(), true)
         if (bottomNavigationView is BottomNavigationView) {
             bottomNavigationView.menu.findItem(R.id.home)?.isChecked = true
         }
@@ -46,13 +43,9 @@ class InitFragment : Fragment() {
         (iDialog as MainActivity).ma_bnv.visibility = View.GONE
         view.if_et.transformationMethod = null
 
-        //Below Code write App Version Name to file when first time Init Screen opens
-        // in App after that this file will override after settlement:-
-        context?.let { writeAppVersionNameInFile(it) }
-
-        //getWakeLock()
-
-        // wl.release()
+        //Below Code write App Revision ID to file when first time Init Screen opens
+        //in App after that this file will override after settlement:-
+        context?.let { writeAppRevisionIDInFile(it) }
 
         view.if_et.addTextChangedListener(OnTextChange {
             view.if_proceed_btn.isEnabled = it.length == 8

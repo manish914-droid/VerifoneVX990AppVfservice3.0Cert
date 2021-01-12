@@ -329,6 +329,8 @@
     <string name="successfull_init">INIT Successful</string>
     <string name="timeOut">Timeout</string>
     <string name="transaction_terminated">Transaction terminated</string>
+    <string name="app_is_already_running_on_latest_version_no_updates_available">App is Already Running on The Latest Version.\nNo Updates Available!</string>
+    <string name="confirmation_app_update_failed">App Update Confirmation Send Failed....</string>
 
 
 </resources>

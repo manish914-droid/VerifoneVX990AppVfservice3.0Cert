@@ -1472,16 +1472,14 @@ fun txnSuccessToast(context: Context,msg: String="Transaction Approved"){
     }
 }
 
-//Below method is used to write TCT Data and TID of user so that after App Update we can get data from file and do AutoInit:-
-fun writeAppVersionNameInFile(context: Context) {
-    val tct = TerminalCommunicationTable.selectFromSchemeTable()
+//Below method is used to write App Revision ID for Update Confirmation:-
+fun writeAppRevisionIDInFile(context: Context) {
     try {
         val saveFile = File(context.externalCacheDir, "version.txt")
         val writer = BufferedWriter(FileWriter(saveFile))
-        writer.write(BuildConfig.VERSION_NAME)
+        writer.write(BuildConfig.REVISION_ID.toString())
         writer.flush()
         writer.close()
-        //VFService.showToast("Successfully write data to the file.")
         Log.d("FilePath:- ", Uri.fromFile(saveFile).toString())
     } catch (e: IOException) {
         VFService.showToast("An error occurred.")
@@ -1489,9 +1487,9 @@ fun writeAppVersionNameInFile(context: Context) {
     }
 }
 
-//Below method is used to read IPAddress , IPPort and Merchant TID from saved File in Terminal:-
+//Below method is used to read App Revision ID from saved File in Terminal:-
 fun readAppVersionNameFromFile(context: Context, cb: (String) -> Unit) {
-    var versionName: String? = null
+    var revisionID: String? = null
     try {
         val file = File(context.externalCacheDir, "version.txt")
         val text: StringBuilder? = null
@@ -1500,14 +1498,32 @@ fun readAppVersionNameFromFile(context: Context, cb: (String) -> Unit) {
         while (br.readLine().also { line = it } != null) {
             text?.append(line)
             text?.append('\n')
-            versionName = line.toString()
+            revisionID = line.toString()
         }
-        Log.d("DataList:- ", versionName.toString())
+        Log.d("DataList:- ", revisionID.toString())
         br.close().toString()
-        cb(versionName ?: "")
+        cb(revisionID ?: "")
     } catch (ex: IOException) {
         ex.printStackTrace()
-        cb(versionName ?: "")
+        cb(revisionID ?: "")
+    }
+}
+
+//Below Method is used to get App Revision ID Saved in Terminal File:-
+fun getRevisionIDFromFile(context: Context , cb: (Boolean) -> Unit){
+    try {
+        readAppVersionNameFromFile(context) { fileStoredAppRevisionID ->
+            if (!TextUtils.isEmpty(fileStoredAppRevisionID)) {
+                if (fileStoredAppRevisionID < BuildConfig.REVISION_ID.toString()) {
+                    cb(true)
+                }else
+                    cb(false)
+            }else
+                cb(false)
+        }
+    } catch (ex: Exception) {
+        ex.printStackTrace()
+        cb(false)
     }
 }
 
