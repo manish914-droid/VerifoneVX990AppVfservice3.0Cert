@@ -547,7 +547,7 @@ fun createTipAdjustISO(tipAmt: Float, batch: BatchFileDataTable): IsoDataWriter 
         )
         val issuerParameterTable =
             IssuerParameterTable.selectFromIssuerParameterTable(AppPreference.WALLET_ISSUER_ID)
-        val version = addPad("${BuildConfig.VERSION_NAME}.$buildDate", "0", 15, false)
+        val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)
         val pcNumber = addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY), "0", 9)
         val data = ConnectionType.GPRS.code + addPad(
             AppPreference.getString("deviceModel"),

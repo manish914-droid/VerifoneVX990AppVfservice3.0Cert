@@ -1,6 +1,5 @@
 package com.example.verifonevx990app.disputetransaction
 
-import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.main.PrefConstant
 import com.example.verifonevx990app.realmtables.BatchFileDataTable
@@ -65,8 +64,7 @@ class CreateSettlementPacket(private var settlementProcessingCode: String? = nul
                 ) + AppPreference.getBankCode()
             )
 
-            val version =
-                addPad("${BuildConfig.VERSION_NAME}.${BuildConfig.REVISION_ID}", "0", 15, false)
+            val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)
 
             //adding field 62
             addFieldByHex(

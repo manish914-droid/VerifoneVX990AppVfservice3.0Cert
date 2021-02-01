@@ -3,7 +3,7 @@ package com.example.verifonevx990app.init
 
 import android.content.Context
 import android.os.Bundle
-import android.text.TextUtils
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +13,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.appupdate.SendAppUpdateConfirmationPacket
 import com.example.verifonevx990app.appupdate.SyncAppUpdateConfirmation
@@ -41,6 +40,7 @@ class DashboardFragment : Fragment() {
     private val itemList = mutableListOf<EDashboardItem>()
     private val mAdapter by lazy { DashboardAdapter(itemList,iFragmentRequest) }
     private var counter = 0
+    private var isUpdate = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_dashboard, container, false).apply { initUI(this) }
@@ -53,6 +53,11 @@ class DashboardFragment : Fragment() {
             bottomNavigationView.visibility = View.VISIBLE
             bottomNavigationView.menu.findItem(R.id.home)?.isChecked = true
         }
+
+        //Fetching Update Key Value From AppPreference Memory to Default Send Confirmation Packet for First Time After App Update
+        //if Merchant using same AppVersion but getting App Update
+        isUpdate = AppPreference.getBoolean("isUpdate")
+        Log.d("Update Value:- ", isUpdate.toString())
 
         //Below method is only called once after App is Updated to newer version:-
         sendConfirmationToHost()
@@ -126,8 +131,8 @@ class DashboardFragment : Fragment() {
         try {
             context?.let {
                 getRevisionIDFromFile(it) { isRevisionIDSame ->
-                        if (isRevisionIDSame) {
-                            sendConfirmation()
+                    if (isRevisionIDSame || !isUpdate) {
+                        sendConfirmation()
                     }
                 }
             }
@@ -144,6 +149,7 @@ class DashboardFragment : Fragment() {
         (activity as MainActivity).showProgress(getString(R.string.please_wait))
         SyncAppUpdateConfirmation(isoByteArray) { syncStatus ->
             GlobalScope.launch(Dispatchers.Main) {
+                AppPreference.saveBoolean("isUpdate", true)
                 (activity as MainActivity).hideProgress()
                 if (syncStatus) {
                     context?.let { it1 ->

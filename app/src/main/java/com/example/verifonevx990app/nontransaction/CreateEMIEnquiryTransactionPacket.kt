@@ -1,14 +1,9 @@
 package com.example.verifonevx990app.nontransaction
 
-import android.text.TextUtils
 import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
-import com.example.verifonevx990app.emv.transactionprocess.CardProcessedDataModal
-import com.example.verifonevx990app.main.DetectCardType
-import com.example.verifonevx990app.realmtables.CardDataTable
 import com.example.verifonevx990app.realmtables.IssuerParameterTable
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
-import com.example.verifonevx990app.transactions.EmiCustomerDetails
 import com.example.verifonevx990app.utils.HexStringConverter
 import com.example.verifonevx990app.vxUtils.*
 import java.text.SimpleDateFormat
@@ -54,8 +49,9 @@ class CreateEMIEnquiryTransactionPacket(var data: HashMap<String, String>) : ITr
 
             //adding field 61
             val buildDate: String = SimpleDateFormat("yyMMdd", Locale.getDefault()).format(Date(BuildConfig.TIMESTAMP))
-            val issuerParameterTable = IssuerParameterTable.selectFromIssuerParameterTable(AppPreference.WALLET_ISSUER_ID)
-            val version = addPad("${BuildConfig.VERSION_NAME}.$buildDate", "0", 15, false)
+            val issuerParameterTable =
+                IssuerParameterTable.selectFromIssuerParameterTable(AppPreference.WALLET_ISSUER_ID)
+            val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)
             val pcNumber = addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY), "0", 9)
             val data = ConnectionType.GPRS.code + addPad(
                 AppPreference.getString("deviceModel"),

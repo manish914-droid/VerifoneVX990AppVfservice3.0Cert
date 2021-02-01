@@ -94,6 +94,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
         initUI()
         decideHome()
         refreshToolbarLogos(this)
+        Log.d("AppVerAndRev:- ", getAppVersionNameAndRevisionID())
 
         //Settle Batch When Auto Settle == 1 After Sale:-
         if (appUpdateFromSale) {
@@ -217,6 +218,8 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                         AppPreference.getString(PrefConstant.FTP_PASSWORD.keyName.toString())
                     val ftpFileName =
                         AppPreference.getString(PrefConstant.FTP_FILE_NAME.keyName.toString())
+                    val ftpFileSize =
+                        AppPreference.getString(PrefConstant.FTP_FILE_SIZE.keyName.toString())
                     if (!TextUtils.isEmpty(ftpIPAddress) && ftpIPPort != 0 && !TextUtils.isEmpty(
                             ftpUserName
                         )
@@ -239,7 +242,8 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                                         ftpIPPort,
                                         ftpUserName,
                                         ftpPassword,
-                                        ftpFileName
+                                        ftpFileName,
+                                        ftpFileSize
                                     )
                                 }
                             }
@@ -324,8 +328,12 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
     //Below method is used to update App Through FTP:-
     private fun startFTPAppUpdate(
-        ftpIPAddress: String? = null, ftpIPPort: Int? = null,
-        ftpUserName: String, ftpPassword: String, downloadAppFileName: String
+        ftpIPAddress: String? = null,
+        ftpIPPort: Int? = null,
+        ftpUserName: String,
+        ftpPassword: String,
+        downloadAppFileName: String,
+        downloadFileSize: String
     ) {
         showProgress(getString(R.string.please_wait_downloading_application_update))
         GlobalScope.launch(Dispatchers.IO) {
@@ -333,22 +341,34 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                 AppUpdateFTPClient(
                     ftpIPAddress, ftpIPPort,
                     ftpUserName, ftpPassword,
-                    downloadAppFileName, this@MainActivity
+                    downloadAppFileName, this@MainActivity, downloadFileSize
                 ) { appUpdateCB, fileUri ->
-                    if (appUpdateCB) {
-                        GlobalScope.launch(Dispatchers.Main) {
-                            hideProgress()
-                            VFService.showToast(getString(R.string.app_update_downloaded_successfully_please_install_updates))
-                            if (!TextUtils.isEmpty(fileUri.toString())) {
-                                startActivity(Intent(Intent.ACTION_VIEW).apply {
-                                    setDataAndType(fileUri, "application/vnd.android.package-archive")
-                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                                })
-                            } else {
+                    if (appUpdateCB && fileUri != null) {
+                        val downloadedFile = File(fileUri.path ?: "")
+                        if (downloadFileSize.toLong() == downloadedFile.length()) {
+                            Log.d("Download:- ", "File Size Matches")
+                            GlobalScope.launch(Dispatchers.Main) {
                                 hideProgress()
-                                VFService.showToast(getString(R.string.something_went_wrong))
+                                VFService.showToast(getString(R.string.app_update_downloaded_successfully_please_install_updates))
+                                if (!TextUtils.isEmpty(fileUri.toString())) {
+                                    startActivity(Intent(Intent.ACTION_VIEW).apply {
+                                        setDataAndType(
+                                            fileUri,
+                                            "application/vnd.android.package-archive"
+                                        )
+                                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                    })
+                                } else {
+                                    hideProgress()
+                                    VFService.showToast(getString(R.string.something_went_wrong))
+                                }
                             }
-                        }
+                        } else
+                            GlobalScope.launch(Dispatchers.Main) {
+                                hideProgress()
+                                VFService.showToast(getString(R.string.download_failed))
+                            }
+
                     } else {
                         GlobalScope.launch(Dispatchers.Main) {
                             hideProgress()
@@ -1129,7 +1149,10 @@ class MainActivity : BaseActivity(), IFragmentRequest,
     }
 
     //Settle Batch and Do the Init:-
-    suspend fun settleBatch(settlementByteArray: ByteArray?) {
+    suspend fun settleBatch(
+        settlementByteArray: ByteArray?,
+        settlementCB: ((Boolean) -> Unit)? = null
+    ) {
         runOnUiThread {
             showProgress()
         }
@@ -1196,7 +1219,8 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
                         //Batch and Roc Increment for Settlement:-
 
-                        val settlement_roc = AppPreference.getIntData(PrefConstant.SETTLEMENT_ROC_INCREMENT.keyName.toString()) + 1
+                        val settlement_roc =
+                            AppPreference.getIntData(PrefConstant.SETTLEMENT_ROC_INCREMENT.keyName.toString()) + 1
 
                         AppPreference.setIntData(
                             PrefConstant.SETTLEMENT_ROC_INCREMENT.keyName.toString(), settlement_roc
@@ -1241,13 +1265,17 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                                             when (dataList[0]) {
                                                 AppUpdate.MANDATORY_APP_UPDATE.updateCode -> {
                                                     if (terminalParameterTable?.reservedValues?.length == 20 &&
-                                                        terminalParameterTable.reservedValues.endsWith("1"))
+                                                        terminalParameterTable.reservedValues.endsWith(
+                                                            "1"
+                                                        )
+                                                    )
                                                         startFTPAppUpdate(
                                                             dataList[2],
                                                             dataList[3].toInt(),
                                                             dataList[4],
                                                             dataList[5],
-                                                            dataList[7]
+                                                            dataList[7],
+                                                            dataList[8]
                                                         )
                                                     /*else
                                                 startHTTPSAppUpdate()*/ //------------>HTTPS App Update not in use currently
@@ -1271,7 +1299,8 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                                                                     dataList[3].toInt(),
                                                                     dataList[4],
                                                                     dataList[5],
-                                                                    dataList[7]
+                                                                    dataList[7],
+                                                                    dataList[8]
                                                                 )
                                                             /*else
                                                     startHTTPSAppUpdate()*/ //------------>HTTPS App Update not in use currently
@@ -1347,9 +1376,9 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                                     TerminalParameterTable.updateTerminalDataInvoiceNumber("0")
 
                                     //Here we are incrementing sale batch number also for next sale:-
-                                    TerminalParameterTable.updateSaleBatchNumber(
-                                        terminalParameterTable?.batchNumber ?: ""
-                                    )
+                                    val updatedBatchNumber =
+                                        terminalParameterTable?.batchNumber?.toInt()?.plus(1)
+                                    TerminalParameterTable.updateSaleBatchNumber(updatedBatchNumber.toString())
                                     GlobalScope.launch(Dispatchers.Main) {
                                         txnSuccessToast(
                                             this@MainActivity,
@@ -1374,7 +1403,8 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                                                                 dataList[3].toInt(),
                                                                 dataList[4],
                                                                 dataList[5],
-                                                                dataList[7]
+                                                                dataList[7],
+                                                                dataList[8]
                                                             )
                                                         /*else
                                                                 startHTTPSAppUpdate()*/ //------------>HTTPS App Update not in use currently
@@ -1398,7 +1428,8 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                                                                         dataList[3].toInt(),
                                                                         dataList[4],
                                                                         dataList[5],
-                                                                        dataList[7]
+                                                                        dataList[7],
+                                                                        dataList[8]
                                                                     )
                                                                 /*else
                                                                     startHTTPSAppUpdate()*/ //------------>HTTPS App Update not in use currently
@@ -1463,6 +1494,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                                 true
                             )
                         }
+                        settlementCB?.invoke(false)
                     }
 
                 } else {
@@ -1495,6 +1527,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                     AppPreference.saveBoolean(
                         PrefConstant.SETTLE_BATCH_SUCCESS.keyName.toString(), true
                     )
+                    settlementCB?.invoke(false)
                 }
             }, {
                 //backToCalled(it, false, true)
@@ -1543,6 +1576,7 @@ enum class PrefConstant(val keyName: Any) {
     FTP_USER_NAME("ftp_user_name"),
     FTP_PASSWORD("ftp_password"),
     FTP_FILE_NAME("ftp_file_name"),
+    FTP_FILE_SIZE("ftp_file_size"),
     BLOCK_MENU_OPTIONS("block_menu_options"),
     INSERT_PPK_DPK("insert_ppk_dpk"),
     INIT_AFTER_SETTLEMENT("init_after_settlement"),

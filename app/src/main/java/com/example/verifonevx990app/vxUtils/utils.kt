@@ -491,7 +491,10 @@ object ConnectionTimeStamps {
             Log.e("[1] iemi,battry,simNo", "$imei ,${batteryStrength} -----> ${simNo}  ")
             "~${VerifoneApp.networkStrength}~${batteryStrength}~${imei}~${simNo}~${VerifoneApp.operatorName}"
         } catch (ex: java.lang.Exception) {
-            Log.e("[2]iemi,battry,simNo", "${VerifoneApp.imeiNo} ,${VerifoneApp.batteryStrength} -----> ${VerifoneApp.simNo}  ")
+            Log.e(
+                "[2]iemi,battry,simNo",
+                "${VerifoneApp.imeiNo} ,${VerifoneApp.batteryStrength} -----> ${VerifoneApp.simNo}  "
+            )
             "~${VerifoneApp.networkStrength}~${VerifoneApp.batteryStrength}~${VerifoneApp.imeiNo}~${VerifoneApp.simNo}~${VerifoneApp.operatorName}"
         }
     }
@@ -772,7 +775,7 @@ object ROCProviderV2 {
 
             val mod = track21.length % DIGIT_8
             if (mod!=0) {
-                track21 = getEncryptedField57DataForVisa(track21.length,track21)
+                track21 = getEncryptedField57DataForVisa(track21.length, track21)
             }
 
             val byteArray = track21.toByteArray(StandardCharsets.ISO_8859_1)
@@ -1077,13 +1080,13 @@ fun getEncryptedField57DataForManualSale(panNumber: String, expDate: String): St
 
 }
 
-fun getEncryptedField57DataForVisa(dataLength: Int,dataDescription: String): String{
+fun getEncryptedField57DataForVisa(dataLength: Int, dataDescription: String): String {
     var dataDescription = dataDescription
     val encryptedByteArray: ByteArray?
     val DIGIT_8 = 8
     if (dataLength > DIGIT_8) {
         val mod = dataLength % DIGIT_8
-        if (mod!=0) {
+        if (mod != 0) {
             val padding = DIGIT_8 - mod
             val totalLength = dataLength + padding
             dataDescription = addPad(dataDescription, " ", totalLength, false)
@@ -1451,22 +1454,22 @@ private fun navigateToMain(context: Context) {
     })
 }
 
-fun txnSuccessToast(context: Context,msg: String="Transaction Approved"){
+fun txnSuccessToast(context: Context, msg: String = "Transaction Approved") {
     try {
         GlobalScope.launch(Dispatchers.Main) {
             VFService.vfBeeper?.startBeep(200)
             val layout = (context as Activity).layoutInflater.inflate(
                 R.layout.success_toast,
-                context.custom_toast_layout)
-            layout.txtvw.text=msg
+                context.custom_toast_layout
+            )
+            layout.txtvw.text = msg
             val myToast = Toast(context)
             myToast.duration = Toast.LENGTH_LONG
             myToast.setGravity(Gravity.CENTER_VERTICAL, 0, 0)
             myToast.view = layout//setting the view of custom toast layout
             myToast.show()
         }
-    }
-    catch (ex:java.lang.Exception){
+    } catch (ex: java.lang.Exception) {
         VFService.showToast(context.getString(R.string.transaction_approved_successfully))
         VFService.connectToVFService(context)
     }
@@ -1488,7 +1491,7 @@ fun writeAppRevisionIDInFile(context: Context) {
 }
 
 //Below method is used to read App Revision ID from saved File in Terminal:-
-fun readAppVersionNameFromFile(context: Context, cb: (String) -> Unit) {
+fun readAppRevisionIDFromFile(context: Context, cb: (String) -> Unit) {
     var revisionID: String? = null
     try {
         val file = File(context.externalCacheDir, "version.txt")
@@ -1510,15 +1513,15 @@ fun readAppVersionNameFromFile(context: Context, cb: (String) -> Unit) {
 }
 
 //Below Method is used to get App Revision ID Saved in Terminal File:-
-fun getRevisionIDFromFile(context: Context , cb: (Boolean) -> Unit){
+fun getRevisionIDFromFile(context: Context, cb: (Boolean) -> Unit) {
     try {
-        readAppVersionNameFromFile(context) { fileStoredAppRevisionID ->
+        readAppRevisionIDFromFile(context) { fileStoredAppRevisionID ->
             if (!TextUtils.isEmpty(fileStoredAppRevisionID)) {
                 if (fileStoredAppRevisionID < BuildConfig.REVISION_ID.toString()) {
                     cb(true)
-                }else
+                } else
                     cb(false)
-            }else
+            } else
                 cb(false)
         }
     } catch (ex: Exception) {
@@ -1528,7 +1531,7 @@ fun getRevisionIDFromFile(context: Context , cb: (Boolean) -> Unit){
 }
 
 //Below method is used to chunk the TNC's text(words's are not slitted in between) which was printed on EMI sale :-
- fun chunkTnC(s: String, limit: Int=48): List<String> {
+fun chunkTnC(s: String, limit: Int = 48): List<String> {
     var str = s
     val parts: MutableList<String> = ArrayList()
     while (str.length > limit) {
@@ -1543,6 +1546,25 @@ fun getRevisionIDFromFile(context: Context , cb: (Boolean) -> Unit){
     parts.add(str)
     return parts
 }
+
+//region================================AppVersionName + AppRevisionID returning method:-
+fun getAppVersionNameAndRevisionID(): String {
+    return "${BuildConfig.VERSION_NAME}.${BuildConfig.REVISION_ID}"
+}
+//endregion
+
+//region===============================Block & UnBlock Touch Event on Screen:-
+fun blockAndUnBlockTouchScreenEvent(isTouchBlock: Boolean, activity: Activity) {
+    if (isTouchBlock) {
+        activity.window.setFlags(
+            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+        );
+    } else {
+        activity.window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+    }
+}
+//endregion
 
 /*
 App Update Through FTP Steps:-

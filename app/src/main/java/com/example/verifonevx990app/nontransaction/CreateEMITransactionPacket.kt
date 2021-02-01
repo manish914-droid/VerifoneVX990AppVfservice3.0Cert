@@ -117,8 +117,9 @@ class CreateEMITransactionPacket(private var cardProcessedData: CardProcessedDat
 
             //adding field 61
             val buildDate: String = SimpleDateFormat("yyMMdd", Locale.getDefault()).format(Date(BuildConfig.TIMESTAMP))
-            val issuerParameterTable = IssuerParameterTable.selectFromIssuerParameterTable(AppPreference.WALLET_ISSUER_ID)
-            val version = addPad("${BuildConfig.VERSION_NAME}.$buildDate", "0", 15, false)
+            val issuerParameterTable =
+                IssuerParameterTable.selectFromIssuerParameterTable(AppPreference.WALLET_ISSUER_ID)
+            val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)
             val pcNumber = addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY), "0", 9)
             val data = ConnectionType.GPRS.code +  addPad(AppPreference.getString("deviceModel") , " " , 6 , false) +
                     addPad(VerifoneApp.appContext.getString(R.string.app_name), " ", 10, false) +
