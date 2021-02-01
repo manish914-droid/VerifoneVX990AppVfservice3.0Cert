@@ -46,8 +46,9 @@ object VFService {
     @JvmStatic
     var vfPrinter:IPrinter?=null
     var pinInputListener: PinInputListener? = null
-    val LYRA_IP_ADDRESS = "192.168.250.10"
     val NEW_IP_ADDRESS = "122.176.84.29"
+    val NEWAMEXHDFC = "192.168.250.10"
+    val NEWAMEXHDFCPort = "4124"
     var savedPan = ""
     var PORT = 8101//4124
 

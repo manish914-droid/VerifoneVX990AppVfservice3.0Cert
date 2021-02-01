@@ -17,7 +17,7 @@ import android.view.Window
 import android.widget.Button
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
-import com.example.verifonevx990app.BuildConfig
+import androidx.multidex.BuildConfig
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.appupdate.*
 import com.example.verifonevx990app.disputetransaction.CreateSettlementPacket
@@ -316,9 +316,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
         ).forEach { _ -> }
 
         //Displaying the Version Name of App:-
-        findViewById<BHTextView>(R.id.version_name).text =
-            "App Version: v${BuildConfig.VERSION_NAME}"
-
+        findViewById<BHTextView>(R.id.version_name).text = "App Version: v${BuildConfig.VERSION_NAME}"
 
         bottomNavigationView.setOnNavigationItemSelectedListener(this)
         setDrawerClick()

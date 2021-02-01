@@ -117,7 +117,7 @@ fun getInputDialog(
         if(_text==TerminalParameterTable.selectFromSchemeTable()?.terminalId.toString()){
             invoiceET.filters = arrayOf<InputFilter>(LengthFilter(8))
         }else {
-            invoiceET.filters = arrayOf<InputFilter>(LengthFilter(13))
+            invoiceET.filters = arrayOf<InputFilter>(LengthFilter(14))
         }
         invoiceET.apply {
             setText(_text)
