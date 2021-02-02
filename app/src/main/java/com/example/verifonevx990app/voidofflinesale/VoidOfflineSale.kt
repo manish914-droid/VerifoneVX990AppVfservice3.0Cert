@@ -4,32 +4,42 @@ import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.databinding.FragmentVoidOfflineSaleBinding
 import com.example.verifonevx990app.emv.transactionprocess.SyncReversalToHost
 import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.realmtables.BatchFileDataTable
 import com.example.verifonevx990app.utils.printerUtils.EPrintCopyType
 import com.example.verifonevx990app.vxUtils.*
-import kotlinx.android.synthetic.main.sub_header_layout.*
-import kotlinx.android.synthetic.main.void_offline_confirmation_dialog_view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class VoidOfflineSale : Fragment(R.layout.fragment_void_offline_sale) {
+class VoidOfflineSale : Fragment() {
     private val title: String by lazy { arguments?.getString(MainActivity.INPUT_SUB_HEADING) ?: "" }
     private var backImageButton: ImageView? = null
     private var invoiceNumberET: BHEditText? = null
     private var voidOfflineSaleBT: BHButton? = null
+    private var binding: FragmentVoidOfflineSaleBinding? = null
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = FragmentVoidOfflineSaleBinding.inflate(layoutInflater, container, false)
+        return binding?.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        sub_header_text?.text = title
+        binding?.subHeaderView?.subHeaderText?.text = title
         logger("ConnectionAddress:- ", VFService.getIpPort().toString(), "d")
 
         invoiceNumberET = view.findViewById(R.id.invoiceNumberET)
@@ -61,7 +71,7 @@ class VoidOfflineSale : Fragment(R.layout.fragment_void_offline_sale) {
 
     //Below method is used to show confirmation pop up for Void Offline Sale:-
     private fun voidOfflineConfirmationDialog(voidOfflineBatchData: BatchFileDataTable) {
-        val dialog = Dialog(activity!!)
+        val dialog = Dialog(requireActivity())
         dialog.setCancelable(false)
         dialog.setContentView(R.layout.void_offline_confirmation_dialog_view)
 
@@ -72,11 +82,12 @@ class VoidOfflineSale : Fragment(R.layout.fragment_void_offline_sale) {
             WindowManager.LayoutParams.WRAP_CONTENT
         )
 
-        dialog.dateET.text = voidOfflineBatchData.printDate
-        dialog.timeET.text = voidOfflineBatchData.time
-        dialog.tidET.text = voidOfflineBatchData.tid
-        dialog.invoiceET.text = invoiceWithPadding(voidOfflineBatchData.invoiceNumber)
-        dialog.amountTV.text = voidOfflineBatchData.totalAmmount
+        dialog.findViewById<BHTextView>(R.id.dateET)?.text = voidOfflineBatchData.printDate
+        dialog.findViewById<BHTextView>(R.id.timeET)?.text = voidOfflineBatchData.time
+        dialog.findViewById<BHTextView>(R.id.tidET)?.text = voidOfflineBatchData.tid
+        dialog.findViewById<BHTextView>(R.id.invoiceET)?.text =
+            invoiceWithPadding(voidOfflineBatchData.invoiceNumber)
+        dialog.findViewById<BHTextView>(R.id.amountTV)?.text = voidOfflineBatchData.totalAmmount
 
         dialog.findViewById<BHButton>(R.id.cancel_btnn).setOnClickListener {
             dialog.dismiss()

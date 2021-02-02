@@ -11,54 +11,58 @@ import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.databinding.FragmentInitBinding
 import com.example.verifonevx990app.main.IFragmentRequest
 import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.main.PrefConstant
 import com.example.verifonevx990app.vxUtils.*
 import com.example.verifonevx990app.vxUtils.ROCProviderV2.refreshToolbarLogos
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_init.view.*
-
 
 class InitFragment : Fragment() {
 
     private var iFragmentRequest: IFragmentRequest? = null
     private var iDialog: IDialog? = null
+    private var binding: FragmentInitBinding? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_init, container, false)
+        binding = FragmentInitBinding.inflate(layoutInflater, container, false)
+        return binding?.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.ma_bnv)
-        AppPreference.saveBoolean(PrefConstant.INIT_AFTER_SETTLE_BATCH_SUCCESS.keyName.toString(), true)
+        AppPreference.saveBoolean(
+            PrefConstant.INIT_AFTER_SETTLE_BATCH_SUCCESS.keyName.toString(),
+            true
+        )
         if (bottomNavigationView is BottomNavigationView) {
             bottomNavigationView.menu.findItem(R.id.home)?.isChecked = true
         }
         activity?.let { refreshToolbarLogos(it) }
-        (iDialog as MainActivity).ma_bnv.visibility = View.GONE
-        view.if_et.transformationMethod = null
+        (iDialog as MainActivity).findViewById<BottomNavigationView>(R.id.ma_bnv).visibility =
+            View.GONE
+        binding?.ifEt?.transformationMethod = null
 
         //Below Code write App Revision ID to file when first time Init Screen opens
         //in App after that this file will override after settlement:-
         context?.let { writeAppRevisionIDInFile(it) }
 
-        view.if_et.addTextChangedListener(OnTextChange {
-            view.if_proceed_btn.isEnabled = it.length == 8
+        binding?.ifEt?.addTextChangedListener(OnTextChange {
+            binding?.ifProceedBtn?.isEnabled = it.length == 8
             /* if(it.length==8)
                  view.if_proceed_btn.isEnabled = true*/
             //actionDone( view.if_et)
         })
 
-        view.if_proceed_btn.setOnClickListener {
+        binding?.ifProceedBtn?.setOnClickListener {
             actionDone(view)
         }
 
-        view.if_et.setOnEditorActionListener(getEditorActionListener(::actionDone))
+        binding?.ifEt?.setOnEditorActionListener(getEditorActionListener(::actionDone))
 
         context?.getString(R.string.init)?.let { VxEvent.ChangeTitle(it) }?.let {
             iDialog?.onEvents(
@@ -68,14 +72,14 @@ class InitFragment : Fragment() {
     }
 
     private fun actionDone(view: View) {
-        if (view.if_et.text.toString().length == 8) {
-            val tid = view.if_et.text.toString()
+        if (binding?.ifEt?.text.toString().length == 8) {
+            val tid = binding?.ifEt?.text.toString()
             iFragmentRequest?.onFragmentRequest(
                 UiAction.INIT_WITH_KEY_EXCHANGE,
                 tid
             )
-        }else
-        iDialog?.showToast("Invalid TID")
+        } else
+            iDialog?.showToast("Invalid TID")
     }
 
     override fun onAttach(context: Context) {

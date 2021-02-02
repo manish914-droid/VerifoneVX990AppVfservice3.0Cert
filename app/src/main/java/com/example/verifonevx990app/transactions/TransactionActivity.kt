@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.database.OnXmlDataParsed
 import com.example.verifonevx990app.database.XmlFieldModel
+import com.example.verifonevx990app.databinding.ActivityTransactionBinding
 import com.example.verifonevx990app.emv.EMVInitialize
 import com.example.verifonevx990app.emv.VFEmv
 import com.example.verifonevx990app.main.MainActivity
@@ -21,7 +22,6 @@ import com.example.verifonevx990app.utils.printerUtils.PrintUtil
 import com.example.verifonevx990app.vxUtils.AppPreference
 import com.example.verifonevx990app.vxUtils.BHTextView
 import com.example.verifonevx990app.vxUtils.VFService
-import kotlinx.android.synthetic.main.activity_transaction.*
 import java.util.*
 
 class TransactionActivity : AppCompatActivity(), OnXmlDataParsed {
@@ -34,11 +34,13 @@ class TransactionActivity : AppCompatActivity(), OnXmlDataParsed {
     private val transactionAmountValue by lazy { intent.getStringExtra("amt") ?: "0" }
     private val cashBackAmountValue by lazy { intent.getStringExtra("cashBack") ?: "0" }
     private var cardDataTable: CardDataTable? = null
+    private var binding: ActivityTransactionBinding? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_transaction)
+        binding = ActivityTransactionBinding.inflate(layoutInflater)
+        setContentView(binding?.root)
         //   txnAmount= intent?.getStringExtra("amt")?.toFloat()?:0f//intent.getStringExtra("amt").toFloat()
         initUI()
         isoPackageWriter = IsoPackageWriter(this, this)
@@ -46,8 +48,8 @@ class TransactionActivity : AppCompatActivity(), OnXmlDataParsed {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initUI() {
-        payment_gif.loadUrl("file:///android_asset/card_animation.html")
-        payment_gif.setOnTouchListener { _, event -> event.action == MotionEvent.ACTION_MOVE }
+        binding?.paymentGif?.loadUrl("file:///android_asset/card_animation.html")
+        binding?.paymentGif?.setOnTouchListener { _, event -> event.action == MotionEvent.ACTION_MOVE }
         val amountValue = "${getString(R.string.rupees_symbol)} $transactionAmountValue"
         findViewById<BHTextView>(R.id.base_amt_tv).text = amountValue
 

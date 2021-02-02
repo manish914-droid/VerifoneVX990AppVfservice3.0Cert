@@ -10,18 +10,20 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.view.*
 import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.databinding.FragmentEmiBinding
+import com.example.verifonevx990app.databinding.FragmentEmiDetailBinding
 import com.example.verifonevx990app.emv.transactionprocess.CardProcessedDataModal
 import com.example.verifonevx990app.emv.transactionprocess.SyncEmiEnquiryTransactionToHost
 import com.example.verifonevx990app.emv.transactionprocess.SyncReversalToHost
@@ -31,12 +33,6 @@ import com.example.verifonevx990app.transactions.*
 import com.example.verifonevx990app.utils.printerUtils.PrintUtil
 import com.example.verifonevx990app.vxUtils.*
 import com.example.verifonevx990app.vxUtils.VerifoneApp.Companion.appContext
-import kotlinx.android.synthetic.main.fragment_emi.*
-import kotlinx.android.synthetic.main.fragment_emi_detail.view.*
-import kotlinx.android.synthetic.main.item_emi_detail.view.*
-import kotlinx.android.synthetic.main.item_scheme_v2.view.*
-import kotlinx.android.synthetic.main.item_select_bank.view.*
-import kotlinx.android.synthetic.main.toolbar_v2.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -63,11 +59,12 @@ class EmiActivity : BaseActivity(), IBenefitTable, View.OnClickListener {
 
     private val mListFragment = mutableListOf<EmiDetailFragment>()
     private val mListTitle = mutableListOf<String>()
+    private var binding: FragmentEmiBinding? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        setContentView(R.layout.fragment_emi)
+        binding = FragmentEmiBinding.inflate(layoutInflater)
+        setContentView(binding?.root)
 
         val intent = Intent().apply {
             if (null != intent) {
@@ -122,13 +119,12 @@ class EmiActivity : BaseActivity(), IBenefitTable, View.OnClickListener {
 
         //region===========Setting Toolbar===============
 
-        setSupportActionBar(toolbar_v2)
+        setSupportActionBar(binding?.toolbarView?.toolbarV2)
 
-        with(toolbar_v2_start) {
-            background = ContextCompat.getDrawable(this@EmiActivity, R.drawable.arrow_back)
-            setOnClickListener { onBackPressed() }
-        }
-        toolbar_v2_tv.text =
+        binding?.toolbarView?.toolbarV2Start?.background =
+            ContextCompat.getDrawable(this@EmiActivity, R.drawable.arrow_back)
+        binding?.toolbarView?.toolbarV2Start?.setOnClickListener { onBackPressed() }
+        binding?.toolbarView?.toolbarV2Tv?.text =
             if (isBankEmi) EDashboardItem.BANK_EMI.title else EDashboardItem.EMI_ENQUIRY.title
 
         //endregion
@@ -160,8 +156,12 @@ class EmiActivity : BaseActivity(), IBenefitTable, View.OnClickListener {
             }
 
             launch(Dispatchers.Main) {
-                pagerAdapter = EmiPagerAdapter(supportFragmentManager, if (isBankEmi) mListFragment else arrayListOf(), if (isBankEmi) mListTitle else arrayListOf())
-                emi_frag_vp.adapter = pagerAdapter
+                pagerAdapter = EmiPagerAdapter(
+                    supportFragmentManager,
+                    if (isBankEmi) mListFragment else arrayListOf(),
+                    if (isBankEmi) mListTitle else arrayListOf()
+                )
+                binding?.emiFragVp?.adapter = pagerAdapter
                 pagerAdapter.notifyDataSetChanged()
 
                 if (!isBankEmi) {
@@ -210,23 +210,21 @@ class EmiActivity : BaseActivity(), IBenefitTable, View.OnClickListener {
         }
 
         arrayOf(
-            emi_frag_print_btn,
-            emi_frag_send_sms_btn,
-            emi_frag_filter_btn
-        ).forEach { it.setOnClickListener(this) }
+            binding?.emiFragPrintBtn,
+            binding?.emiFragSendSmsBtn,
+            binding?.emiFragFilterBtn
+        ).forEach { it?.setOnClickListener(this) }
 
-        emi_send_fab.run {
             if (isBankEmi) {
-            //    setImageResource(R.drawable.ic_proceed_button)
-                setOnClickListener { nextBankEmi() }
-                emi_frag_btn_ll.visibility = View.GONE
+                //    setImageResource(R.drawable.ic_proceed_button)
+                binding?.emiSendFab?.setOnClickListener { nextBankEmi() }
+                binding?.emiFragBtnLl?.visibility = View.GONE
             } else {
-                visibility = View.GONE
-                emi_frag_btn_ll.visibility = View.VISIBLE
+                binding?.emiSendFab?.visibility = View.GONE
+                binding?.emiFragBtnLl?.visibility = View.VISIBLE
             }
-        }
 
-        emi_frag_vp.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+        binding?.emiFragVp?.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageScrollStateChanged(state: Int) {
             }
 
@@ -751,12 +749,12 @@ class EmiActivity : BaseActivity(), IBenefitTable, View.OnClickListener {
 
         override fun onBindViewHolder(holder: EmiFilterHolder, position: Int) {
 
-            with(holder.v.ck_bx as CheckBox) {
+            with(holder.ckBX as CheckBox) {
                 isChecked = list[position][2] == "1"
                 text = list[position][1]
             }
             if(list[position][0]=="53")
-            holder.v.bnk_logo.setBackgroundResource(R.drawable.amex_logo)
+                holder.bnkLogo.setBackgroundResource(R.drawable.amex_logo)
         }
 
         private fun onCheck(position: Int, isCheck: Boolean) {
@@ -787,8 +785,11 @@ class EmiActivity : BaseActivity(), IBenefitTable, View.OnClickListener {
 
     private inner class EmiFilterHolder(val v: View, cb: (Int, Boolean) -> Unit) :
         RecyclerView.ViewHolder(v) {
+        var ckBX = v.findViewById<CheckBox>(R.id.ck_bx)
+        var bnkLogo = v.findViewById<ImageView>(R.id.bnk_logo)
+
         init {
-            (v.ck_bx as CheckBox).run {
+            (ckBX as CheckBox).run {
                 setOnClickListener { _ ->
                     cb(adapterPosition, isChecked)
                 }
@@ -848,6 +849,7 @@ class EmiDetailFragment : Fragment() {
     var issuerDataModel: IssuerDataModel? = null
 
     private val isBank: Boolean by lazy { arguments?.getBoolean("isbank", true) ?: true }
+    private var binding: FragmentEmiDetailBinding? = null
 
     companion object {
         fun getInstance(ip: IssuerParameterTable, arg: Bundle): EmiDetailFragment {
@@ -940,8 +942,13 @@ class EmiDetailFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_emi_detail, container, false)
-            .apply { initUI(this) }
+        binding = FragmentEmiDetailBinding.inflate(layoutInflater, container, false)
+        return binding?.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initUI(view)
     }
 
     @SuppressLint("WrongConstant")
@@ -951,7 +958,7 @@ class EmiDetailFragment : Fragment() {
             val idm = issuerDataModel as IssuerDataModel
 
             mSchemeAdpater.isBank = isBank
-            with(v.fed_rv) {
+            binding?.fedRv?.apply {
                 layoutManager = LinearLayoutManager(context, LinearLayout.VERTICAL, false)
                 adapter = mSchemeAdpater
             }
@@ -1031,13 +1038,11 @@ class SchemeAdapter(private var emiList: List<EmiView>, private var amount: Floa
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, i: Int) {
-
-
         if (emiList[i].type.ordinal == EmiViewType.SCHEME.ordinal) {
             val data = emiList[i] as SchemeDataModel
             val hold = holder as SchemeHolderV2
             with(hold) {
-                item_view.isv2_scheme_name_tv.text = data.schemeName
+                item_view.findViewById<BHTextView>(R.id.isv2_scheme_name_tv)?.text = data.schemeName
             }
         } else {
             val data = emiList[i] as TenureDataModel
@@ -1049,13 +1054,13 @@ class SchemeAdapter(private var emiList: List<EmiView>, private var amount: Floa
             with(hold) {
 
                 if (data.isChecked) {
-                    item_view.ied_check_iv.background =
+                    item_view.findViewById<ImageView>(R.id.ied_check_iv)?.background =
                         ContextCompat.getDrawable(
                             holder.item_view.context,
                             R.drawable.ic_check_box_selected
                         )
                 } else {
-                    item_view.ied_check_iv.background =
+                    item_view.findViewById<ImageView>(R.id.ied_check_iv)?.background =
                         ContextCompat.getDrawable(
                             holder.item_view.context,
                             R.drawable.ic_check_box_unselected
@@ -1064,93 +1069,110 @@ class SchemeAdapter(private var emiList: List<EmiView>, private var amount: Floa
 
                 val tenMsg = "Tenure : ${data.tenure} Month"
                 val msg = "Interest Rate :${(data.emiAmount?.roi)?.toFormatString()}%"
-                item_view.ied_tenure_tv.text = tenMsg
-                item_view.ied_interest_tv.text = msg
+                item_view.findViewById<BHTextView>(R.id.ied_tenure_tv)?.text = tenMsg
+                item_view.findViewById<BHTextView>(R.id.ied_interest_tv)?.text = msg
 
-                item_view.BHTextView4.visibility = View.VISIBLE
-                item_view.ied_processing_fee_tv.visibility = View.VISIBLE
+                item_view.findViewById<BHTextView>(R.id.BHTextView4)?.visibility = View.VISIBLE
+                val iedProcessingFeeTV =
+                    item_view.findViewById<BHTextView>(R.id.ied_processing_fee_tv)
 
-               // if(data.proccesingFee.toFloat() > 0.0) {
-                    val proFee = "${appContext.getString(R.string.rupees_symbol)} " + "${((data.proccesingFee.toFloat() / 100) + ((data.processingRate.toFloat() / 100) * ((amount - (data.emiAmount?.discount ?: 0f))) / 100)).toFormatString()}"
+                // if(data.proccesingFee.toFloat() > 0.0) {
+                val proFee =
+                    "${appContext.getString(R.string.rupees_symbol)} " + ((data.proccesingFee.toFloat() / 100) + ((data.processingRate.toFloat() / 100) * ((amount - (data.emiAmount?.discount
+                        ?: 0f))) / 100)).toFormatString()
 
-                    item_view.BHTextView4.visibility = View.VISIBLE
-                    item_view.ied_processing_fee_tv.visibility = View.VISIBLE
-                    item_view.ied_processing_fee_tv.text = proFee
-           //     }
+                item_view.findViewById<BHTextView>(R.id.BHTextView4)?.visibility = View.VISIBLE
+                iedProcessingFeeTV?.visibility = View.VISIBLE
+                iedProcessingFeeTV?.text = proFee
+                //     }
 
-                val amt = "${appContext.getString(R.string.rupees_symbol)} ${amount.toFormatString()}"
-
-                item_view.ied_amount_tv.text = amt
-                item_view.ied_loan_amt_tv.text = "${appContext.getString(R.string.rupees_symbol)}${((data.emiAmount?.principleAmt ?: 0f)-(data.emiAmount?.discount ?: 0f)).toFormatString()}"
+                val amt =
+                    "${appContext.getString(R.string.rupees_symbol)} ${amount.toFormatString()}"
+                val iedAmountTV = item_view.findViewById<BHTextView>(R.id.ied_amount_tv)
+                val iedTotalInterestTV =
+                    item_view.findViewById<BHTextView>(R.id.ied_total_interest_tv)
+                val iedMonthEmiTV = item_view.findViewById<BHTextView>(R.id.ied_month_emi_tv)
+                iedAmountTV?.text = amt
+                iedAmountTV?.text =
+                    "${appContext.getString(R.string.rupees_symbol)}${((data.emiAmount?.principleAmt ?: 0f) - (data.emiAmount?.discount ?: 0f)).toFormatString()}"
 
                 val toint =
                     "${appContext.getString(R.string.rupees_symbol)} ${data.emiAmount?.totalInterest?.toFormatString()}"
-                item_view.ied_total_interest_tv.text = toint
+                iedTotalInterestTV?.text = toint
 
                 val monEmi =
                     "${appContext.getString(R.string.rupees_symbol)} ${data.emiAmount?.monthlyEmi?.toFormatString()}"
-                item_view.ied_month_emi_tv.text = monEmi
+                iedMonthEmiTV?.text = monEmi
 
-
+                val iedDiscountLL = item_view.findViewById<LinearLayout>(R.id.ied_discount_ll)
+                val iedExtraLL = item_view.findViewById<LinearLayout>(R.id.ied_extra_ll)
+                val iedExtraTv = item_view.findViewById<BHTextView>(R.id.ied_extra_tv_lbl)
+                val iedDiscountTv = item_view.findViewById<BHTextView>(R.id.ied_discount_tv_lbl)
                 when {
                     data.emiAmount?.benefitModel == EBenefitModel.DISCOUNT -> {
-                        item_view.ied_discount_ll.visibility = View.VISIBLE
-                        item_view.ied_extra_ll.visibility = View.VISIBLE
-                        item_view.ied_extra_tv_lbl.text = when {
+                        iedDiscountLL?.visibility = View.VISIBLE
+                        iedExtraLL?.visibility = View.VISIBLE
+                        iedExtraTv?.text = when {
                             data.emiAmount?.benefitCalc == EBenefitCalculation.PERCENTAGE_VALUE -> "Total Discount"
                             data.emiAmount?.benefitCalc == EBenefitCalculation.FIXED_VALUE -> "Total Discount"
                             else -> "Total Discount "
                         }
-                        item_view.ied_discount_tv_lbl.text = when {
+                        iedDiscountTv?.text = when {
                             data.emiAmount?.benefitCalc == EBenefitCalculation.PERCENTAGE_VALUE -> "Discount (percent[%])"
                             data.emiAmount?.benefitCalc == EBenefitCalculation.FIXED_VALUE -> "Discount (flat)"
                             else -> "Discount "
                         }
 
                         if(data.emiAmount?.benefitCalc == EBenefitCalculation.PERCENTAGE_VALUE){
-                            var discount = data.emiAmount?.discount?.toFloat()
+                            val discount = data.emiAmount?.discount
                             if (discount != null) {
                                 if (discount > 0f) {
-                                    item_view.ied_discount_ll.visibility = View.VISIBLE
-                                    item_view.ied_extra_ll.visibility = View.VISIBLE
-                                    var percentage =   (discount/amount)* 100
-                                    item_view.ied_discount_tv.text = "${data.emiAmount?.discountpercent?.toFormatString()}${"%"}"
-                                 //   item_view.ied_discount_tv.text = "${percentage.toFormatString()}${"%"}"
-                                    item_view.ied_extra_tv.text = "${appContext.getString(R.string.rupees_symbol)}${data.emiAmount?.discount?.toFormatString()}"
+                                    iedDiscountLL?.visibility = View.VISIBLE
+                                    iedExtraLL?.visibility = View.VISIBLE
+                                    var percentage = (discount / amount) * 100
+                                    iedDiscountTv?.text =
+                                        "${data.emiAmount?.discountpercent?.toFormatString()}${"%"}"
+                                    //   item_view.ied_discount_tv.text = "${percentage.toFormatString()}${"%"}"
+                                    iedExtraTv?.text =
+                                        "${appContext.getString(R.string.rupees_symbol)}${data.emiAmount?.discount?.toFormatString()}"
                                 }
-                                else{
-                                    item_view.ied_discount_ll.visibility = View.GONE
-                                    item_view.ied_extra_ll.visibility = View.GONE
+                                else {
+                                    iedDiscountLL?.visibility = View.GONE
+                                    iedExtraLL?.visibility = View.GONE
                                 }
                             }
                         }
                         else if(data.emiAmount?.benefitCalc == EBenefitCalculation.FIXED_VALUE){
-                            var discount = data.emiAmount?.discount?.toFloat()
+                            val discount = data.emiAmount?.discount
                             if (discount != null) {
                                 if (discount > 0f) {
-                                    item_view.ied_discount_ll.visibility = View.VISIBLE
-                                    item_view.ied_extra_ll.visibility = View.VISIBLE
-                                    item_view.ied_discount_tv.text = "${appContext.getString(R.string.rupees_symbol)}${data.emiAmount?.discount?.toFormatString()}"
-                                    item_view.ied_extra_tv.text = "${appContext.getString(R.string.rupees_symbol)}${data.emiAmount?.discount?.toFormatString()}"
+                                    iedDiscountLL?.visibility = View.VISIBLE
+                                    iedExtraLL?.visibility = View.VISIBLE
+                                    iedDiscountTv?.text =
+                                        "${appContext.getString(R.string.rupees_symbol)}${data.emiAmount?.discount?.toFormatString()}"
+                                    iedExtraTv?.text =
+                                        "${appContext.getString(R.string.rupees_symbol)}${data.emiAmount?.discount?.toFormatString()}"
                                 }
-                                else{
-                                    item_view.ied_discount_ll.visibility = View.GONE
-                                    item_view.ied_extra_ll.visibility = View.GONE
+                                else {
+                                    iedDiscountLL?.visibility = View.GONE
+                                    iedExtraLL?.visibility = View.GONE
                                 }
                             }
                         }
                         else{
-                            var discount = data.emiAmount?.discount?.toFloat()
+                            val discount = data.emiAmount?.discount
                             if (discount != null) {
                                 if (discount > 0f) {
-                                    item_view.ied_discount_ll.visibility = View.VISIBLE
-                                    item_view.ied_extra_ll.visibility = View.VISIBLE
-                                    item_view.ied_discount_tv.text = "${appContext.getString(R.string.rupees_symbol)}${data.emiAmount?.discount?.toFormatString()}"
-                                    item_view.ied_extra_tv.text = "${appContext.getString(R.string.rupees_symbol)}${data.emiAmount?.discount?.toFormatString()}"
+                                    iedDiscountLL?.visibility = View.VISIBLE
+                                    iedExtraLL?.visibility = View.VISIBLE
+                                    iedDiscountTv?.text =
+                                        "${appContext.getString(R.string.rupees_symbol)}${data.emiAmount?.discount?.toFormatString()}"
+                                    iedExtraTv?.text =
+                                        "${appContext.getString(R.string.rupees_symbol)}${data.emiAmount?.discount?.toFormatString()}"
                                 }
-                                else{
-                                    item_view.ied_discount_ll.visibility = View.GONE
-                                    item_view.ied_extra_ll.visibility = View.GONE
+                                else {
+                                    iedDiscountLL?.visibility = View.GONE
+                                    iedExtraLL?.visibility = View.GONE
                                 }
                             }
 
@@ -1160,16 +1182,18 @@ class SchemeAdapter(private var emiList: List<EmiView>, private var amount: Floa
                         //need to check
                     }
                     data.emiAmount?.benefitModel == EBenefitModel.CASH_BACK -> {
-                        item_view.ied_discount_ll.visibility = View.VISIBLE
-                        item_view.ied_extra_ll.visibility = View.VISIBLE
+                        iedDiscountLL?.visibility = View.VISIBLE
+                        iedExtraLL?.visibility = View.VISIBLE
 
-                        item_view.ied_extra_tv_lbl.text = when {
+                        iedExtraTv?.text = when {
                             data.emiAmount?.benefitCalc == EBenefitCalculation.PERCENTAGE_VALUE -> "Total Cashback"
                             data.emiAmount?.benefitCalc == EBenefitCalculation.FIXED_VALUE -> "Total Cashback"
                             else -> "Total Cashback "
                         }
-                        item_view.ied_discount_tv_lbl.text = when {
-                            data.emiAmount?.benefitCalc == EBenefitCalculation.PERCENTAGE_VALUE -> {"Cashback (percent[%])"}
+                        iedDiscountTv?.text = when {
+                            data.emiAmount?.benefitCalc == EBenefitCalculation.PERCENTAGE_VALUE -> {
+                                "Cashback (percent[%])"
+                            }
                             data.emiAmount?.benefitCalc == EBenefitCalculation.FIXED_VALUE -> "Cashback (flat)"
                             else -> "Cashback "
 
@@ -1177,19 +1201,21 @@ class SchemeAdapter(private var emiList: List<EmiView>, private var amount: Floa
 
 
                         if(data.emiAmount?.benefitCalc == EBenefitCalculation.PERCENTAGE_VALUE){
-                            var cashBack = data.emiAmount?.cashBack?.toFloat()
+                            val cashBack = data.emiAmount?.cashBack
                             if (cashBack != null) {
                                 if (cashBack > 0f) {
-                                    item_view.ied_discount_ll.visibility = View.VISIBLE
-                                    item_view.ied_extra_ll.visibility = View.VISIBLE
-                                    var percentage =   (cashBack/amount)* 100
-                                    item_view.ied_discount_tv.text = "${data.emiAmount?.cashBackpercent?.toFormatString()}${"%"}"
-                              //      item_view.ied_discount_tv.text = "${percentage.toFormatString()}${"%"}"
-                                    item_view.ied_extra_tv.text = "${appContext.getString(R.string.rupees_symbol)}${data.emiAmount?.cashBack?.toFormatString()}"
-                                  }
-                                else{
-                                    item_view.ied_discount_ll.visibility = View.GONE
-                                    item_view.ied_extra_ll.visibility = View.GONE
+                                    iedDiscountLL?.visibility = View.VISIBLE
+                                    iedExtraLL?.visibility = View.VISIBLE
+                                    var percentage = (cashBack / amount) * 100
+                                    iedDiscountTv?.text =
+                                        "${data.emiAmount?.cashBackpercent?.toFormatString()}${"%"}"
+                                    //      item_view.ied_discount_tv.text = "${percentage.toFormatString()}${"%"}"
+                                    iedExtraTv?.text =
+                                        "${appContext.getString(R.string.rupees_symbol)}${data.emiAmount?.cashBack?.toFormatString()}"
+                                }
+                                else {
+                                    iedDiscountLL?.visibility = View.GONE
+                                    iedExtraLL?.visibility = View.GONE
                                 }
                             }
                         }
@@ -1197,14 +1223,16 @@ class SchemeAdapter(private var emiList: List<EmiView>, private var amount: Floa
                             var cashBack = data.emiAmount?.cashBack?.toFloat()
                             if (cashBack != null) {
                                 if (cashBack > 0f) {
-                                    item_view.ied_discount_ll.visibility = View.VISIBLE
-                                    item_view.ied_extra_ll.visibility = View.VISIBLE
-                                    item_view.ied_discount_tv.text = "${appContext.getString(R.string.rupees_symbol)}${data.emiAmount?.cashBack?.toFormatString()}"
-                                    item_view.ied_extra_tv.text = "${appContext.getString(R.string.rupees_symbol)}${data.emiAmount?.cashBack?.toFormatString()}"
+                                    iedDiscountLL?.visibility = View.VISIBLE
+                                    iedExtraLL?.visibility = View.VISIBLE
+                                    iedDiscountTv?.text =
+                                        "${appContext.getString(R.string.rupees_symbol)}${data.emiAmount?.cashBack?.toFormatString()}"
+                                    iedExtraTv?.text =
+                                        "${appContext.getString(R.string.rupees_symbol)}${data.emiAmount?.cashBack?.toFormatString()}"
                                 }
-                                else{
-                                    item_view.ied_discount_ll.visibility = View.GONE
-                                    item_view.ied_extra_ll.visibility = View.GONE
+                                else {
+                                    iedDiscountLL?.visibility = View.GONE
+                                    iedExtraLL?.visibility = View.GONE
                                 }
                             }
 
@@ -1214,14 +1242,16 @@ class SchemeAdapter(private var emiList: List<EmiView>, private var amount: Floa
                             var cashBack = data.emiAmount?.cashBack?.toFloat()
                             if (cashBack != null) {
                                 if (cashBack > 0f) {
-                                    item_view.ied_discount_ll.visibility = View.VISIBLE
-                                    item_view.ied_extra_ll.visibility = View.VISIBLE
-                                    item_view.ied_discount_tv.text = "${appContext.getString(R.string.rupees_symbol)}${data.emiAmount?.cashBack?.toFormatString()}"
-                                    item_view.ied_extra_tv.text = "${appContext.getString(R.string.rupees_symbol)}${data.emiAmount?.cashBack?.toFormatString()}"
+                                    iedDiscountLL?.visibility = View.VISIBLE
+                                    iedExtraLL?.visibility = View.VISIBLE
+                                    iedDiscountTv?.text =
+                                        "${appContext.getString(R.string.rupees_symbol)}${data.emiAmount?.cashBack?.toFormatString()}"
+                                    iedExtraTv?.text =
+                                        "${appContext.getString(R.string.rupees_symbol)}${data.emiAmount?.cashBack?.toFormatString()}"
                                 }
-                                else{
-                                    item_view.ied_discount_ll.visibility = View.GONE
-                                    item_view.ied_extra_ll.visibility = View.GONE
+                                else {
+                                    iedDiscountLL?.visibility = View.GONE
+                                    iedExtraLL?.visibility = View.GONE
                                 }
                             }
 
@@ -1231,13 +1261,14 @@ class SchemeAdapter(private var emiList: List<EmiView>, private var amount: Floa
                         // need to check
                     }
                     else -> {
-                        item_view.ied_extra_ll.visibility = View.GONE
-                        item_view.ied_discount_ll.visibility = View.GONE
+                        iedExtraLL?.visibility = View.GONE
+                        iedDiscountLL?.visibility = View.GONE
                     }
                 }
+                val iedTotalAmountTv = item_view.findViewById<BHTextView>(R.id.ied_total_amt_tv)
                 val tamt =
                     "${appContext.getString(R.string.rupees_symbol)} ${totalPayment.toFormatString()}"
-                item_view.ied_total_amt_tv.text = tamt
+                iedTotalAmountTv?.text = tamt
             }
 
         }

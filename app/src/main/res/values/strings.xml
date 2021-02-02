@@ -332,6 +332,7 @@
     <string name="app_is_already_running_on_latest_version_no_updates_available">App is Already Running on The Latest Version.\nNo Updates Available!</string>
     <string name="confirmation_app_update_failed">App Update Confirmation Send Failed....</string>
     <string name="download_failed">Download Failed</string>
+    <string name="american_express">AMERICAN EXPRESS</string>
 
 
 </resources>

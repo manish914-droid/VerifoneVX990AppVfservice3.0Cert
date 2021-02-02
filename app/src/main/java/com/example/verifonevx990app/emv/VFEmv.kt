@@ -1246,7 +1246,7 @@ object VFEmv : ISO8583(), OnXmlDataParsed {
                     10,
                     context?.getString(R.string.app_name_2)
                 )///Build.//"BonusHub  "
-                val pInfo = context?.packageManager?.getPackageInfo(context?.packageName, 0)
+                val pInfo = context?.packageManager?.getPackageInfo(context?.packageName ?: "", 0)
                 val version = pInfo?.versionName
                 val buildDate = Date(BuildConfig.TIMESTAMP)
                 val format = SimpleDateFormat("yyMMdd", Locale.getDefault())

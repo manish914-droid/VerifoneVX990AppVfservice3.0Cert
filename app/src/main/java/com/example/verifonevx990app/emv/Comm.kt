@@ -70,14 +70,14 @@ fun send(data: ByteArray): Int {
         return 0
     }
     Log.d(TAG, "SEND:")
-    Log.d(TAG, byte2HexStr(data))
+    Log.d(TAG, byte2HexStr(data) ?: "")
     try {
         outputStream = socket!!.getOutputStream()
         if (null == outputStream) {
             return 0
         }
-        outputStream!!.write(data)
-        outputStream!!.flush()
+        outputStream?.write(data)
+        outputStream?.flush()
         return data.size
     } catch (e: IOException) {
         e.printStackTrace()

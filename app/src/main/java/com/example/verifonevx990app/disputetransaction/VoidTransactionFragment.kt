@@ -16,6 +16,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.databinding.FragmentVoidRefundViewBinding
 import com.example.verifonevx990app.emv.transactionprocess.CardProcessedDataModal
 import com.example.verifonevx990app.emv.transactionprocess.SyncReversalToHost
 import com.example.verifonevx990app.emv.transactionprocess.SyncVoidTransactionToHost
@@ -27,8 +28,6 @@ import com.example.verifonevx990app.utils.printerUtils.PrintUtil
 import com.example.verifonevx990app.utils.printerUtils.checkForPrintReversalReceipt
 import com.example.verifonevx990app.vxUtils.*
 import com.google.gson.Gson
-import kotlinx.android.synthetic.main.sub_header_layout.*
-import kotlinx.android.synthetic.main.void_offline_confirmation_dialog_view.*
 import kotlinx.coroutines.*
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -40,15 +39,17 @@ class VoidTransactionFragment : Fragment() {
     private var backImageButton: ImageView? = null
     private var invoiceNumberET: BHEditText? = null
     private var voidRefundBT: BHButton? = null
+    private var binding: FragmentVoidRefundViewBinding? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_void_refund_view, container, false)
+        binding = FragmentVoidRefundViewBinding.inflate(inflater, container, false)
+        return binding?.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        sub_header_text?.text = title
+        binding?.subHeaderView?.subHeaderText?.text = title
         logger("ConnectionAddress:- ", VFService.getIpPort().toString(), "d")
         invoiceNumberET = view.findViewById(R.id.invoiceNumberET)
         voidRefundBT = view.findViewById(R.id.voidRefundBT)
@@ -102,7 +103,7 @@ class VoidTransactionFragment : Fragment() {
 
     //Below method is used to show confirmation pop up for Void Offline Sale:-
     private fun voidTransConfirmationDialog(voidData: BatchFileDataTable) {
-        val dialog = Dialog(activity!!)
+        val dialog = Dialog(requireActivity())
         dialog.setCancelable(false)
         dialog.setContentView(R.layout.void_offline_confirmation_dialog_view)
 
@@ -113,7 +114,7 @@ class VoidTransactionFragment : Fragment() {
             WindowManager.LayoutParams.WRAP_CONTENT
         )
 
-        dialog.dateET.text = voidData.transactionDate
+        dialog.findViewById<BHTextView>(R.id.dateET)?.text = voidData.transactionDate
 
         val time = voidData.time
         val timeFormat = SimpleDateFormat("HHmmss", Locale.getDefault())
@@ -127,19 +128,19 @@ class VoidTransactionFragment : Fragment() {
             e.printStackTrace()
         }
 
-        dialog.timeET.text =formattedTime
-        dialog.tidET.text = voidData.tid
-        dialog.invoiceET.text = invoiceWithPadding(voidData.invoiceNumber)
-        var amt=voidData.totalAmmount.toFloat()
-        if(voidData.tipAmmount=="") {
-            dialog.amountTV.text = voidData.totalAmmount
-        }
-        else{
+        dialog.findViewById<BHTextView>(R.id.timeET)?.text = formattedTime
+        dialog.findViewById<BHTextView>(R.id.tidET)?.text = voidData.tid
+        dialog.findViewById<BHTextView>(R.id.invoiceET)?.text =
+            invoiceWithPadding(voidData.invoiceNumber)
+        var amt = voidData.totalAmmount.toFloat()
+        if (voidData.tipAmmount == "") {
+            dialog.findViewById<BHTextView>(R.id.amountTV)?.text = voidData.totalAmmount
+        } else {
             amt /= 100
-            dialog.amountTV.text="%.2f".format(amt)
+            dialog.findViewById<BHTextView>(R.id.amountTV)?.text = "%.2f".format(amt)
         }
         dialog.findViewById<Button>(R.id.cancel_btnn).setOnClickListener {
-            voidRefundBT?.isEnabled=true
+            voidRefundBT?.isEnabled = true
             dialog.dismiss()
         }
         dialog.findViewById<Button>(R.id.ok_btnn).setOnClickListener {

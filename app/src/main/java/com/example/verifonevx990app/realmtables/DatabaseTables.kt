@@ -3721,7 +3721,6 @@ open class ProductCategoryTable() : RealmObject(), Parcelable {
 
 @RealmClass
 open class OfflineSaleTable() : RealmObject(), Parcelable {
-
     var maskedPan = ""
     var amount: Long = 0
     var encriptedF57 = ""
@@ -3849,7 +3848,6 @@ open class OfflineSaleTable() : RealmObject(), Parcelable {
 
 
 suspend fun clearDatabase() {
-
     BatchFileDataTable.clear()
     IssuerParameterTable.clear()
     TerminalCommunicationTable.clear()
@@ -3866,8 +3864,6 @@ suspend fun clearDatabase() {
     EmiSchemeProductTable.clear()
     ProductTable.clear()
     ProductCategoryTable.clear()
-
-
 }
 
 

@@ -3,13 +3,16 @@ package com.example.verifonevx990app.transactions
 
 import android.content.Context
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.databinding.FragmentInputAmountBinding
 import com.example.verifonevx990app.init.getEditorActionListener
 import com.example.verifonevx990app.main.IFragmentRequest
 import com.example.verifonevx990app.main.MainActivity
@@ -19,11 +22,10 @@ import com.example.verifonevx990app.realmtables.EDashboardItem
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
 import com.example.verifonevx990app.vxUtils.*
 import com.example.verifonevx990app.vxUtils.ROCProviderV2.refreshToolbarLogos
-import kotlinx.android.synthetic.main.fragment_input_amount.*
 
-class InputAmountFragment : Fragment(R.layout.fragment_input_amount) {
+class InputAmountFragment : Fragment() {
 
-    private var iDailog : IDialog? = null
+    private var iDailog: IDialog? = null
 
     companion object {
         private val TAG = InputAmountFragment::class.java.simpleName
@@ -37,15 +39,25 @@ class InputAmountFragment : Fragment(R.layout.fragment_input_amount) {
     private var proceedToPaybutton: Button? = null
     private var back_image_button: ImageView? = null
     private var sub_header_text: TextView? = null
+    private var binding: FragmentInputAmountBinding? = null
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = FragmentInputAmountBinding.inflate(layoutInflater, container, false)
+        return binding?.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val data = BatchFileDataTable.selectBatchData()
         activity?.let { refreshToolbarLogos(it) }
-        if(transactionType==EDashboardItem.SALE_WITH_CASH){
-            cash_amount_ll.visibility=View.VISIBLE
-        }else{
-            cash_amount_ll.visibility=View.GONE
+        if (transactionType == EDashboardItem.SALE_WITH_CASH) {
+            binding?.cashAmountLl?.visibility = View.VISIBLE
+        } else {
+            binding?.cashAmountLl?.visibility = View.GONE
         }
 
         inputAmountEditText = view.findViewById(R.id.iaf_amount_et)
@@ -157,17 +169,16 @@ class InputAmountFragment : Fragment(R.layout.fragment_input_amount) {
                        // val formatAmt = "%.2f".format(amt)
                         iDailog?.onEvents(VxEvent.Emi(amt.toDouble(),transactionType))  }//(activity as MainActivity).showToast("TO BE IMPLEMENTED")
                     EDashboardItem.CASH_ADVANCE->iFrReq?.onFragmentRequest(UiAction.CASH_ADVANCE, amt)
-                    EDashboardItem.SALE_WITH_CASH ->{
-                        val cashAmt= iaf_cash_amount_et.text.toString()
-                        if(!cashAmt.isBlank()){
+                    EDashboardItem.SALE_WITH_CASH -> {
+                        val cashAmt = binding?.iafCashAmountEt?.text.toString()
+                        if (!cashAmt.isBlank()) {
                             val cash = cashAmt.toDouble()
                             if (cash >= 1) {
-                                val amtArr= arrayListOf<String>()
-                                amtArr.add(0,amt)
-                                amtArr.add(1,cashAmt)
+                                val amtArr = arrayListOf<String>()
+                                amtArr.add(0, amt)
+                                amtArr.add(1, cashAmt)
                                 iFrReq?.onFragmentRequest(UiAction.SALE_WITH_CASH, amtArr)
-                            }
-                            else {
+                            } else {
                                 Toast.makeText(
                                     context,
                                     getString(R.string.minimum_amt_msg),

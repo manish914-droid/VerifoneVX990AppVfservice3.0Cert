@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
+import android.widget.RadioButton
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.verifonevx990app.R
@@ -24,8 +25,6 @@ import com.vfi.smartpos.deviceservice.aidl.EMVHandler
 import com.vfi.smartpos.deviceservice.aidl.IEMV
 import com.vfi.smartpos.deviceservice.constdefine.ConstIPBOC
 import com.vfi.smartpos.deviceservice.constdefine.ConstPBOCHandler
-import kotlinx.android.synthetic.main.item_multiapp_selection_layout.view.*
-import kotlinx.android.synthetic.main.multiapp_selection_layout.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -804,7 +803,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                 setContentView(R.layout.multiapp_selection_layout)
                 /*val body = dialog.findViewById(R.id.body) as TextView
                     body.text = title*/
-                apps_Rv.apply {
+                this.findViewById<RecyclerView>(R.id.apps_Rv)?.apply {
                     // set a LinearLayoutManager to handle Android
                     // RecyclerView behavior
                     layoutManager = LinearLayoutManager(activity)
@@ -813,7 +812,8 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                         appSelectedPosition = it
                     }
                 }
-                cancel_btnn.setOnClickListener {
+
+                this.findViewById<BHButton>(R.id.cancel_btnn)?.setOnClickListener {
                     logger("cancel_Btn", "$appSelectedPosition  ", "e")
                     dismiss()
                     iemv?.stopCheckCard()
@@ -823,7 +823,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                     activity.startActivity(intent)
                 }
 
-                ok_btnn.setOnClickListener {
+                this.findViewById<BHButton>(R.id.ok_btnn)?.setOnClickListener {
                     // iemv?.importAppSelection(appSelectedPosition)
                     logger("OkBtn", "$appSelectedPosition  ", "e")
                     try {
@@ -832,7 +832,8 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                     } catch (ex: java.lang.Exception) {
                         ex.printStackTrace()
                         dialog.dismiss()
-                        (activity as VFTransactionActivity).alertBoxWithAction(null,
+                        (activity as VFTransactionActivity).alertBoxWithAction(
+                            null,
                             null,
                             activity.getString(R.string.app_selection_failed),
                             activity.getString(R.string.please_reinitiate_transaction),
@@ -880,13 +881,14 @@ class MultiSelectionAppAdapter(
         val aid = aidBundle.getString("aid")
         val aidLabel = aidBundle.getString("aidLabel")
         Log.i("TAG", "AID Name=$aidName | AID Label=$aidLabel | AID=$aid")
-        holder.view.app_Rb.text = aidLabel
+        val appRB = holder.view.findViewById<RadioButton>(R.id.app_Rb)
+        appRB.text = aidLabel
 
         //since only one radio button is allowed to be selected,
         // this condition un-checks previous selections
-        holder.view.app_Rb.isChecked = lastSelectedPosition == position
+        appRB.isChecked = lastSelectedPosition == position
 
-        holder.view.app_Rb.setOnClickListener {
+        appRB.setOnClickListener {
             //VFService.showToast("onSelectApplication..." + (appList[position]))
 
             lastSelectedPosition = position

@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.databinding.FragmentSubmenuBinding
 import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.main.PrefConstant
 import com.example.verifonevx990app.offlinemanualsale.OfflineSalePrintReceipt
@@ -26,13 +27,9 @@ import com.example.verifonevx990app.voidrefund.VoidRefundSalePrintReceipt
 import com.example.verifonevx990app.vxUtils.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import kotlinx.android.synthetic.main.fragment_submenu.view.*
-import kotlinx.android.synthetic.main.item_sub_menu.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.util.*
-import kotlin.collections.ArrayList
 
 enum class EOptionGroup {
     FUNCTIONS, REPORT, NONE
@@ -197,7 +194,7 @@ class TableEditFragment : Fragment() {
         3.Reversal should be cleared or synced to host successfully.
         */
         if (dataList[position].titleValue == TerminalParameterTable.selectFromSchemeTable()?.terminalId.toString()) {
-            verifySuperAdminPasswordDialog(activity!!) { success ->
+            verifySuperAdminPasswordDialog(requireActivity()) { success ->
                 if (success) {
                     val batchData = BatchFileDataTable.selectBatchData()
                     when {
@@ -388,6 +385,7 @@ SubMenuFragment : Fragment(), IOnSubMenuItemSelectListener {
     private val optionList by lazy { mutableListOf<BankOptions>() }
     private val mAdapter by lazy { SubMenuFragmentAdapter(optionList, this) }
     private val option by lazy { arguments?.getSerializable("option") as EOptionGroup }
+    private var binding: FragmentSubmenuBinding? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -403,16 +401,20 @@ SubMenuFragment : Fragment(), IOnSubMenuItemSelectListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_submenu, container, false).apply {
-            initUI(this)
-        }
+        binding = FragmentSubmenuBinding.inflate(layoutInflater, container, false)
+        return binding?.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initUI(view)
     }
 
     private fun initUI(v: View) {
         iDiag?.onEvents(VxEvent.ChangeTitle(option.name))
-        v.f_sm_title_tv.text = option.name
+        binding?.fSmTitleTv?.text = option.name
 
-        v.f_sm_rv.apply {
+        binding?.fSmRv?.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = mAdapter
         }
@@ -440,7 +442,7 @@ SubMenuFragment : Fragment(), IOnSubMenuItemSelectListener {
                     iDiag?.onEvents(VxEvent.AppUpdate)
                 }
                 else -> {
-                    verifySuperAdminPasswordDialog(activity!!) { success ->
+                    verifySuperAdminPasswordDialog(requireActivity()) { success ->
                         if (success) {
                             when (type) {
 
@@ -1377,16 +1379,19 @@ class SubMenuFragmentAdapter(
     override fun getItemCount(): Int = list.size
 
     override fun onBindViewHolder(p0: SubMenuHolder, p1: Int) {
-        with(p0.view) {
-            ifsm_title_tv.text = list[p1]._name
-            ifsm_iv.background = ContextCompat.getDrawable(p0.view.context, list[p1].res)
-        }
+        p0.isfmTitleTV?.text = list[p1]._name
+        p0.ifsmIV.background = ContextCompat.getDrawable(p0.view.context, list[p1].res)
     }
 
     inner class SubMenuHolder(val view: View) : RecyclerView.ViewHolder(view) {
+        val isfmTitleTV = view.findViewById<BHTextView>(R.id.ifsm_title_tv)
+        val icLock = view.findViewById<ImageView>(R.id.ic_lock)
+        val ifsmIV = view.findViewById<ImageView>(R.id.ifsm_iv)
+        val ifsmParentLL = view.findViewById<LinearLayout>(R.id.ifsm_parent_ll)
+
         init {
-            view.ic_lock.visibility = View.GONE
-            view.ifsm_parent_ll.apply {
+            icLock.visibility = View.GONE
+            ifsmParentLL.apply {
                 //    setOnTouchListener(SubMenuFragment.onTouchListenerWithBorder)
 
                 setOnClickListener {

@@ -7,11 +7,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.*
-import com.example.verifonevx990app.vxUtils.VerifoneApp
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
 import com.example.verifonevx990app.vxUtils.AppPreference
+import com.example.verifonevx990app.vxUtils.VerifoneApp
 import com.example.verifonevx990app.vxUtils.VxEvent
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.*
 
 
@@ -101,46 +102,41 @@ class AutoSettleService: Service(){
 
 
 
-    inner class AutoSettleHandler(looper: Looper): Handler(looper){
+    inner class AutoSettleHandler(looper: Looper): Handler(looper) {
 
-        override fun handleMessage(msg: Message?) {
-            when(msg?.arg1){
-                1->{
+        override fun handleMessage(msg: Message) {
+            when (msg.arg1) {
+                1 ->
                     GlobalScope.launch {
 
-                       AppPreference.setAutoSettle(true)
+                        AppPreference.setAutoSettle(true)
                         while (AppPreference.getAutoSettle()) {
                             if (VerifoneApp.activeActivity == MainActivity::class.java.simpleName) {
 
                                 EventSender.fireEvent(VxEvent.ForceSettle)
                                 try {
                                     Thread.sleep(10 * 1000)
-                                }catch (ex:InterruptedException){}
+                                } catch (ex: InterruptedException) {
+                                }
 
                             } else {
                                 try {
                                     Thread.sleep(10 * 1000)
-                                }catch (ex:InterruptedException){}
+                                } catch (ex: InterruptedException) {
+                                }
                             }
 
                         }
 
-                        obtainMessage().also { msg->
-                            msg.arg1 =0
+                        obtainMessage().also { msg ->
+                            msg.arg1 = 0
                             sendMessage(msg)
                         }
                     }
                 }
-                0->{
-                    stopSelf()
-                }
             }
-
-
         }
     }
-
-}
 
 
 object EventSender{

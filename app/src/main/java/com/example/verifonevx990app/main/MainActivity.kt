@@ -15,11 +15,13 @@ import android.view.MenuItem
 import android.view.View
 import android.view.Window
 import android.widget.Button
+import android.widget.LinearLayout
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import androidx.multidex.BuildConfig
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.appupdate.*
+import com.example.verifonevx990app.databinding.ActivityMainBinding
 import com.example.verifonevx990app.disputetransaction.CreateSettlementPacket
 import com.example.verifonevx990app.disputetransaction.SettlementFragment
 import com.example.verifonevx990app.disputetransaction.VoidTransactionFragment
@@ -43,9 +45,6 @@ import com.example.verifonevx990app.vxUtils.*
 import com.example.verifonevx990app.vxUtils.ROCProviderV2.refreshToolbarLogos
 import com.example.verifonevx990app.vxUtils.ROCProviderV2.saveBatchInPreference
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.app_toolbar.*
-import kotlinx.android.synthetic.main.main_drawer.*
 import kotlinx.coroutines.*
 import java.io.File
 
@@ -87,10 +86,12 @@ class MainActivity : BaseActivity(), IFragmentRequest,
     private val changeTID by lazy { intent.getBooleanExtra("changeTID", false) }
     private var alert: androidx.appcompat.app.AlertDialog? = null
     private val builder by lazy { androidx.appcompat.app.AlertDialog.Builder(this) }
+    private var binding: ActivityMainBinding? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding?.root)
         initUI()
         decideHome()
         refreshToolbarLogos(this)
@@ -308,11 +309,11 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
     @SuppressLint("SetTextI18n")
     private fun initUI() {
-        main_toolbar_start.setOnClickListener { toggleDrawer() }
+        binding?.toolbarView?.mainToolbarStart?.setOnClickListener { toggleDrawer() }
         arrayOf<View>(
             // app_update_ll,
-            report_ll,
-            bank_fun_ll
+            findViewById<LinearLayout>(R.id.report_ll),
+            findViewById<LinearLayout>(R.id.bank_fun_ll)
         ).forEach { _ -> }
 
         //Displaying the Version Name of App:-
@@ -490,19 +491,19 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
     private fun refreshSide() {
         //region==========Setting for sidebar details==========
-        md_shop_tv.text = UserProvider.name
+        binding?.mainDrawerView?.mdShopTv?.text = UserProvider.name
         val tid = "TID : ${UserProvider.tid}"
-        md_tid_tv.text = tid
+        binding?.mainDrawerView?.mdTidTv?.text = tid
         val mid = "MID : ${UserProvider.mid}"
-        md_mid_tv.text = mid
+        binding?.mainDrawerView?.mdMidTv?.text = mid
         //endregion
     }
 
     private fun toggleDrawer() {
-        if (main_dl.isDrawerOpen(GravityCompat.START)) {
-            main_dl.closeDrawer(GravityCompat.START, true)
+        if (binding?.mainDl?.isDrawerOpen(GravityCompat.START) == true) {
+            binding?.mainDl?.closeDrawer(GravityCompat.START, true)
         } else {
-            main_dl.openDrawer(GravityCompat.START, true)
+            binding?.mainDl?.openDrawer(GravityCompat.START, true)
         }
     }
 
@@ -511,7 +512,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
         if (AppPreference.getLogin()) {
             //  init_ll.visibility = View.VISIBLE
             // key_exchange_ll.visibility = View.VISIBLE
-            report_ll.visibility = View.VISIBLE
+            binding?.mainDrawerView?.reportLl?.visibility = View.VISIBLE
             // app_update_ll.visibility = View.VISIBLE
             //  key_exchange_hdfc_ll.visibility = View.VISIBLE
             transactFragment(DashboardFragment(), isBackStackAdded = true)
@@ -532,7 +533,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
             //  init_ll.visibility = View.GONE
             //   key_exchange_ll.visibility = View.GONE
             //  key_exchange_hdfc_ll.visibility = View.GONE
-            report_ll.visibility = View.GONE
+            binding?.mainDrawerView?.reportLl?.visibility = View.GONE
             //   app_update_ll.visibility = View.GONE
             //initFragment
             transactFragment(initFragment, isBackStackAdded = false)
@@ -975,7 +976,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
             }, isBackStackAdded = isReport)
         }
 
-        bank_fun_ll.setOnClickListener {
+        binding?.mainDrawerView?.bankFunLl?.setOnClickListener {
             verifyAdminPasswordDialog(this) {
                 if (it) {
                     send(EOptionGroup.FUNCTIONS)
@@ -983,7 +984,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
             }
         }
 
-        report_ll.setOnClickListener {
+        binding?.mainDrawerView?.reportLl?.setOnClickListener {
             send(EOptionGroup.REPORT, false)
         }
 
@@ -1026,8 +1027,8 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
     override fun onBackPressed() {
 
-        if (main_dl.isDrawerOpen(GravityCompat.START)) {
-            main_dl.closeDrawer(GravityCompat.START, true)
+        if (binding?.mainDl?.isDrawerOpen(GravityCompat.START) == true) {
+            binding?.mainDl?.closeDrawer(GravityCompat.START, true)
         } else {
             when (supportFragmentManager.findFragmentById(R.id.ma_fl)) {
 

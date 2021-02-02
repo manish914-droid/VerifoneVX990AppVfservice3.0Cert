@@ -38,9 +38,9 @@ class PrinterActivity : BaseActivity() {
     private var footerText = arrayOf("*Thanks you Visit Again*", "POWERED BY")
 
     private val printingData by lazy{
-        intent.getParcelableExtra("printingData") as BatchFileDataTable
-        
+        intent.getParcelableExtra("printingData") as? BatchFileDataTable
     }
+
     private val printingType by lazy {
         intent.getSerializableExtra("printingType") as EPrinting
     }
@@ -266,98 +266,106 @@ class PrinterActivity : BaseActivity() {
         printerCallback: (Boolean) -> Unit
     ) {
         try {
-            hasPin(printingData)
+            printingData?.let { hasPin(it) }
             setLogoAndHeader()
-            printTransDatetime(printingData)
+            printingData?.let { printTransDatetime(it) }
             //===========================
             alignLeftRightText(
                 textInLineFormatBundle,
-                "MID : ${printingData.mid}",
-                "TID : ${printingData.tid}"
+                "MID : ${printingData?.mid}",
+                "TID : ${printingData?.tid}"
             )
             alignLeftRightText(
                 textInLineFormatBundle,
-                "BATCH NO : ${printingData.batchNumber}",
-                "ROC : ${invoiceWithPadding(printingData.roc)}"
+                "BATCH NO : ${printingData?.batchNumber}",
+                "ROC : ${printingData?.let { invoiceWithPadding(it.roc) }}"
             )
             alignLeftRightText(
                 textInLineFormatBundle,
-                "INVOICE : ${invoiceWithPadding(printingData.invoiceNumber)}",
+                "INVOICE : ${printingData?.let { invoiceWithPadding(it.invoiceNumber) }}",
                 ""
             )
             // printer?.addText(textFormatBundle, printingData.getTransactionType())
-            centerText(textFormatBundle, printingData.getTransactionType(), true)
+            printingData?.let { centerText(textFormatBundle, it.getTransactionType(), true) }
             alignLeftRightText(
                 textInLineFormatBundle,
-                "CARD TYPE : ${printingData.cardType}",
+                "CARD TYPE : ${printingData?.cardType}",
                 "EXP : XX/XX"
             )
-            alignLeftRightText(
-                textInLineFormatBundle, "CARD NO : ${getMaskedPan(
-                    TerminalParameterTable.selectFromSchemeTable(),
-                    printingData.cardNumber
-                )}", printingData.operationType
-            )
+            printingData?.let {
+                alignLeftRightText(
+                    textInLineFormatBundle, "CARD NO : ${
+                        printingData?.let {
+                            getMaskedPan(
+                                TerminalParameterTable.selectFromSchemeTable(),
+                                it.cardNumber
+                            )
+                        }
+                    }", it.operationType
+                )
+            }
 
 
             alignLeftRightText(
                 textInLineFormatBundle,
-                "AUTH CODE : ${printingData.authCode.trim()}",
-                "RRN : ${printingData.referenceNumber}"
+                "AUTH CODE : ${printingData?.authCode?.trim()}",
+                "RRN : ${printingData?.referenceNumber}"
             )
 
-            if (printingData.operationType != "Mag") {
+            if (printingData?.operationType ?: "" != "Mag") {
                 //Condition nee to be here before inflating below tvr and tsi?
-                if (printingData.operationType == "Chip") {
+                if (printingData?.operationType ?: "" == "Chip") {
                     alignLeftRightText(
                         textInLineFormatBundle,
-                        "TVR : ${printingData.tvr}",
-                        "TSI : ${printingData.tsi}"
+                        "TVR : ${printingData?.tvr}",
+                        "TSI : ${printingData?.tsi}"
                     )
                 }
-                if (!printingData.aid.isBlank() && !printingData.tc.isBlank()) {
+                if (printingData?.aid?.isNotBlank() == true && printingData!!.tc.isNotBlank()) {
                     alignLeftRightText(
                         textInLineFormatBundle,
-                        "AID : ${printingData.aid}",
+                        "AID : ${printingData!!.aid}",
                         ""
                     )
-                    alignLeftRightText(textInLineFormatBundle, "TC : ${printingData.tc}", "")
+                    alignLeftRightText(textInLineFormatBundle, "TC : ${printingData!!.tc}", "")
                 }
             }
 
             printSeperator(textFormatBundle)
 
             //  val txnAmount=(((printingData.transactionAmt).toFloat())%100)
-            val txnAmount = "%.2f".format(printingData.transactionalAmmount.toFloat() / 100)
+            val txnAmount = "%.2f".format((printingData?.transactionalAmmount?.toFloat())?.div(100))
             alignLeftRightText(textInLineFormatBundle, "TXN AMOUNT", "Rs $txnAmount", ":")
-            alignLeftRightText(
-                textInLineFormatBundle,
-                "CARD ISSUER",
-                printingData.cardType,
-                ":"
-            )
+            printingData?.let {
+                alignLeftRightText(
+                    textInLineFormatBundle,
+                    "CARD ISSUER",
+                    it.cardType,
+                    ":"
+                )
+            }
 
-            val rateOfInterest = "%.2f".format(printingData.roi.toFloat() / 100) + " %"
+            val rateOfInterest = "%.2f".format((printingData?.roi?.toFloat())?.div(100)) + " %"
             alignLeftRightText(textInLineFormatBundle, "ROI (p.a)", rateOfInterest, ":")
             alignLeftRightText(
                 textInLineFormatBundle,
                 "TENURE",
-                printingData.tenure + " months",
+                (printingData?.tenure ?: "") + " months",
                 ":"
             )
 
-            val loanAmount = "%.2f".format(printingData.loanAmt.toFloat() / 100)
+            val loanAmount = "%.2f".format((printingData?.loanAmt?.toFloat()?.div(100)))
             alignLeftRightText(textInLineFormatBundle, "LOAN AMOUNT", "Rs $loanAmount", ":")
 
-            val monthlyEMI = "%.2f".format(printingData.monthlyEmi.toFloat() / 100)
+            val monthlyEMI = "%.2f".format((printingData?.monthlyEmi?.toFloat()?.div(100)))
             alignLeftRightText(textInLineFormatBundle, "MONTHLY EMI", "Rs $monthlyEMI", ":")
             alignLeftRightText(
                 textInLineFormatBundle,
                 "TOTAL INTEREST",
-                "Rs " + printingData.totalInterest,
+                "Rs " + (printingData?.totalInterest ?: ""),
                 ":"
             )
-            val netPay = "%.2f".format(printingData.netPay.toFloat() / 100)
+            val netPay = "%.2f".format(printingData?.netPay?.toFloat()?.div(100))
 
 
             alignLeftRightText(textInLineFormatBundle, "TOTAL Amt(With int)", "Rs $netPay", ":")
@@ -367,7 +375,7 @@ class PrinterActivity : BaseActivity() {
             alignLeftRightText(textInLineFormatBundle, "CUSTOMER CONSENT FOR EMI", "")
             printer?.setLineSpace(1)
             val est = EmiSchemeTable.selectFromEmiSchemeTable()
-                .first { it.emiSchemeId == printingData.emiSchemeId }
+                .first { it.emiSchemeId == printingData?.emiSchemeId ?: "" }
 
             val disclaimer = est.disclaimer
 
@@ -396,7 +404,7 @@ class PrinterActivity : BaseActivity() {
 
             centerText(textInLineFormatBundle, pinVerifyMsg.toString())
             centerText(textInLineFormatBundle, signatureMsg.toString())
-            centerText(textInLineFormatBundle, printingData.cardHolderName)
+            printingData?.let { centerText(textInLineFormatBundle, it.cardHolderName) }
             centerText(textInLineFormatBundle, copyType.pName)
 
 
@@ -430,10 +438,10 @@ class PrinterActivity : BaseActivity() {
                     msg.data.putString("msg", "print finished")
                     VFService.showToast("Printing Successfully")
 
-                    when(copyType){
-                        EPrintCopyType.MERCHANT->{
+                    when (copyType) {
+                        EPrintCopyType.MERCHANT -> {
                             Handler(Looper.getMainLooper()).postDelayed({
-                                if (printingData.transactionType == TransactionType.EMI_SALE.type)
+                                if (printingData?.transactionType ?: 0 == TransactionType.EMI_SALE.type)
                                     showMerchantAlertBox(
                                         true
                                     ) { dialogCB ->
@@ -442,11 +450,11 @@ class PrinterActivity : BaseActivity() {
                             }, 100)
 
                         }
-                        EPrintCopyType.CUSTOMER->{
+                        EPrintCopyType.CUSTOMER -> {
                             VFService.showToast("Customer Transaction Slip Printed Successfully")
                             printerCallback(true)
                         }
-                        EPrintCopyType.DUPLICATE->{
+                        EPrintCopyType.DUPLICATE -> {
                             VFService.showToast("Printing Successful")
                             printerCallback(true)
 

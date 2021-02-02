@@ -1,20 +1,18 @@
 package com.example.verifonevx990app.preAuth
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.databinding.FragmentPendingPreAuthBinding
 import com.example.verifonevx990app.emv.transactionprocess.CardProcessedDataModal
 import com.example.verifonevx990app.utils.printerUtils.PrintUtil
+import com.example.verifonevx990app.vxUtils.BHTextView
 import com.example.verifonevx990app.vxUtils.invoiceWithPadding
-import kotlinx.android.synthetic.main.fragment_pending_pre_auth.*
-import kotlinx.android.synthetic.main.item_pending_preauth.view.*
-import kotlinx.android.synthetic.main.sub_header_layout.*
 
 class PendingPreAuthFragment : Fragment() {
 
@@ -31,22 +29,23 @@ class PendingPreAuthFragment : Fragment() {
         PendingPreauthAdapter(preAuthDataList)
     }
 
-
+    private var binding: FragmentPendingPreAuthBinding? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_pending_pre_auth, container, false)
+        binding = FragmentPendingPreAuthBinding.inflate(layoutInflater, container, false)
+        return binding?.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        back_image_button?.setOnClickListener {
-            fragmentManager?.popBackStackImmediate()
+        binding?.subHeaderView?.backImageButton?.setOnClickListener {
+            parentFragmentManager.popBackStackImmediate()
         }
-        sub_header_text?.text = getString(R.string.pending_pre_auth)
+        binding?.subHeaderView?.subHeaderText?.text = getString(R.string.pending_pre_auth)
 
-        pending_pre_auth_print_btn.setOnClickListener {
+        binding?.pendingPreAuthPrintBtn?.setOnClickListener {
             PrintUtil(context).printPendingPreauth(
                 cardProcessData,
                 context,
@@ -69,10 +68,10 @@ class PendingPreAuthFragment : Fragment() {
 
         }
 
-        pending_pre_rv.layoutManager = LinearLayoutManager(activity)
-
-        //now adding the adapter to recyclerview
-        pending_pre_rv.adapter = mAdapter
+        binding?.pendingPreRv?.apply {
+            layoutManager = LinearLayoutManager(activity)
+            adapter = mAdapter
+        }
     }
 
 }
@@ -92,21 +91,28 @@ class PendingPreauthAdapter(val pendPreauthData: ArrayList<PendingPreauthData>) 
     override fun onBindViewHolder(holder: PendingPreAuthViewHolder, position: Int) {
 
         val batchNo = "BATCH NO : " + invoiceWithPadding(pendPreauthData[position].batch.toString())
-        holder.view.batch_no_tv.text = batchNo
+        holder.batchNoTv?.text = batchNo
         val roc = "ROC : " + invoiceWithPadding(pendPreauthData[position].roc.toString())
-        holder.view.roc_tv.text = roc
+        holder.rocTV?.text = roc
 
         val pan = "PAN : " + pendPreauthData[position].pan
-        holder.view.pan_no_tv.text = pan
+        holder.panNoTv?.text = pan
         val amt = "AMT : " + "%.2f".format(pendPreauthData[position].amount)
-        holder.view.amt_tv.text = amt
+        holder.amtTv?.text = amt
 
         val date = "DATE : " + pendPreauthData[position].date
-        holder.view.date_tv.text = date
+        holder.dateTv?.text = date
         val time = "TIME : " + pendPreauthData[position].time
-        holder.view.time_tv.text = time
+        holder.timeTv?.text = time
 
     }
 
-    class PendingPreAuthViewHolder(val view: View) : RecyclerView.ViewHolder(view)
+    class PendingPreAuthViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
+        var batchNoTv = view.findViewById<BHTextView>(R.id.batch_no_tv)
+        var rocTV = view.findViewById<BHTextView>(R.id.roc_tv)
+        var panNoTv = view.findViewById<BHTextView>(R.id.pan_no_tv)
+        var amtTv = view.findViewById<BHTextView>(R.id.amt_tv)
+        var dateTv = view.findViewById<BHTextView>(R.id.date_tv)
+        var timeTv = view.findViewById<BHTextView>(R.id.time_tv)
+    }
 }

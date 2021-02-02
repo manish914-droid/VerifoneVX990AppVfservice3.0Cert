@@ -3,10 +3,13 @@ package com.example.verifonevx990app.offlinemanualsale
 import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.databinding.FragmentOfflineManualSaleBinding
 import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.main.PrefConstant
 import com.example.verifonevx990app.realmtables.CardDataTable
@@ -14,13 +17,12 @@ import com.example.verifonevx990app.realmtables.IssuerParameterTable
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
 import com.example.verifonevx990app.utils.printerUtils.EPrintCopyType
 import com.example.verifonevx990app.vxUtils.*
-import kotlinx.android.synthetic.main.sub_header_layout.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
 
-class OfflineManualSaleInputFragment : Fragment(R.layout.fragment_offline_manual_sale) {
+class OfflineManualSaleInputFragment : Fragment() {
     private val title: String by lazy { arguments?.getString(MainActivity.INPUT_SUB_HEADING) ?: "" }
     private var backImageButton: ImageView? = null
     private var expiryDateET: BHTextInputEditText? = null
@@ -32,10 +34,20 @@ class OfflineManualSaleInputFragment : Fragment(R.layout.fragment_offline_manual
     private var cardDataTable: CardDataTable? = null
     private val calender: Calendar by lazy { Calendar.getInstance() }
     private var offlineTransLimit: Double? = 0.0
+    private var binding: FragmentOfflineManualSaleBinding? = null
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = FragmentOfflineManualSaleBinding.inflate(layoutInflater, container, false)
+        return binding?.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        sub_header_text?.text = title
+        binding?.subHeaderView?.subHeaderText?.text = title
         logger("ConnectionAddress:- ", VFService.getIpPort().toString(), "d")
         terminalParameterTable = TerminalParameterTable.selectFromSchemeTable()
         cardDataTable = CardDataTable.selectFirstCardTableData()

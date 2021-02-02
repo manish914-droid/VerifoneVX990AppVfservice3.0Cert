@@ -8,13 +8,11 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.fragment.app.Fragment
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.databinding.FragmentPreAuthCompleteDetailBinding
 import com.example.verifonevx990app.emv.transactionprocess.CardProcessedDataModal
 import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.vxUtils.*
 import com.example.verifonevx990app.vxUtils.VFService.showToast
-import kotlinx.android.synthetic.main.auth_complete_confirm_dialog.*
-import kotlinx.android.synthetic.main.fragment_pre_auth_complete_detail.*
-import kotlinx.android.synthetic.main.sub_header_layout.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -29,11 +27,7 @@ class PreAuthCompleteInputDetailFragment : Fragment() {
     private val cardProcessedData: CardProcessedDataModal by lazy { CardProcessedDataModal() }
 
     private val authData: AuthCompletionData by lazy { AuthCompletionData() }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
+    private var binding: FragmentPreAuthCompleteDetailBinding? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,17 +40,17 @@ class PreAuthCompleteInputDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        sub_header_text?.text = title
-        tid_et.isFocusableInTouchMode = true
-        tid_et.requestFocus()
-        back_image_button?.setOnClickListener {
-            fragmentManager?.popBackStackImmediate()
+        binding?.subHeaderView?.subHeaderText?.text = title
+        binding?.tidEt?.isFocusableInTouchMode = true
+        binding?.tidEt?.requestFocus()
+        binding?.subHeaderView?.backImageButton?.setOnClickListener {
+            parentFragmentManager.popBackStackImmediate()
         }
-        auth_complete_btn.setOnClickListener {
-            authData.authTid = tid_et.text.toString()//""
-            authData.authAmt = amount_et.text.toString()
-            authData.authBatchNo = batch_et.text.toString()
-            authData.authRoc = roc_et.text.toString()
+        binding?.authCompleteBtn?.setOnClickListener {
+            authData.authTid = binding?.tidEt?.text.toString()//""
+            authData.authAmt = binding?.amountEt?.text.toString()
+            authData.authBatchNo = binding?.batchEt?.text.toString()
+            authData.authRoc = binding?.rocEt?.text.toString()
             if (authData.authTid.isNullOrBlank() || authData.authTid!!.length < 8) {
                 showToast("Invalid TID")
                 return@setOnClickListener
@@ -76,7 +70,7 @@ class PreAuthCompleteInputDetailFragment : Fragment() {
     }
 
     private fun authCompleteConfirmDialog(authCompletionData: AuthCompletionData) {
-        val dialog = Dialog(activity!!)
+        val dialog = Dialog(requireActivity())
         // dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setCancelable(false)
         dialog.setContentView(R.layout.auth_complete_confirm_dialog)
@@ -84,16 +78,18 @@ class PreAuthCompleteInputDetailFragment : Fragment() {
         val amountWithRsSymbol =
             "${getString(R.string.rupees_symbol)} ${authCompletionData.authAmt}"
 
-        dialog.amt_auth.text = amountWithRsSymbol
-        dialog.roc_auth.text = authCompletionData.authRoc?.let { invoiceWithPadding(it) }
-        dialog.tid_auth.text = authCompletionData.authTid
-        dialog.batchno_auth.text = authCompletionData.authBatchNo?.let { invoiceWithPadding(it) }
+        dialog.findViewById<BHTextView>(R.id.amt_auth)?.text = amountWithRsSymbol
+        dialog.findViewById<BHTextView>(R.id.roc_auth)?.text =
+            authCompletionData.authRoc?.let { invoiceWithPadding(it) }
+        dialog.findViewById<BHTextView>(R.id.tid_auth)?.text = authCompletionData.authTid
+        dialog.findViewById<BHTextView>(R.id.batchno_auth)?.text =
+            authCompletionData.authBatchNo?.let { invoiceWithPadding(it) }
 
-        dialog.cancel_btnn.setOnClickListener {
+        dialog.findViewById<BHButton>(R.id.cancel_btnn)?.setOnClickListener {
             dialog.dismiss()
             //  doProcessCard()
         }
-        dialog.ok_btnn.setOnClickListener {
+        dialog.findViewById<BHButton>(R.id.ok_btnn)?.setOnClickListener {
             confirmCompletePreAuth(authCompletionData)
             dialog.dismiss()
         }

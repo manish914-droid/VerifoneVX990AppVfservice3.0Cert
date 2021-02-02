@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.appupdate.SendAppUpdateConfirmationPacket
 import com.example.verifonevx990app.appupdate.SyncAppUpdateConfirmation
+import com.example.verifonevx990app.databinding.FragmentDashboardBinding
 import com.example.verifonevx990app.main.IFragmentRequest
 import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.realmtables.BHDashboardItem
@@ -24,7 +25,6 @@ import com.example.verifonevx990app.realmtables.TerminalParameterTable
 import com.example.verifonevx990app.vxUtils.*
 import com.example.verifonevx990app.vxUtils.ROCProviderV2.refreshToolbarLogos
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import kotlinx.android.synthetic.main.fragment_dashboard.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -36,18 +36,29 @@ class DashboardFragment : Fragment() {
         var toRefresh = true
     }
 
-    private var iFragmentRequest: IFragmentRequest?= null
+    private var iFragmentRequest: IFragmentRequest? = null
     private val itemList = mutableListOf<EDashboardItem>()
-    private val mAdapter by lazy { DashboardAdapter(itemList,iFragmentRequest) }
+    private val mAdapter by lazy { DashboardAdapter(itemList, iFragmentRequest) }
     private var counter = 0
     private var isUpdate = false
+    private var binding: FragmentDashboardBinding? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_dashboard, container, false).apply { initUI(this) }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = FragmentDashboardBinding.inflate(inflater, container, false)
+        return binding?.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initUI(view)
     }
 
 
-    private fun initUI(v:View) {
+    private fun initUI(v: View) {
         val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.ma_bnv)
         if (bottomNavigationView is BottomNavigationView) {
             bottomNavigationView.visibility = View.VISIBLE
@@ -92,7 +103,7 @@ class DashboardFragment : Fragment() {
                 itemList.sortWith(compareBy{it.rank})
 
                 launch(Dispatchers.Main) {
-                    v.dash_frag_rv.apply {
+                    binding?.dashFragRv?.apply {
                         layoutManager = GridLayoutManager(context, 2)
                         adapter = mAdapter
                     }
@@ -101,7 +112,7 @@ class DashboardFragment : Fragment() {
             }
             toRefresh = false
         }else{
-            v.dash_frag_rv.apply {
+            binding?.dashFragRv?.apply {
                 layoutManager = GridLayoutManager(context, 2)
                 adapter = mAdapter
             }

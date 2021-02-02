@@ -8,9 +8,11 @@ import android.os.*
 import android.text.TextUtils
 import android.util.Log
 import android.view.*
+import android.widget.Button
 import android.widget.ImageView
 import androidx.cardview.widget.CardView
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.databinding.ActivityTransactionBinding
 import com.example.verifonevx990app.emv.VFEmv
 import com.example.verifonevx990app.main.ConnectionError
 import com.example.verifonevx990app.main.DetectCardType
@@ -36,9 +38,6 @@ import com.google.gson.Gson
 import com.vfi.smartpos.deviceservice.aidl.PinInputListener
 import com.vfi.smartpos.deviceservice.constdefine.ConstIPBOC
 import com.vfi.smartpos.deviceservice.constdefine.ConstIPinpad
-import kotlinx.android.synthetic.main.activity_transaction.*
-import kotlinx.android.synthetic.main.app_toolbar.*
-import kotlinx.android.synthetic.main.enter_manual_detail_layout.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -77,14 +76,16 @@ class VFTransactionActivity : BaseActivity() {
     private val cardView_l by lazy { findViewById<CardView>(R.id.cardView_l) }
     private val tv_card_number_heading by lazy { findViewById<BHTextView>(R.id.tv_card_number_heading) }
     private val tv_insert_card by lazy { findViewById<BHTextView>(R.id.tv_insert_card) }
+    private var binding: ActivityTransactionBinding? = null
 
-//onCreate called 
+    //onCreate called
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_transaction)
-        main_toolbar_start.setBackgroundResource(R.drawable.ic_back_arrow)
+        binding = ActivityTransactionBinding.inflate(layoutInflater)
+        setContentView(binding?.root)
+        binding?.toolbarTxn?.mainToolbarTv?.setBackgroundResource(R.drawable.ic_back_arrow)
         refreshToolbarLogos(this)
-        main_toolbar_start.setOnClickListener {
+        binding?.toolbarTxn?.mainToolbarStart?.setOnClickListener {
             //  onBackPressed()
             declinedTransaction()
         }
@@ -115,10 +116,23 @@ class VFTransactionActivity : BaseActivity() {
             logger("STATUS_P", printer?.status.toString(), "e")
             if (printer?.status != 0) {
                 GlobalScope.launch(Dispatchers.Main) {
-                    alertBoxWithAction(null, null, getString(R.string.printer_error), "Want to Proceed SALE with no charge slip", true, getString(R.string.yes), { alertPositiveCallback ->
+                    alertBoxWithAction(null,
+                        null,
+                        getString(R.string.printer_error),
+                        "Want to Proceed SALE with no charge slip",
+                        true,
+                        getString(R.string.yes),
+                        { alertPositiveCallback ->
                             if (alertPositiveCallback)
-                                ProcessCard(this@VFTransactionActivity, pinHandler, globalCardProcessedModel, transactionalAmount) { localCardProcessedData ->
-                                    localCardProcessedData.setProcessingCode(transactionProcessingCode)
+                                ProcessCard(
+                                    this@VFTransactionActivity,
+                                    pinHandler,
+                                    globalCardProcessedModel,
+                                    transactionalAmount
+                                ) { localCardProcessedData ->
+                                    localCardProcessedData.setProcessingCode(
+                                        transactionProcessingCode
+                                    )
                                     localCardProcessedData.setTransactionAmount(transactionalAmount)
                                     localCardProcessedData.setCashAmount(cashAmount)
                                     localCardProcessedData.setMobileBillExtraData(
@@ -126,16 +140,22 @@ class VFTransactionActivity : BaseActivity() {
                                     )
                                     //    localCardProcessedData.setTransType(transactionType)
                                     globalCardProcessedModel = localCardProcessedData
-                                    Log.d("CardProcessedData:- ", Gson().toJson(localCardProcessedData))
+                                    Log.d(
+                                        "CardProcessedData:- ",
+                                        Gson().toJson(localCardProcessedData)
+                                    )
                                     val maskedPan = localCardProcessedData.getPanNumberData()?.let {
-                                        getMaskedPan(TerminalParameterTable.selectFromSchemeTable(), it)
+                                        getMaskedPan(
+                                            TerminalParameterTable.selectFromSchemeTable(),
+                                            it
+                                        )
                                     }
                                     runOnUiThread {
-                                        at_card_no_tv.text = maskedPan
+                                        binding?.atCardNoTv?.text = maskedPan
                                         cardView_l.visibility = View.VISIBLE
                                         tv_card_number_heading.visibility = View.VISIBLE
                                         tv_insert_card.visibility = View.INVISIBLE
-                                        payment_gif.visibility=View.INVISIBLE
+                                        binding?.paymentGif?.visibility = View.INVISIBLE
                                     }
                                     //Below Different Type of Transaction check Based ISO Packet Generation happening:-
                                     processAccordingToCardType(localCardProcessedData)
@@ -163,11 +183,11 @@ class VFTransactionActivity : BaseActivity() {
                         getMaskedPan(TerminalParameterTable.selectFromSchemeTable(), it)
                     }
                     runOnUiThread {
-                        at_card_no_tv.text = maskedPan
+                        binding?.atCardNoTv?.text = maskedPan
                         cardView_l.visibility = View.VISIBLE
                         tv_card_number_heading.visibility = View.VISIBLE
                         tv_insert_card.visibility = View.INVISIBLE
-                        payment_gif.visibility=View.INVISIBLE
+                        binding?.paymentGif?.visibility = View.INVISIBLE
                     }
                     //Below Different Type of Transaction check Based ISO Packet Generation happening:-
                     processAccordingToCardType(localCardProcessedData)
@@ -307,26 +327,24 @@ class VFTransactionActivity : BaseActivity() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initUI() {
-        payment_gif.loadUrl("file:///android_asset/card_animation.html")
-        payment_gif.setOnTouchListener { _, event -> event.action == MotionEvent.ACTION_MOVE }
+        binding?.paymentGif?.loadUrl("file:///android_asset/card_animation.html")
+        binding?.paymentGif?.setOnTouchListener { _, event -> event.action == MotionEvent.ACTION_MOVE }
         val amountValue = "${getString(R.string.rupees_symbol)} $transactionAmountValue"
         findViewById<BHTextView>(R.id.base_amt_tv).text = amountValue
 
         transactionalAmount = transactionAmountValue.replace(".", "").toLong()
         cashAmount = transactionCashAmountValue.replace(".", "").toLong()
 
-        if (isManualEntryAllowed) manual_entry_button.visibility =
-            View.VISIBLE else manual_entry_button.visibility = View.GONE
+        if (isManualEntryAllowed) binding?.manualEntryButton?.visibility =
+            View.VISIBLE else binding?.manualEntryButton?.visibility = View.GONE
 
-        manual_entry_button.setOnClickListener {
+        binding?.manualEntryButton?.setOnClickListener {
             //have to check
             try {
                 vfIEMV?.stopCheckCard()
-               }
-            catch (ex: DeadObjectException){
+            } catch (ex: DeadObjectException) {
                 ex.printStackTrace()
-            }
-            catch (ex: RemoteException){
+            } catch (ex: RemoteException) {
                 ex.printStackTrace()
             }
             catch (ex: Exception){
@@ -346,22 +364,24 @@ class VFTransactionActivity : BaseActivity() {
         cardExpDate.isFocusable = false
         cardExpDate.setOnClickListener { openDatePicker(cardExpDate, this) }
 
-        dialog.cancel_btnn.setOnClickListener {
+        dialog.findViewById<Button>(R.id.cancel_btnn)?.setOnClickListener {
             dialog.dismiss()
             doProcessCard()
         }
-        dialog.ok_btnn.setOnClickListener {
+        dialog.findViewById<Button>(R.id.ok_btnn)?.setOnClickListener {
             //showToast("Proceed..")
-            if (dialog.card_no.text.isNullOrBlank() || dialog.card_no.text!!.length < 15) {
+            if (dialog.findViewById<BHTextInputEditText>(R.id.card_no)?.text.isNullOrBlank() ||
+                dialog.findViewById<BHTextInputEditText>(R.id.card_no)?.text?.length ?: 0 < 15
+            ) {
                 showToast("Invalid CardNumber")
-            } else if (!cardLuhnCheck(dialog.card_no.text.toString())) {
+            } else if (!cardLuhnCheck(dialog.findViewById<BHTextInputEditText>(R.id.card_no)?.text.toString())) {
                 VFService.showToast(getString(R.string.card_number_not_valid_as_per_luhn_check))
-            } else if (dialog.card_exp_date.text.isNullOrBlank()) {
+            } else if (dialog.findViewById<BHTextInputEditText>(R.id.card_exp_date).text.isNullOrBlank()) {
                 showToast("Invalid Exp Date")
             } else {
                 dialog.dismiss()
                 createDataForManualEntry(
-                    dialog.card_no.text.toString(),
+                    dialog.findViewById<BHTextInputEditText>(R.id.card_no).text.toString(),
                     cardExpDate?.text.toString().substring(0, 2) + cardExpDate?.text.toString()
                         .substring(3, 5)
                 )
@@ -817,11 +837,11 @@ class VFTransactionActivity : BaseActivity() {
             getMaskedPan(TerminalParameterTable.selectFromSchemeTable(), it)
         }
         runOnUiThread {
-            at_card_no_tv.text = maskedPan
+            binding?.atCardNoTv?.text = maskedPan
             cardView_l.visibility = View.VISIBLE
             tv_card_number_heading.visibility = View.VISIBLE
             tv_insert_card.visibility = View.INVISIBLE
-            payment_gif.visibility=View.INVISIBLE
+            binding?.paymentGif?.visibility = View.INVISIBLE
         }
 
         var iptList = IssuerParameterTable.selectFromIssuerParameterTable()
@@ -892,11 +912,11 @@ class VFTransactionActivity : BaseActivity() {
             getMaskedPan(TerminalParameterTable.selectFromSchemeTable(), it)
         }
         runOnUiThread {
-            at_card_no_tv.text = maskedPan
+            binding?.atCardNoTv?.text = maskedPan
             cardView_l.visibility = View.VISIBLE
             tv_card_number_heading.visibility = View.VISIBLE
             tv_insert_card.visibility = View.INVISIBLE
-            payment_gif.visibility=View.INVISIBLE
+            binding?.paymentGif?.visibility = View.INVISIBLE
         }
         //Below Different Type of Transaction check Based ISO Packet Generation happening:-
         // processAccordingToCardType(cardProcessedDataModal)

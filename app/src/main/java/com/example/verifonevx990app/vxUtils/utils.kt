@@ -16,10 +16,7 @@ import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
 import android.view.*
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
@@ -33,8 +30,6 @@ import com.google.gson.reflect.TypeToken
 import com.vfi.smartpos.deviceservice.constdefine.ConstIPBOC
 import io.realm.RealmObject
 import io.realm.RealmResults
-import kotlinx.android.synthetic.main.success_toast.*
-import kotlinx.android.synthetic.main.success_toast.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -1460,9 +1455,9 @@ fun txnSuccessToast(context: Context, msg: String = "Transaction Approved") {
             VFService.vfBeeper?.startBeep(200)
             val layout = (context as Activity).layoutInflater.inflate(
                 R.layout.success_toast,
-                context.custom_toast_layout
+                context.findViewById<LinearLayout>(R.id.custom_toast_layout)
             )
-            layout.txtvw.text = msg
+            layout.findViewById<BHTextView>(R.id.txtvw)?.text = msg
             val myToast = Toast(context)
             myToast.duration = Toast.LENGTH_LONG
             myToast.setGravity(Gravity.CENTER_VERTICAL, 0, 0)
@@ -1559,9 +1554,9 @@ fun blockAndUnBlockTouchScreenEvent(isTouchBlock: Boolean, activity: Activity) {
         activity.window.setFlags(
             WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
             WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-        );
+        )
     } else {
-        activity.window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        activity.window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
     }
 }
 //endregion

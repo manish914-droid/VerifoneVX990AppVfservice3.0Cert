@@ -6,14 +6,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.databinding.FragmentVoidPreAuthBinding
 import com.example.verifonevx990app.emv.transactionprocess.CardProcessedDataModal
 import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.vxUtils.*
-import kotlinx.android.synthetic.main.auth_complete_confirm_dialog.*
-import kotlinx.android.synthetic.main.fragment_void_pre_auth.*
-import kotlinx.android.synthetic.main.sub_header_layout.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -26,54 +25,58 @@ class VoidPreAuthFragment : Fragment() {
 
     private val cardProcessedData: CardProcessedDataModal by lazy { CardProcessedDataModal() }
     private val authData: AuthCompletionData by lazy { AuthCompletionData() }
+    private var binding: FragmentVoidPreAuthBinding? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_void_pre_auth, container, false)
+        binding = FragmentVoidPreAuthBinding.inflate(layoutInflater, container, false)
+        return binding?.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        sub_header_text?.text = title
+        binding?.subHeaderView?.subHeaderText?.text = title
 
-        back_image_button?.setOnClickListener {
-            fragmentManager?.popBackStackImmediate()
+        binding?.subHeaderView?.backImageButton?.setOnClickListener {
+            parentFragmentManager.popBackStackImmediate()
         }
-        auth_void_btn.setOnClickListener {
+        binding?.authVoidBtn?.setOnClickListener {
 
-            authData.authBatchNo = batch_void_et.text.toString()
-            authData.authRoc = roc_void_et.text.toString()
+            authData.authBatchNo = binding?.batchVoidEt?.text.toString()
+            authData.authRoc = binding?.rocVoidEt?.text.toString()
             if (authData.authBatchNo.isNullOrBlank()) {
                 VFService.showToast("Invalid BatchNo")
                 return@setOnClickListener
             } else if (authData.authRoc.isNullOrBlank()) {
                 VFService.showToast("Invalid ROC")
                 return@setOnClickListener
-            }  else {
-               // voidAuthDataCreation(authData)
+            } else {
+                // voidAuthDataCreation(authData)
                 confirmationDialog(authData)
             }
         }
 
     }
 
-    private fun confirmationDialog(authData:AuthCompletionData){
-        val dialog = Dialog(activity!!)
+    private fun confirmationDialog(authData:AuthCompletionData) {
+        val dialog = Dialog(requireActivity())
         // dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setCancelable(false)
         dialog.setContentView(R.layout.auth_complete_confirm_dialog)
-        dialog.tid_ll.visibility=View.GONE
-        dialog.amount_ll.visibility=View.GONE
-        dialog.roc_auth.text = authData.authRoc?.let { invoiceWithPadding(it) }
-        dialog.batchno_auth.text =  authData.authBatchNo?.let { invoiceWithPadding(it) }
+        dialog.findViewById<LinearLayout>(R.id.tid_ll)?.visibility = View.GONE
+        dialog.findViewById<LinearLayout>(R.id.amount_ll)?.visibility = View.GONE
+        dialog.findViewById<BHTextView>(R.id.roc_auth)?.text =
+            authData.authRoc?.let { invoiceWithPadding(it) }
+        dialog.findViewById<BHTextView>(R.id.batchno_auth)?.text =
+            authData.authBatchNo?.let { invoiceWithPadding(it) }
 
-        dialog.cancel_btnn.setOnClickListener {
+        dialog.findViewById<BHButton>(R.id.cancel_btnn)?.setOnClickListener {
             dialog.dismiss()
         }
-        dialog.ok_btnn.setOnClickListener {
+        dialog.findViewById<BHButton>(R.id.ok_btnn)?.setOnClickListener {
             voidAuthDataCreation(authData)
             dialog.dismiss()
         }

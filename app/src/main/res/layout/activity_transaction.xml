@@ -6,9 +6,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
 
-    <include layout="@layout/app_toolbar"
-        android:id="@+id/toolbar_txn"
-        />
+    <include
+        layout="@layout/app_toolbar"
+        android:id="@+id/toolbar_txn" />
 
     <com.example.verifonevx990app.vxUtils.BHTextView
         android:id="@+id/tv_transaction_amount_heading"

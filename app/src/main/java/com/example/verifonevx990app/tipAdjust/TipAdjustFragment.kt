@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.databinding.FragmentTipAdjustBinding
 import com.example.verifonevx990app.emv.transactionprocess.SyncReversalToHost
 import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.offlinemanualsale.SyncOfflineSaleToHost
@@ -22,9 +23,6 @@ import com.example.verifonevx990app.utils.printerUtils.PrintUtil
 import com.example.verifonevx990app.utils.printerUtils.checkForPrintReversalReceipt
 import com.example.verifonevx990app.vxUtils.*
 import com.google.gson.Gson
-import kotlinx.android.synthetic.main.fragment_tip_adjust.*
-import kotlinx.android.synthetic.main.fragment_void_pre_auth.auth_void_btn
-import kotlinx.android.synthetic.main.sub_header_layout.*
 import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -38,24 +36,26 @@ class TipAdjustFragment : Fragment() {
       private val authData: AuthCompletionData by lazy { AuthCompletionData() }*/
 
     private val tpt by lazy { TerminalParameterTable.selectFromSchemeTable() }
+    private var binding: FragmentTipAdjustBinding? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_tip_adjust, container, false)
+        binding = FragmentTipAdjustBinding.inflate(layoutInflater, container, false)
+        return binding?.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        sub_header_text?.text = title
-        tip_on_invoice_et.isFocusableInTouchMode = true
-        tip_on_invoice_et.requestFocus()
-        back_image_button?.setOnClickListener {
-            fragmentManager?.popBackStackImmediate()
+        binding?.subHeaderView?.subHeaderText?.text = title
+        binding?.tipOnInvoiceEt?.isFocusableInTouchMode = true
+        binding?.tipOnInvoiceEt?.requestFocus()
+        binding?.subHeaderView?.backImageButton?.setOnClickListener {
+            parentFragmentManager.popBackStackImmediate()
         }
-        auth_void_btn.setOnClickListener {
+        binding?.authVoidBtn?.setOnClickListener {
             validate()
         }
 
@@ -64,11 +64,11 @@ class TipAdjustFragment : Fragment() {
 
     private fun validate() {
         if (tpt != null) {
-            val invoice = tip_on_invoice_et?.text.toString()
+            val invoice = binding?.tipOnInvoiceEt?.text.toString()
 
             //  val amm=  tip_amount_et.text?.toString()?.replace(".", "")?.toLong() ?: 0L
             val amount = try {
-                tip_amount_et.text.toString().toFloat()
+                binding?.tipAmountEt?.text.toString().toFloat()
             } catch (ex: Exception) {
                 0f
             }
@@ -119,9 +119,9 @@ class TipAdjustFragment : Fragment() {
                 }
 
             } else if (batch == null) {
-                tip_on_invoice_et?.error = "No Invoice Found."
+                binding?.tipOnInvoiceEt?.error = "No Invoice Found."
             } else if (amount == 0f) {
-                tip_amount_et?.error = "Enter Amount."
+                binding?.tipAmountEt?.error = "Enter Amount."
             } else if (batch.transactionType != TransactionType.SALE.ordinal) {
                 val msg = "Tip sale is not valid for ${batch.getTransactionType()}"
                 VFService.showToast(msg)

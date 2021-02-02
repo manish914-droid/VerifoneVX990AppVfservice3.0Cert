@@ -22,7 +22,9 @@
             android:layout_weight="1"
             tools:context=".main.MainActivity">
 
-            <include layout="@layout/app_toolbar"/>
+            <include
+                android:id="@+id/toolbar_view"
+                layout="@layout/app_toolbar" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -73,11 +75,13 @@
             android:layout_gravity="bottom"
             android:background="@color/white"
             android:id="@+id/ma_bnv"
-            app:menu="@menu/bottom_navigation_menu"/>
+            app:menu="@menu/bottom_navigation_menu" />
 
     </LinearLayout>
     <!--Sliding drawer-->
-    <include layout="@layout/main_drawer"/>
+    <include
+        android:id="@+id/main_drawer_view"
+        layout="@layout/main_drawer" />
 
 </androidx.drawerlayout.widget.DrawerLayout>
 
