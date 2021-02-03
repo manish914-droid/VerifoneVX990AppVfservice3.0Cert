@@ -318,8 +318,6 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                     )
 
         //    VFService.showToast("onConfirmCardInfo:$result")
-
-
                     //  checkEmiInstaEmi(cardProcessedDataModal)
                     if (cardProcessedDataModal.getTransType() == TransactionType.SALE.type) {
                         (activity as VFTransactionActivity).checkEmiInstaEmi(cardProcessedDataModal) {

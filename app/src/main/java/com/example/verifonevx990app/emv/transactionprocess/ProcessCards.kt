@@ -9,7 +9,6 @@ import com.example.verifonevx990app.main.DetectCardType
 import com.example.verifonevx990app.main.DetectError
 import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.main.PosEntryModeType
-import com.example.verifonevx990app.nontransaction.PinpadPopUpWindow
 import com.example.verifonevx990app.utils.Utility
 import com.example.verifonevx990app.vxUtils.*
 import com.example.verifonevx990app.vxUtils.ROCProviderV2.getEncryptedTrackData
@@ -279,7 +278,6 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                         }, 200)
                     }
                 }
-
 
                 fun processSwipeCardWithPINorWithoutPIN(ispin: Boolean, cardProcessedDataModal: CardProcessedDataModal) {
                     if (ispin) {

@@ -46,9 +46,10 @@ object VFService {
     @JvmStatic
     var vfPrinter:IPrinter?=null
     var pinInputListener: PinInputListener? = null
+    val LYRA_IP_ADDRESS = "192.168.250.10"
     val NEW_IP_ADDRESS = "122.176.84.29"
     val NEWAMEXHDFC = "192.168.250.10"
-    val NEWAMEXHDFCPort = "4124"
+    val NEWAMEXHDFCPort = 4124
     var savedPan = ""
     var PORT = 8101//4124
 
@@ -58,12 +59,9 @@ object VFService {
         return if (tct != null) {
             InetSocketAddress(InetAddress.getByName(tct.hostPrimaryIp), tct.hostPrimaryPortNo.toInt())
         }else{
-            InetSocketAddress(InetAddress.getByName(NEW_IP_ADDRESS), PORT)
+            InetSocketAddress(InetAddress.getByName(NEWAMEXHDFC), NEWAMEXHDFCPort)
         }
     }
-
-
-
 
     fun connectToVFService(context: Context){
         val conn: ServiceConnection = object : ServiceConnection {
@@ -120,7 +118,6 @@ object VFService {
             }*/
         }
     }
-
     //Below Method is used to Inject Decripted TMK in VFService AIDL IPinPad.loadMainKey(int keyId, byte[] key, byte[] checkValue):-
     fun injectTMK(decriptedTmk: ByteArray? = null , ppk: ByteArray, ppkcv: ByteArray , dpk: ByteArray, dpkcv: ByteArray,
                   isLoadMainKey : Boolean = true) : Boolean? {
@@ -138,7 +135,6 @@ object VFService {
                 injectPPKKey(ppk, ppkcv, dpk, dpkcv)
             }else
                 false
-
         }catch (e : Exception){
             e.printStackTrace()
             Log.d("FAILURE" , "TMK Inserted failed")
@@ -162,7 +158,6 @@ object VFService {
             false
         }
     }
-
     //Below Method is used to Inject DPK in VFService AIDL IPinPad.loadWorkKey(int keyType, int mkId, int wkId, byte[] key, byte[] checkValue):-
     private fun injectDPKKey(dpk: ByteArray, dpkcv: ByteArray) : Boolean? {
         return try {
