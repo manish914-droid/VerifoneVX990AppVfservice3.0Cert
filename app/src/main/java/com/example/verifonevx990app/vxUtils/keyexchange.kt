@@ -54,6 +54,10 @@ interface IAppUpdateConfirmationPacketExchange {
     fun createAppUpdateConfirmationPacket(): IWriter
 }
 
+interface ICrossSellPacketExchange {
+    fun createCrossSellPacket(): IWriter
+}
+
 /**
  * KCV matching part is remaining, KCV extraction is done [18-07-2019]
  * */

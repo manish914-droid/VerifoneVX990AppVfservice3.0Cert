@@ -691,6 +691,8 @@ class PrinterActivity : BaseActivity() {
         }
 
     }
+
+
     private fun getNameByTransactionType(transactionType: Int): String {
         var tTyp = ""
         for (e in TransactionType.values()) {

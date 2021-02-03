@@ -12,6 +12,7 @@ import android.net.Uri
 import android.os.*
 import android.provider.Settings
 import android.text.Editable
+import android.text.InputFilter
 import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
@@ -20,6 +21,7 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.init.getEditorActionListener
 import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.realmtables.*
 import com.example.verifonevx990app.utils.PaxUtils
@@ -33,6 +35,7 @@ import io.realm.RealmResults
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.*
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
@@ -40,6 +43,9 @@ import java.util.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import kotlin.experimental.and
+
+var isDashboardOpen = false
+var isExpanded = false
 
 open class OnTextChange(private val cb: (String) -> Unit) : TextWatcher {
 
@@ -614,8 +620,8 @@ object ROCProviderV2 {
     fun refreshToolbarLogos(activity: Activity) {
         //Show Logo of Bank by checking Bank Code:-
         val tpt = TerminalParameterTable.selectFromSchemeTable()
-        val bonushubLogo = activity.findViewById<ImageView>(R.id.main_toolbar_tv)
-        val bankLogoImageView = activity.findViewById<ImageView>(R.id.bonushub_logo)
+        val bonushubLogo = activity.findViewById<ImageView>(R.id.main_toolbar_BhLogo)
+        val bankLogoImageView = activity.findViewById<ImageView>(R.id.toolbar_Bank_logo)
         var bankLogo = 0
 
         when (AppPreference.getBankCode()) {
@@ -1561,6 +1567,127 @@ fun blockAndUnBlockTouchScreenEvent(isTouchBlock: Boolean, activity: Activity) {
 }
 //endregion
 
+//region=========================Below method to check HDFC TPT Fields Check:-
+fun checkHDFCTPTFieldsBitOnOff(transactionType: TransactionType): Boolean {
+    val hdfcTPTData = runBlocking(Dispatchers.IO) { getHDFCTptData() }
+    Log.d("HDFC TPT:- ", hdfcTPTData.toString())
+    var data: String? = null
+    if (hdfcTPTData != null) {
+        when (transactionType) {
+            TransactionType.VOID -> {
+                data = convertValue2BCD(hdfcTPTData.localTerminalOption)
+                return data[1] == '1' // checking second position of data for on/off case
+            }
+            TransactionType.REFUND -> {
+                data = convertValue2BCD(hdfcTPTData.localTerminalOption)
+                return data[2] == '1' // checking third position of data for on/off case
+            }
+            TransactionType.TIP_ADJUSTMENT -> {
+                data = convertValue2BCD(hdfcTPTData.localTerminalOption)
+                return data[3] == '1' // checking fourth position of data for on/off case
+            }
+            TransactionType.TIP_SALE -> {
+                data = convertValue2BCD(hdfcTPTData.option1)
+                return data[2] == '1' // checking third position of data for on/off case
+            }
+            else -> {
+            }
+        }
+    }
+
+    return false
+}
+//endregion
+
+// region ========== converting value in BCD format:-
+fun convertValue2BCD(optionValue: String): String {
+    val optionsBinaryValue = optionValue.toInt(16).let { Integer.toBinaryString(it) }
+    return addPad(optionsBinaryValue, "0", 8, toLeft = true)
+}
+//endregion
+
+//getHDFCTptData
+fun getHDFCTptData(): HdfcTpt? {
+    val hdfcTptRecords = HdfcTpt.selectAllHDFCtpt()
+    return if (!hdfcTptRecords.isNullOrEmpty())
+        hdfcTptRecords[0]
+    else null
+}
+
+//region===============================Verify Admin Password From HDFC TPT Table Dialog:-
+fun verifyAdminPasswordFromHDFCTPT(activity: Activity, callback: (Boolean) -> Unit) =
+    getHDFCTPTAdminPasswordDialog(
+        activity.getString(R.string.admin_password),
+        activity.getString(R.string.enter_admin_password),
+        activity,
+        callback
+    )
+//endregion
+
+
+//region====================HDFC TPT Password Dialog:-
+private fun getHDFCTPTAdminPasswordDialog(
+    title: String,
+    _hint: String,
+    activity: Activity,
+    callback: (Boolean) -> Unit,
+) {
+    val hdfcTPTData = getHDFCTptData()
+    val tptData = runBlocking(Dispatchers.IO) { TerminalParameterTable.selectFromSchemeTable() }
+    GlobalScope.launch {
+        try {
+            launch(Dispatchers.Main) {
+                Dialog(activity).apply {
+                    requestWindowFeature(Window.FEATURE_NO_TITLE)
+                    setContentView(R.layout.item_get_invoice_no)
+                    setCancelable(false)
+
+                    val enterPasswordET = this.findViewById<BHEditText>(R.id.invoice_no_et)
+                    enterPasswordET.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(4))
+
+                    enterPasswordET.apply {
+                        setOnFocusChangeListener { _, _ -> error = null }
+                        hint = _hint
+                    }
+
+                    val okBtn = findViewById<Button>(R.id.invoice_ok_btn)
+                    enterPasswordET.setOnEditorActionListener(getEditorActionListener { okBtn.performClick() })
+                    findViewById<TextView>(R.id.title_tv).text = title
+                    findViewById<Button>(R.id.invoice_cancel_btn).setOnClickListener {
+                        dismiss()
+                        callback(false)
+                    }
+                    var adminPassword: String? = null
+                    okBtn.setOnClickListener {
+                        //region===============Getting Admin Password From DB to Check:-
+                        adminPassword = if (hdfcTPTData != null) {
+                            if (!TextUtils.isEmpty(hdfcTPTData.adminPassword)) {
+                                hdfcTPTData.adminPassword
+                            } else {
+                                tptData?.adminPassword
+                            }
+                        } else {
+                            tptData?.adminPassword
+                        }
+                        //endregion
+
+                        //region=================checking Admin Password Match Case below:-
+                        if (adminPassword == enterPasswordET.text.toString().trim()) {
+                            dismiss()
+                            callback(true)
+                        } else {
+                            enterPasswordET.error = activity.getString(R.string.invalid_password)
+                        }
+                        //endregion
+                    }
+                }.show()
+            }
+        } catch (ex: NullPointerException) {
+            callback(true)
+        }
+    }
+}
+//endregion
 /*
 App Update Through FTP Steps:-
 1.Make Signing apk Build by using Verifone Signing USB and Signing Tool in Windows System.

@@ -83,7 +83,7 @@ class VFTransactionActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityTransactionBinding.inflate(layoutInflater)
         setContentView(binding?.root)
-        binding?.toolbarTxn?.mainToolbarTv?.setBackgroundResource(R.drawable.ic_back_arrow)
+        binding?.toolbarTxn?.mainToolbarStart?.setBackgroundResource(R.drawable.ic_back_arrow)
         refreshToolbarLogos(this)
         binding?.toolbarTxn?.mainToolbarStart?.setOnClickListener {
             //  onBackPressed()

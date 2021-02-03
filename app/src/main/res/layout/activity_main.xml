@@ -39,21 +39,12 @@
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:background="@color/colorPrimary"
-                    android:layout_weight="1">
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="250dp"
-                        android:background="@drawable/rounded_cor"
-                        />
+                    android:layout_weight="1">
 
                     <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginEnd="8dp"
                         android:id="@+id/ma_fl"/>
 
                 </FrameLayout>

@@ -8,6 +8,9 @@ import android.text.TextUtils
 import android.util.Log
 import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.crosssell.CrossSellReportWithType
+import com.example.verifonevx990app.crosssell.ReportDownloadedModel
+import com.example.verifonevx990app.crosssell.TotalCrossellRep
 import com.example.verifonevx990app.emv.transactionprocess.CardProcessedDataModal
 import com.example.verifonevx990app.emv.transactionprocess.VFTransactionActivity
 import com.example.verifonevx990app.main.MainActivity
@@ -2726,6 +2729,121 @@ class PrintUtil(context: Context?) {
             )
         }
     }
+
+
+    fun printCrossSellReport(reportDataList: ArrayList<ReportDownloadedModel>) {
+        printSeperator(Bundle())
+        centerText(Bundle(), "CROSS SELL REPORT", true)
+        printSeperator(Bundle())
+        alignLeftRightText(Bundle(), "Product", "4 Digit Mobile No.")
+        alignLeftRightText(Bundle(), "Txn Ref No.", "Status")
+        alignLeftRightText(Bundle(), "Date & Time", "")
+        printSeperator(Bundle())
+
+
+        val rr = arrayListOf<TotalCrossellRep>()
+        val testArrayL = arrayListOf<HashMap<String, String>>()
+        for (data in reportDataList) {
+            val reqMap = hashMapOf<String, String>()
+            var reqType = ""
+            val totalR = TotalCrossellRep()
+            if (data.requestTypeId == "1") {
+                reqType = "Insta Loan"
+                reqMap[data.requestTypeId] = data.requestStatus
+                totalR.reqStatus = data.requestStatus
+                totalR.reqType = data.requestTypeId
+            }
+            if (data.requestTypeId == "3") {
+                reqType = "Jumbo Loan"
+                reqMap[data.requestTypeId] = data.requestStatus
+                totalR.reqStatus = data.requestStatus
+                totalR.reqType = data.requestTypeId
+            }
+            if (data.requestTypeId == "5") {
+                reqType = "Credit Limit Increase"
+                reqMap[data.requestTypeId] = data.requestStatus
+                totalR.reqStatus = data.requestStatus
+                totalR.reqType = data.requestTypeId
+            }
+            if (data.requestTypeId == "9") {
+                reqType = "HDFC Credit Card"
+                reqMap[data.requestTypeId] = data.requestStatus
+                totalR.reqStatus = data.requestStatus
+                totalR.reqType = data.requestTypeId
+            }
+            rr.add(totalR)
+            testArrayL.add(reqMap)
+            alignLeftRightText(Bundle(), reqType, data.mobile)
+            var status = ""
+            if (data.requestStatus == "1") {
+                status = "Request send to customer"
+            }
+            if (data.requestStatus == "2") {
+                status = "Request submitted to bank"
+            }
+            alignLeftRightText(Bundle(), data.transactionRefNo, status)
+            alignLeftRightText(Bundle(), data.requestDate, "")
+            printSeperator(Bundle())
+        }
+        val requestTypeList = arrayListOf<CrossSellReportWithType>()
+        val obj1 = CrossSellReportWithType()
+        obj1.type = "1"
+        obj1.typeName = "Insta Loan"
+
+        val obj2 = CrossSellReportWithType()
+        obj2.type = "3"
+        obj2.typeName = "Jumbo Loan"
+
+        val obj3 = CrossSellReportWithType()
+        obj3.type = "5"
+        obj3.typeName = "Credit Limit Increase"
+
+        val obj4 = CrossSellReportWithType()
+        obj4.type = "9"
+        obj4.typeName = "HDFC Credit Card"
+
+        requestTypeList.add(obj1)
+        requestTypeList.add(obj2)
+        requestTypeList.add(obj3)
+        requestTypeList.add(obj4)
+
+        printer?.setLineSpace(2)
+        alignLeftRightText(Bundle(), "Product", "S.C", "S.B")
+        for (i in 0 until requestTypeList.size) {
+            val list1 = rr.filter { it.reqType == requestTypeList[i].type && it.reqStatus == "1" }
+            val list2 = rr.filter { it.reqType == requestTypeList[i].type && it.reqStatus == "2" }
+            println("${requestTypeList[i].typeName}--> ${list1.size} ,  ${list2.size}")
+            alignLeftRightText(
+                Bundle(),
+                requestTypeList[i].typeName,
+                list1.size.toString(),
+                list2.size.toString()
+            )
+        }
+
+        printSeperator(Bundle())
+
+        centerText(textFormatBundle, "BonusHub")
+        centerText(textFormatBundle, "App Version : ${BuildConfig.VERSION_NAME}")
+        printer?.feedLine(4)
+        printer?.startPrint(object : PrinterListener.Stub() {
+            override fun onFinish() {
+                //  val msg = Message()
+                VFService.showToast("Printing Successfully")
+            }
+
+            override fun onError(error: Int) {
+                if (error == 240) {
+                    VFService.showToast("Printing roll not available..")
+                    //   printerCallback(false, 0)
+                } else {
+                    VFService.showToast("Printer Error------> $error")
+                    //   printerCallback(false, 0)
+                }
+            }
+        })
+    }
+
 
     private fun getNameByTransactionType(transactionType: Int): String {
         var tTyp = ""

@@ -45,5 +45,9 @@
     <dimen name="pad_40">40dp</dimen>
     <dimen name="pad_36">36dp</dimen>
 
+    <dimen name="dashboard_img_width">48dp</dimen>
+    <dimen name="dashboard_img_height">56dp</dimen>
+    <dimen name="pad_2">2dp</dimen>
+
 
 </resources>

@@ -3886,7 +3886,12 @@ annotation class BHDashboardItem(
 )
 
 
-enum class EDashboardItem(val title: String, val res: Int, val rank: Int = 15) {
+enum class EDashboardItem(
+    val title: String,
+    val res: Int,
+    val rank: Int = 15,
+    var childList: MutableList<EDashboardItem>? = null
+) {
     NONE("No Option Found", R.drawable.ic_home),
     SALE("Sale", R.drawable.ic_sale, 1),
     BANK_EMI("Bank EMI", R.drawable.ic_emi, 2),
@@ -3901,11 +3906,14 @@ enum class EDashboardItem(val title: String, val res: Int, val rank: Int = 15) {
     REFUND("Refund", R.drawable.ic_refund, 11),
     VOID_REFUND("Void Refund", R.drawable.ic_void_refund, 12),
     VOID_SALE("Void", R.drawable.ic_void, 13),
-
+    CROSS_SELL("Cross Sell", R.drawable.ic_sale, 14),
     SALE_WITH_CASH("Sale With Cash", R.drawable.ic_sale_with_cash),
     CASH_ADVANCE("Cash Advance", R.drawable.ic_cash_advance),
     BRAND_EMI("Brand EMI", R.drawable.ic_brand_emi),
-    PENDING_OFFLINE_SALE("View Offline Sale", R.drawable.ic_pending_preauth);
+    PENDING_OFFLINE_SALE("View Offline Sale", R.drawable.ic_pending_preauth),
+    PREAUTHCATAGORY("Pre-Auth", R.drawable.ic_preauth, 9),
+    MORE("View More", R.drawable.ic_arrow_down, 999),
+    LESS("View Less", R.drawable.ic_arrow_up, 888);
 
 }
 
@@ -4130,7 +4138,7 @@ open class HdfcTpt() : RealmObject(), Parcelable {
                 it.executeTransaction { i -> i.insertOrUpdate(param) }
             }
 
-        fun select(): List<HdfcTpt> = runBlocking {
+        fun selectAllHDFCtpt(): List<HdfcTpt> = runBlocking {
             var result = listOf<HdfcTpt>()
             getRealm {
                 result = it.copyFromRealm(

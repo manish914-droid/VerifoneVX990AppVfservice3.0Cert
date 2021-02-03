@@ -1,8 +1,11 @@
 package com.example.verifonevx990app.main
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -11,17 +14,24 @@ import android.text.InputFilter
 import android.text.InputType
 import android.text.TextUtils
 import android.util.Log
-import android.view.MenuItem
-import android.view.View
-import android.view.Window
+import android.view.*
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import androidx.multidex.BuildConfig
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.appupdate.*
+import com.example.verifonevx990app.crosssell.HDFCCrossSellFragment
 import com.example.verifonevx990app.databinding.ActivityMainBinding
+import com.example.verifonevx990app.databinding.AuthCatogoryDialogBinding
 import com.example.verifonevx990app.disputetransaction.CreateSettlementPacket
 import com.example.verifonevx990app.disputetransaction.SettlementFragment
 import com.example.verifonevx990app.disputetransaction.VoidTransactionFragment
@@ -61,6 +71,10 @@ class MainActivity : BaseActivity(), IFragmentRequest,
     private var tempSettlementByteArray: ByteArray? = null
     private var settlementServerHitCount: Int = 0
     private var offlineTransactionAmountLimit: Double? = 0.0
+    private val alertDialog by lazy { AlertDialog.Builder(this).create() }
+    private val subCatogoryDashBoardAdapter by lazy {
+        SubCatagoryDashboardAdapter(this, alertDialog)
+    }
 
     companion object {
         val TAG = MainActivity::class.java.simpleName
@@ -78,6 +92,11 @@ class MainActivity : BaseActivity(), IFragmentRequest,
         //Below Const String are SubHeader Keys:-
         const val VOID_SUB_HEADER = "void_sub_header"
         const val INPUT_SUB_HEADING = "input_amount"
+
+        const val RESERVED_VALUE = "reservedValue"
+        const val CROSS_SELL_PROCESS_TYPE_HEADING = "cross_sell_process_type_heading"
+        const val CROSS_SELL_OPTIONS = "cross_sell_options"
+        const val CROSS_SELL_REQUEST_TYPE = "cross_sell_request_type"
 
     }
 
@@ -652,6 +671,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
     }
 
+    //Old Amex
     override fun onTransactionRequest(action: EDashboardItem) {
         when (action) {
 
@@ -942,6 +962,208 @@ class MainActivity : BaseActivity(), IFragmentRequest,
         }
     }
 
+    //New HDFC
+    override fun onDashBoardItemClick(action: EDashboardItem) {
+        //   NeptuneService.beepNormal()
+        isDashboardOpen = false
+        when (action) {
+            EDashboardItem.SALE, EDashboardItem.SALE_WITH_CASH, EDashboardItem.CASH_ADVANCE, EDashboardItem.PREAUTH -> {
+                /* val bundle = Bundle()
+                bundle.putSerializable("type", action)
+                navHostFragment?.navController?.navigate(R.id.inputAmountFragment, bundle)*/
+                if (checkInternetConnection()) {
+                    inflateInputFragment(
+                        InputAmountFragment(),
+                        SubHeaderTitle.SALE_SUBHEADER_VALUE.title,
+                        action
+                    )
+                } else {
+                    VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                }
+
+            }
+
+            EDashboardItem.VOID_SALE -> {
+                if (checkInternetConnection()) {
+                    val bundle = Bundle()
+                    bundle.putSerializable("type", action)
+                    if (checkHDFCTPTFieldsBitOnOff(TransactionType.VOID)) {
+                        verifyAdminPasswordFromHDFCTPT(this) {
+                            transactFragment(VoidTransactionFragment().apply {
+                                arguments = Bundle().apply {
+                                    putSerializable("type", action)
+                                    putString(
+                                        INPUT_SUB_HEADING,
+                                        SubHeaderTitle.VOID_SUBHEADER_VALUE.title
+                                    )
+                                }
+                            })
+                        }
+                    } else {
+                        VFService.showToast("VOID NOT ALLOWEED...!!")
+                    }
+                } else {
+                    VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                }
+
+
+            }
+
+            EDashboardItem.REFUND -> {
+                if (checkInternetConnection()) {
+                    verifyAdminPasswordDialog(this) {
+                        if (it) {
+                            transactFragment(InputAmountFragment().apply {
+                                arguments = Bundle().apply {
+                                    putSerializable("type", action)
+                                    putString(
+                                        INPUT_SUB_HEADING,
+                                        SubHeaderTitle.REFUND_SUBHEADER_VALUE.title
+                                    )
+                                }
+                            })
+                        }
+                    }
+                } else {
+                    VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                }
+
+
+            }
+
+            EDashboardItem.PREAUTH_COMPLETE -> {
+                if (checkInternetConnection()) {
+                    transactFragment(PreAuthCompleteInputDetailFragment()
+                        .apply {
+                            arguments = Bundle().apply {
+                                putSerializable("type", action)
+                                putString(
+                                    INPUT_SUB_HEADING,
+                                    SubHeaderTitle.PRE_AUTH_COMPLETE.title
+                                )
+                            }
+                        })
+                } else {
+                    VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                }
+            }
+
+            EDashboardItem.VOID_PREAUTH -> {
+                if (checkInternetConnection()) {
+                    transactFragment(
+                        VoidPreAuthFragment()
+                            .apply {
+                                arguments = Bundle().apply {
+                                    putSerializable("type", TransactionType.VOID_PREAUTH)
+                                    putString(
+                                        INPUT_SUB_HEADING,
+                                        SubHeaderTitle.VOID_PRE_AUTH.title
+                                    )
+                                }
+                            })
+                } else {
+                    VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                }
+
+            }
+
+            EDashboardItem.PENDING_PREAUTH -> {
+                if (checkInternetConnection()) {
+                    PendingPreauth(this).confirmationAlert(
+                        getString(R.string.confirmation),
+                        getString(R.string.pending_preauth_alert_msg)
+                    )
+                } else {
+                    VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                }
+            }
+
+            EDashboardItem.PREAUTHCATAGORY -> {
+                if (!action.childList.isNullOrEmpty()) {
+                    dashBoardCatagoryDialog(action.childList!!)
+
+                } else {
+                    showToast("PreAuth Not Found")
+                }
+            }
+
+            EDashboardItem.SALE_TIP -> {
+                if (checkInternetConnection()) {
+                    (transactFragment(TipAdjustFragment()
+                        .apply {
+                            arguments = Bundle().apply {
+                                putSerializable("type", TransactionType.TIP_SALE)
+                                putString(
+                                    INPUT_SUB_HEADING,
+                                    SubHeaderTitle.TIP_SALE.title
+                                )
+                            }
+                        }))
+                } else {
+                    VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                }
+            }
+
+            EDashboardItem.CROSS_SELL ->
+
+                if (checkInternetConnection()) {
+                    val tpt = TerminalParameterTable.selectFromSchemeTable()
+                    if (tpt != null) {
+                        tpt.reservedValues = "00000000000001111000"
+                        transactFragment(HDFCCrossSellFragment().apply {
+                            arguments = Bundle().apply {
+                                putSerializable("type", action)
+                                putString(RESERVED_VALUE, tpt.reservedValues)
+                                putString(
+                                    INPUT_SUB_HEADING,
+                                    SubHeaderTitle.CROSS_SELL_SUBHEADER_VALUE.title
+                                )
+                            }
+                        })
+                    } else
+                        VFService.showToast(getString(R.string.something_went_wrong))
+                } else {
+                    VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                }
+
+            else -> {
+                showToast("To be implemented...")
+            }
+        }
+    }
+
+    //region ==============PreAuthcatogory Dialog==========
+    private fun dashBoardCatagoryDialog(subCatogoryItem: MutableList<EDashboardItem>) {
+        // dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        alertDialog.setCancelable(false)
+        val authCatDialogBinding = AuthCatogoryDialogBinding.inflate(LayoutInflater.from(this))
+
+        alertDialog.setView(authCatDialogBinding.root)
+
+        authCatDialogBinding.dashBoardSubcatRV.apply {
+            layoutManager = GridLayoutManager(this@MainActivity, 3)
+            itemAnimator = DefaultItemAnimator()
+            adapter = subCatogoryDashBoardAdapter
+            subCatogoryDashBoardAdapter.onUpdatedItem(subCatogoryItem)
+            scheduleLayoutAnimation()
+        }
+
+
+        authCatDialogBinding.appCompatImageButton.setOnClickListener {
+            alertDialog.dismiss()
+        }
+        alertDialog.window?.attributes?.windowAnimations = R.style.DialogAnimation
+        val window = alertDialog.window
+        window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.WRAP_CONTENT
+        )
+        window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        alertDialog.show()
+    }
+
+
+    // endregion
     //Below Method is to Handle the Input Fragment Inflate with the Sub Heading it belongs to:-
     private fun inflateInputFragment(
         fragment: Fragment,
@@ -1536,6 +1758,50 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 }
 
 
+class SubCatagoryDashboardAdapter(
+    private val fragReq: IFragmentRequest?, val dialog: Dialog
+) : RecyclerView.Adapter<SubCatagoryDashboardAdapter.SubCatogoryDashBoardViewHolder>() {
+    var mList: ArrayList<EDashboardItem> = arrayListOf()
+
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): SubCatogoryDashBoardViewHolder {
+        return SubCatogoryDashBoardViewHolder(
+            LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_dashboart, parent, false)
+        )
+    }
+
+    override fun getItemCount(): Int = mList.size
+
+    override fun onBindViewHolder(holder: SubCatogoryDashBoardViewHolder, position: Int) {
+        holder.logoIV.background =
+            ContextCompat.getDrawable(holder.view.context, mList[position].res)
+        holder.titleTV.text = mList[position].title
+        holder.itemParent.setOnClickListener {
+            dialog.dismiss()
+            fragReq?.onDashBoardItemClick(mList[position])
+        }
+
+    }
+
+    fun onUpdatedItem(list: List<EDashboardItem>) {
+        mList.clear()
+        mList.addAll(list)
+
+    }
+
+
+    inner class SubCatogoryDashBoardViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
+        val logoIV: ImageView = view.findViewById(R.id.item_logo_iv)
+        val titleTV: TextView = view.findViewById(R.id.item_title_tv)
+        val itemParent: ConstraintLayout = view.findViewById(R.id.item_parent_rv)
+
+    }
+}
+
+
 enum class TransType {
     T_BANLANCE, T_PURCHASE, M_SIGNIN
 }
@@ -1556,7 +1822,8 @@ enum class SubHeaderTitle(val title: String) {
     VOID_REFUND_SUBHEADER_VALUE("Void Refund"),
     REFUND_SUBHEADER_VALUE("Refund"),
     EMI_CATALOG("EMI Enquiry"),
-    BANK_EMI("Bank EMI")
+    BANK_EMI("Bank EMI"),
+    CROSS_SELL_SUBHEADER_VALUE("Cross Sell")
 
 }
 
@@ -1698,4 +1965,5 @@ enum class ConnectionError(val errorCode: Int) {
 interface IFragmentRequest {
     fun onFragmentRequest(action: UiAction, data: Any, extraPairData: Pair<String, String>? = null)
     fun onTransactionRequest(action: EDashboardItem)
+    fun onDashBoardItemClick(action: EDashboardItem)
 }

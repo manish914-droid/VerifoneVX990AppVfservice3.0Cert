@@ -333,6 +333,23 @@
     <string name="confirmation_app_update_failed">App Update Confirmation Send Failed....</string>
     <string name="download_failed">Download Failed</string>
     <string name="american_express">AMERICAN EXPRESS</string>
+    <string name="banner">Banner</string>
+
+    <string name="hdfc_credit_card">HDFC Credit Card</string>
+    <string name="insta_loan">Insta Loan</string>
+    <string name="jumbo_loan">Jumbo Loan</string>
+    <string name="credit_limit_increase">Credit Limit Increase</string>
+    <string name="Current_month">Current Month</string>
+    <string name="last_month">Last Month</string>
+    <string name="enter_otp">Enter OTP</string>
+    <string name="enter_last_four_digit">Enter Last 4 Digit Card Number</string>
+    <string name="enter_choice">Enter Choice</string>
+    <string name="sent_to_registered_email_id">Sent To Registered Email id</string>
+    <string name="print_on_pos">Print on POS</string>
+    <string name="otp_time_out">OTP Time Out</string>
+    <string name="enter_valid_last_four_digit_of_card">Enter Valid Last 4 Digit of Card</string>
+    <string name="success_message">SUCCESS</string>
+    <string name="success_transaction">Success Transaction</string>
 
 
 </resources>
