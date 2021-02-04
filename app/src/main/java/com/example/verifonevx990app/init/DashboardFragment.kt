@@ -379,9 +379,12 @@ class DashboardFragment : Fragment() {
 
     //Sync App Confirmation to Host:-
     private fun sendConfirmation() {
-        val appUpdateConfirmationISOData = SendAppUpdateConfirmationPacket().createAppUpdateConfirmationPacket()
+        val appUpdateConfirmationISOData =
+            SendAppUpdateConfirmationPacket().createAppUpdateConfirmationPacket()
         val isoByteArray = appUpdateConfirmationISOData.generateIsoByteRequest()
-        (activity as MainActivity).showProgress(getString(R.string.please_wait))
+        GlobalScope.launch(Dispatchers.Main) {
+            (activity as MainActivity).showProgress(getString(R.string.please_wait))
+        }
         SyncAppUpdateConfirmation(isoByteArray) { syncStatus ->
             GlobalScope.launch(Dispatchers.Main) {
                 AppPreference.saveBoolean("isUpdate", true)

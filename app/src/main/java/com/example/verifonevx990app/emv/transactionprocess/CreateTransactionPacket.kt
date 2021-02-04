@@ -7,7 +7,6 @@ import com.example.verifonevx990app.main.DetectCardType
 import com.example.verifonevx990app.realmtables.CardDataTable
 import com.example.verifonevx990app.realmtables.IssuerParameterTable
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
-import com.example.verifonevx990app.utils.HexStringConverter
 import com.example.verifonevx990app.vxUtils.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -127,7 +126,8 @@ class CreateTransactionPacket(private var cardProcessedData: CardProcessedDataMo
             }
 
             //adding field 61
-            val buildDate: String = SimpleDateFormat("yyMMdd", Locale.getDefault()).format(Date(BuildConfig.TIMESTAMP))
+            val buildDate: String =
+                SimpleDateFormat("yyMMdd", Locale.getDefault()).format(Date(BuildConfig.TIMESTAMP))
             val issuerParameterTable =
                 IssuerParameterTable.selectFromIssuerParameterTable(AppPreference.WALLET_ISSUER_ID)
             val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)
@@ -139,12 +139,15 @@ class CreateTransactionPacket(private var cardProcessedData: CardProcessedDataMo
                 false
             ) + addPad(VerifoneApp.appContext.getString(R.string.app_name), " ", 10, false) +
                     version + addPad("0", "0", 9) + pcNumber
-            val customerID = HexStringConverter.addPreFixer(
-                issuerParameterTable?.customerIdentifierFiledType,
-                2
-            )
+            /* val customerID = HexStringConverter.addPreFixer(
+                 issuerParameterTable?.customerIdentifierFiledType,
+                 2
+             )*/
+            val customerID =
+                issuerParameterTable?.customerIdentifierFiledType?.let { addPad(it, "0", 2) }
 
-            val walletIssuerID = HexStringConverter.addPreFixer(issuerParameterTable?.issuerId, 2)
+            //  val walletIssuerID = HexStringConverter.addPreFixer(issuerParameterTable?.issuerId, 2)
+            val walletIssuerID = issuerParameterTable?.issuerId?.let { addPad(it, "0", 2) }
             addFieldByHex(
                 61, addPad(
                     AppPreference.getString("serialNumber"), " ", 15, false

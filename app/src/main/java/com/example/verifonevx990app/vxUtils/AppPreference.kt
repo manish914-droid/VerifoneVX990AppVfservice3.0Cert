@@ -15,7 +15,7 @@ object AppPreference {
     const val BATCH_LOCK = "b_l_k"
 
     const val BANKCODE = "07" // "07" for amex, 08 for Hitachi
-    const val WALLET_ISSUER_ID = "53"
+    const val WALLET_ISSUER_ID = "50"
 
 
     const val HDFC_BANK_CODE = "01"

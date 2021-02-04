@@ -660,6 +660,13 @@ object ROCProviderV2 {
                 bankLogoImageView?.visibility = View.VISIBLE
             }
         }
+
+        if (!AppPreference.getLogin()) {
+            bonushubLogo?.visibility = View.VISIBLE
+            //   bankLogoImageView?.setImageResource(bankLogo)
+            bankLogoImageView?.visibility = View.GONE
+
+        }
     }
 
     //Dialog Pop Up for Settle Batch Data:-

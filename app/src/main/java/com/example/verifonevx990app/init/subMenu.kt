@@ -1268,6 +1268,7 @@ SubMenuFragment : Fragment(), IOnSubMenuItemSelectListener {
                         pcEt.setText(AppPreference.getString(AppPreference.PC_NUMBER_KEY))
                         bankEt.setText(AppPreference.getBankCode())
                         issuerEt.setText(AppPreference.getString(AppPreference.CRDB_ISSUER_ID_KEY))
+                      //  issuerEt.setText(AppPreference.getString(AppPreference.WALLET_ISSUER_ID))
                         accEt.setText(AppPreference.getString(AppPreference.ACC_SEL_KEY))
 
                         val rg = findViewById<RadioGroup>(R.id.emv_radio_grp_btn)
@@ -1288,6 +1289,7 @@ SubMenuFragment : Fragment(), IOnSubMenuItemSelectListener {
                                             AppPreference.CRDB_ISSUER_ID_KEY,
                                             issuerName
                                         )
+
                                     }
                                 }
                             }
@@ -1342,6 +1344,7 @@ SubMenuFragment : Fragment(), IOnSubMenuItemSelectListener {
                                         AppPreference.CRDB_ISSUER_ID_KEY,
                                         issuerEt.text.toString()
                                     )
+
                                 }
                                 hh(arrayOf(container, sep), arrayOf(pcEt, bankEt, accEt), View.GONE)
                                 activity?.let { it1 -> ROCProviderV2.refreshToolbarLogos(it1) }

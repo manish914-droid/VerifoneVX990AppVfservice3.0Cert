@@ -452,6 +452,7 @@ class PayBySms(
     companion object {
         private val TAG = PayBySmsData::class.java.simpleName
     }
+/*
 
     fun startTransaction() {
         GlobalScope.launch {
@@ -488,6 +489,7 @@ class PayBySms(
         }
     }
 
+*/
 
     override suspend fun readIsoResponse(data: String) {
         val iso = readIso(data)
