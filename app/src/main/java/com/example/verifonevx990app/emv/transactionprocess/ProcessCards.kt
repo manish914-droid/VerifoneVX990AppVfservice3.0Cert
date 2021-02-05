@@ -36,23 +36,22 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
 
     }
 
-
+// Detecting the card type ie(emv,cls,mag...)
     private fun detectCard(transactionalAmount: Long?, fallbackType: Int = 0) {
         //Toast to show for the use card case:-
         //  VFService.showToast("start check card\nUse you card please")
-
         var iemv: IEMV? = VFService.vfIEMV
 
         try {
             //Below checkCard process is happening with the help of IEMV AIDL Interface:-
-            iemv?.checkCard(getCardOptionBundle(), 30, object : CheckCardListener.Stub() {
+            iemv.checkCard(getCardOptionBundle(), 30, object : CheckCardListener.Stub() {
                 override fun onCardSwiped(track: Bundle) {
                     try {
-                        iemv?.stopCheckCard()
+                        iemv.stopCheckCard()
                         println("Mag is calling")
                         if (fallbackType != EFallbackCode.Swipe_fallback.fallBackCode) {
                             Log.d(MainActivity.TAG, "onCardSwiped ...")
-                            VFService.vfBeeper?.startBeep(200)
+                            VFService.vfBeeper.startBeep(200)
                             val pan =
                                 track.getString(ConstCheckCardListener.onCardSwiped.track.KEY_PAN_String)
                             val track1 =
@@ -111,7 +110,8 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                 cardProcessedDataModal.setReadCardType(DetectCardType.MAG_CARD_TYPE)
                                 if (track2 != null) {
                                     cardProcessedDataModal.setTrack2Data(
-                                        getEncryptedTrackData(track2).toString())
+                                        getEncryptedTrackData(track2).toString()
+                                    )
                                 }
                                 if (track1 != null) {
                                     cardProcessedDataModal.setTrack1Data(track1)
@@ -168,17 +168,24 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                                 )
                                             } else {
                                                 if (cardProcessedDataModal.getTransType() == TransactionType.SALE.type) {
-                                                    (activity as VFTransactionActivity).checkEmiInstaEmi(cardProcessedDataModal) {
+                                                    (activity as VFTransactionActivity).checkEmiInstaEmi(
+                                                        cardProcessedDataModal
+                                                    ) {
                                                         cardProcessedDataModal = it
                                                         if (cardProcessedDataModal.getTransType() == TransactionType.EMI_SALE.type) {
 
                                                         } else {
-                                                            processSwipeCardWithPINorWithoutPIN(isPin, cardProcessedDataModal)
+                                                            processSwipeCardWithPINorWithoutPIN(
+                                                                isPin,
+                                                                cardProcessedDataModal
+                                                            )
                                                         }
 
                                                     }
                                                 } else if (cardProcessedDataModal.getTransType() == TransactionType.EMI_SALE.type) {
-                                                    (activity as VFTransactionActivity).checkEmiBankEmi(cardProcessedDataModal) {
+                                                    (activity as VFTransactionActivity).checkEmiBankEmi(
+                                                        cardProcessedDataModal
+                                                    ) {
                                                     }
 
                                                 } else {
@@ -190,21 +197,34 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                             }
                                         } else {
                                             if (cardProcessedDataModal.getTransType() == TransactionType.SALE.type) {
-                                                (activity as VFTransactionActivity).checkEmiInstaEmi(cardProcessedDataModal) {
+                                                (activity as VFTransactionActivity).checkEmiInstaEmi(
+                                                    cardProcessedDataModal
+                                                ) {
                                                     cardProcessedDataModal = it
                                                     if (cardProcessedDataModal.getTransType() == TransactionType.EMI_SALE.type) {
-                                                        processSwipeCardWithPINorWithoutPIN(isPin, cardProcessedDataModal)
+                                                        processSwipeCardWithPINorWithoutPIN(
+                                                            isPin,
+                                                            cardProcessedDataModal
+                                                        )
 
                                                     } else {
-                                                        processSwipeCardWithPINorWithoutPIN(isPin, cardProcessedDataModal)
+                                                        processSwipeCardWithPINorWithoutPIN(
+                                                            isPin,
+                                                            cardProcessedDataModal
+                                                        )
                                                     }
                                                 }
                                             } else if (cardProcessedDataModal.getTransType() == TransactionType.EMI_SALE.type) {
-                                                (activity as VFTransactionActivity).checkEmiBankEmi(cardProcessedDataModal) {
+                                                (activity as VFTransactionActivity).checkEmiBankEmi(
+                                                    cardProcessedDataModal
+                                                ) {
                                                     //   iemv?.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed)
                                                 }
                                             } else {
-                                                processSwipeCardWithPINorWithoutPIN(isPin, cardProcessedDataModal)
+                                                processSwipeCardWithPINorWithoutPIN(
+                                                    isPin,
+                                                    cardProcessedDataModal
+                                                )
                                             }
                                         }
                                     }
@@ -237,10 +257,9 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                         ex.printStackTrace()
                         VFService.showToast("Please use your card again now")
                         detectCard(transactionalAmounts, fallbackType)
-                    }
-                    catch (ex: DeadObjectException) {
+                    } catch (ex: DeadObjectException) {
                         ex.printStackTrace()
-                        println("Process card error22"+ex.message)
+                        println("Process card error22" + ex.message)
                         Handler(Looper.getMainLooper()).postDelayed(Runnable {
                             GlobalScope.launch {
                                 VFService.connectToVFService(VerifoneApp.appContext)
@@ -250,10 +269,9 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                 detectCard(transactionalAmounts, 0)
                             }
                         }, 200)
-                    }
-                    catch (ex: RemoteException) {
+                    } catch (ex: RemoteException) {
                         ex.printStackTrace()
-                        println("Process card error23"+ex.message)
+                        println("Process card error23" + ex.message)
                         Handler(Looper.getMainLooper()).postDelayed(Runnable {
                             GlobalScope.launch {
                                 VFService.connectToVFService(VerifoneApp.appContext)
@@ -263,10 +281,9 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                 detectCard(transactionalAmounts, 0)
                             }
                         }, 200)
-                    }
-                    catch (ex: Exception) {
+                    } catch (ex: Exception) {
                         ex.printStackTrace()
-                        println("Process card error24"+ex.message)
+                        println("Process card error24" + ex.message)
                         Handler(Looper.getMainLooper()).postDelayed(Runnable {
                             GlobalScope.launch {
                                 VFService.connectToVFService(VerifoneApp.appContext)
@@ -279,22 +296,38 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                     }
                 }
 
-                fun processSwipeCardWithPINorWithoutPIN(ispin: Boolean, cardProcessedDataModal: CardProcessedDataModal) {
+                fun processSwipeCardWithPINorWithoutPIN(
+                    ispin: Boolean,
+                    cardProcessedDataModal: CardProcessedDataModal
+                ) {
                     if (ispin) {
 
                         val param = Bundle()
                         val globleparam = Bundle()
                         val panBlock: String? = cardProcessedDataModal.getPanNumberData()
                         val pinLimit = byteArrayOf(4, 5, 6)
-                        param.putByteArray(ConstIPinpad.startPinInput.param.KEY_pinLimit_ByteArray, pinLimit)
+                        param.putByteArray(
+                            ConstIPinpad.startPinInput.param.KEY_pinLimit_ByteArray,
+                            pinLimit
+                        )
                         param.putInt(ConstIPinpad.startPinInput.param.KEY_timeout_int, 20)
-                        param.putBoolean(ConstIPinpad.startPinInput.param.KEY_isOnline_boolean, ispin)
+                        param.putBoolean(
+                            ConstIPinpad.startPinInput.param.KEY_isOnline_boolean,
+                            ispin
+                        )
                         param.putString(ConstIPinpad.startPinInput.param.KEY_pan_String, panBlock)
-                        param.putString(ConstIPinpad.startPinInput.param.KEY_promptString_String, "Enter PIN")
-                        param.putInt(ConstIPinpad.startPinInput.param.KEY_desType_int, ConstIPinpad.startPinInput.param.Value_desType_3DES)
+                        param.putString(
+                            ConstIPinpad.startPinInput.param.KEY_promptString_String,
+                            "Enter PIN"
+                        )
+                        param.putInt(
+                            ConstIPinpad.startPinInput.param.KEY_desType_int,
+                            ConstIPinpad.startPinInput.param.Value_desType_3DES
+                        )
 
 
-                        VFService.vfPinPad?.startPinInput(2, param, globleparam,
+                        VFService.vfPinPad.startPinInput(
+                            2, param, globleparam,
                             object : PinInputListener.Stub() {
                                 override fun onInput(len: Int, key: Int) {
                                     Log.d("Data", "PinPad onInput, len:$len, key:$key")
@@ -310,8 +343,8 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                     )
                                     //    VFEmv.savedPinblock = data
                                     /*    if(VFService.isOnlinePin!!) {
-                                                                        VFService.mIsoWriter?.genratedPinBlock = Utility.byte2HexStr(data)
-                                                                    }*/
+                                                                                                    VFService.mIsoWriter?.genratedPinBlock = Utility.byte2HexStr(data)
+                                                                                                }*/
                                     cardProcessedDataModal.setGeneratePinBlock(
                                         Utility.byte2HexStr(data)
                                     )
@@ -356,27 +389,33 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                 override fun onCardPowerUp() {
                     try {
                         println("Contact is calling")
-                        iemv?.stopCheckCard()
-                        iemv?.abortEMV()
+                        iemv.stopCheckCard()
+                        iemv.abortEMV()
                         cardProcessedDataModal.setReadCardType(DetectCardType.EMV_CARD_TYPE)
-                        VFService.vfBeeper?.startBeep(200)
-                        println("Transactionamount is calling"+transactionalAmount.toString()+"Handler is"+handler)
+                        VFService.vfBeeper.startBeep(200)
+                        println("Transactionamount is calling" + transactionalAmount.toString() + "Handler is" + handler)
                         if (transactionalAmount != null) {
-                            DoEmv(activity, handler, cardProcessedDataModal, ConstIPBOC.startEMV.intent.VALUE_cardType_smart_card, transactionalAmount) { cardProcessedDataModal ->
+                            DoEmv(
+                                activity,
+                                handler,
+                                cardProcessedDataModal,
+                                ConstIPBOC.startEMV.intent.VALUE_cardType_smart_card,
+                                transactionalAmount
+                            ) { cardProcessedDataModal ->
                                 /*    if (cardProcessedDataModal.getFallbackType() != EFallbackCode.EMV_fallback.fallBackCode) {
-                                        println("Contact is calling in fallback")
-                                        iemv?.stopCheckCard()
-                                        detectCard(cardProcessedDataModal.getTransactionAmount(), cardProcessedDataModal.getFallbackType())
-                                    } else {
-                                        println("Contact is calling in fallback1")
-                                        transactionCallback(cardProcessedDataModal)
-                                    }*/
+                                                println("Contact is calling in fallback")
+                                                iemv?.stopCheckCard()
+                                                detectCard(cardProcessedDataModal.getTransactionAmount(), cardProcessedDataModal.getFallbackType())
+                                            } else {
+                                                println("Contact is calling in fallback1")
+                                                transactionCallback(cardProcessedDataModal)
+                                            }*/
                                 transactionCallback(cardProcessedDataModal)
                             }
                         }
                     } catch (ex: DeadObjectException) {
                         ex.printStackTrace()
-                        println("Process card error11"+ex.message)
+                        println("Process card error11" + ex.message)
                         Handler(Looper.getMainLooper()).postDelayed(Runnable {
                             GlobalScope.launch {
                                 VFService.connectToVFService(VerifoneApp.appContext)
@@ -388,7 +427,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                         }, 200)
                     } catch (ex: RemoteException) {
                         ex.printStackTrace()
-                        println("Process card error12"+ex.message)
+                        println("Process card error12" + ex.message)
                         Handler(Looper.getMainLooper()).postDelayed(Runnable {
                             GlobalScope.launch {
                                 VFService.connectToVFService(VerifoneApp.appContext)
@@ -398,18 +437,19 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                 detectCard(transactionalAmounts, 0)
                             }
                         }, 200)
-                    }
-                    catch (ex: Exception) {
+                    } catch (ex: Exception) {
                         ex.printStackTrace()
-                        println("Process card error13"+ex.message)
+                        println("Process card error13" + ex.message)
                         val builder = AlertDialog.Builder(activity)
                         object : Thread() {
                             override fun run() {
                                 Looper.prepare()
                                 builder.setTitle("Alert...!!")
                                 builder.setCancelable(false)
-                                builder.setMessage("Service stopped , " +
-                                        "Please reinitiate the transaction.")
+                                builder.setMessage(
+                                    "Service stopped , " +
+                                            "Please reinitiate the transaction."
+                                )
                                     .setCancelable(false)
                                     .setPositiveButton("Start") { _, _ ->
                                         forceStart(activity)
@@ -429,19 +469,25 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                 override fun onCardActivate() {
                     try {
                         println("Contactless is calling")
-                        iemv?.stopCheckCard()
-                        iemv?.abortEMV()
+                        iemv.stopCheckCard()
+                        iemv.abortEMV()
                         cardProcessedDataModal.setReadCardType(DetectCardType.CONTACT_LESS_CARD_TYPE)
-                        VFService.vfBeeper?.startBeep(200)
-                        println("Transactionamount is calling"+transactionalAmount.toString()+"Handler is"+handler)
+                        VFService.vfBeeper.startBeep(200)
+                        println("Transactionamount is calling" + transactionalAmount.toString() + "Handler is" + handler)
                         if (transactionalAmount != null) {
-                            DoEmv(activity, handler, cardProcessedDataModal, ConstIPBOC.startEMV.intent.VALUE_cardType_contactless, transactionalAmount) { cardProcessedDataModal ->
+                            DoEmv(
+                                activity,
+                                handler,
+                                cardProcessedDataModal,
+                                ConstIPBOC.startEMV.intent.VALUE_cardType_contactless,
+                                transactionalAmount
+                            ) { cardProcessedDataModal ->
                                 transactionCallback(cardProcessedDataModal)
                             }
                         }
                     } catch (ex: DeadObjectException) {
                         ex.printStackTrace()
-                        println("Process card error14"+ex.message)
+                        println("Process card error14" + ex.message)
                         Handler(Looper.getMainLooper()).postDelayed(Runnable {
                             GlobalScope.launch {
                                 VFService.connectToVFService(VerifoneApp.appContext)
@@ -453,7 +499,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                         }, 200)
                     } catch (ex: RemoteException) {
                         ex.printStackTrace()
-                        println("Process card error15"+ex.message)
+                        println("Process card error15" + ex.message)
                         Handler(Looper.getMainLooper()).postDelayed(Runnable {
                             GlobalScope.launch {
                                 VFService.connectToVFService(VerifoneApp.appContext)
@@ -465,15 +511,17 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                         }, 200)
                     } catch (ex: Exception) {
                         ex.printStackTrace()
-                        println("Process card error16"+ex.message)
+                        println("Process card error16" + ex.message)
                         val builder = AlertDialog.Builder(activity)
                         object : Thread() {
                             override fun run() {
                                 Looper.prepare()
                                 builder.setTitle("Alert...!!")
                                 builder.setCancelable(false)
-                                builder.setMessage("Service stopped , " +
-                                        "Please reinitiate the transaction.")
+                                builder.setMessage(
+                                    "Service stopped , " +
+                                            "Please reinitiate the transaction."
+                                )
                                     .setCancelable(false)
                                     .setPositiveButton("Start") { _, _ ->
                                         forceStart(activity)
@@ -506,7 +554,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                     try {
                         when (error) {
                             EFallbackCode.Swipe_fallback.fallBackCode -> {
-                                iemv?.stopCheckCard()
+                                iemv.stopCheckCard()
                                 (activity as VFTransactionActivity).handleEMVFallbackFromError(
                                     activity.getString(
                                         R.string.fallback
@@ -524,12 +572,17 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                             }
                             CardErrorCode.EMV_FALLBACK_ERROR_CODE.errorCode -> {
                                 //EMV Fallback case when we insert card from other side then chip side:-
-                                iemv?.stopCheckCard()
-                                (activity as VFTransactionActivity).handleEMVFallbackFromError(activity.getString(
-                                    R.string.fallback
-                                ), activity.getString(R.string.please_use_another_option), false) {
+                                iemv.stopCheckCard()
+                                (activity as VFTransactionActivity).handleEMVFallbackFromError(
+                                    activity.getString(
+                                        R.string.fallback
+                                    ), activity.getString(R.string.please_use_another_option), false
+                                ) {
                                     cardProcessedDataModal.setFallbackType(EFallbackCode.EMV_fallback.fallBackCode)
-                                    detectCard(cardProcessedDataModal.getTransactionAmount() ?: 0, error)
+                                    detectCard(
+                                        cardProcessedDataModal.getTransactionAmount() ?: 0,
+                                        error
+                                    )
                                 }
                             }
 
@@ -551,10 +604,9 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
 
                             }
                         }
-                    }
-                    catch (ex: DeadObjectException) {
+                    } catch (ex: DeadObjectException) {
                         ex.printStackTrace()
-                        println("Process card error17"+ex.message)
+                        println("Process card error17" + ex.message)
                         Handler(Looper.getMainLooper()).postDelayed(Runnable {
                             GlobalScope.launch {
                                 VFService.connectToVFService(VerifoneApp.appContext)
@@ -565,10 +617,9 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                             }
                         }, 200)
 
-                    }
-                    catch (ex: RemoteException) {
+                    } catch (ex: RemoteException) {
                         ex.printStackTrace()
-                        println("Process card error18"+ex.message)
+                        println("Process card error18" + ex.message)
                         Handler(Looper.getMainLooper()).postDelayed(Runnable {
                             GlobalScope.launch {
                                 VFService.connectToVFService(VerifoneApp.appContext)

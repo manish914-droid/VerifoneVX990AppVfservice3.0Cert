@@ -19,102 +19,98 @@ class DoEmv(var activity: Activity, var handler: Handler, var cardProcessedDataM
         startEMVProcess(valueCardTypeSmartCard , transactionalAmount)
     }
 
+    // First GEN AC
     private fun startEMVProcess(type: Int, transactionalAmount: Long) {
         try {
+            val terminalParameterTable = TerminalParameterTable.selectFromSchemeTable()
+            val emvIntent = Bundle()
+            emvIntent.putInt(ConstIPBOC.startEMV.intent.KEY_cardType_int, type)
+            emvIntent.putLong(ConstIPBOC.startEMV.intent.KEY_authAmount_long, transactionalAmount)
+            emvIntent.putString(
+                ConstIPBOC.startEMV.intent.KEY_merchantName_String,
+                terminalParameterTable?.receiptHeaderTwo
+            )
+            emvIntent.putString(
+                ConstIPBOC.startEMV.intent.KEY_merchantId_String,
+                terminalParameterTable?.merchantId
+            )
+            emvIntent.putString(
+                ConstIPBOC.startEMV.intent.KEY_terminalId_String,
+                terminalParameterTable?.terminalId
+            )
+            emvIntent.putBoolean(
+                ConstIPBOC.startEMV.intent.KEY_isSupportQ_boolean,
+                ConstIPBOC.startEMV.intent.VALUE_supported
+            )
+            emvIntent.putBoolean(
+                ConstIPBOC.startEMV.intent.KEY_isSupportSM_boolean,
+                ConstIPBOC.startEMV.intent.VALUE_unsupported
+            )
+            emvIntent.putBoolean(
+                ConstIPBOC.startEMV.intent.KEY_isQPBOCForceOnline_boolean,
+                ConstIPBOC.startEMV.intent.VALUE_unforced
+            )
+            emvIntent.putBoolean("isForceOffline", false)
+            if (type == ConstIPBOC.startEMV.intent.VALUE_cardType_contactless) {
+                emvIntent.putByte(
+                    ConstIPBOC.startEMV.intent.KEY_transProcessCode_byte,
+                    0x00.toByte()
+                )
+            }
+            //Below we are setting 9C for all Type of Transaction CTLS & EMV:-
+            when (cardProcessedDataModal.getProcessingCode()) {
+                ProcessingCode.REFUND.code -> emvIntent.putByte(
+                    ConstIPBOC.startEMV.intent.KEY_transProcessCode_byte,
+                    0x20.toByte()
+                ) //------> For Refund Transaction
 
-        val terminalParameterTable = TerminalParameterTable.selectFromSchemeTable()
+                ProcessingCode.SALE_WITH_CASH.code -> emvIntent.putByte(
+                    ConstIPBOC.startEMV.intent.KEY_transProcessCode_byte,
+                    0x09.toByte()
+                ) //------> For Sale with Cash Transaction
 
-        val emvIntent = Bundle()
-        emvIntent.putInt(ConstIPBOC.startEMV.intent.KEY_cardType_int, type)
-        emvIntent.putLong(ConstIPBOC.startEMV.intent.KEY_authAmount_long, transactionalAmount)
-        emvIntent.putString(
-            ConstIPBOC.startEMV.intent.KEY_merchantName_String,
-            terminalParameterTable?.receiptHeaderTwo
-        )
-        emvIntent.putString(
-            ConstIPBOC.startEMV.intent.KEY_merchantId_String,
-            terminalParameterTable?.merchantId
-        )
-        emvIntent.putString(
-            ConstIPBOC.startEMV.intent.KEY_terminalId_String,
-            terminalParameterTable?.terminalId
-        )
-        emvIntent.putBoolean(
-            ConstIPBOC.startEMV.intent.KEY_isSupportQ_boolean,
-            ConstIPBOC.startEMV.intent.VALUE_supported
-        )
-        emvIntent.putBoolean(
-            ConstIPBOC.startEMV.intent.KEY_isSupportSM_boolean,
-            ConstIPBOC.startEMV.intent.VALUE_unsupported
-        )
-        emvIntent.putBoolean(
-            ConstIPBOC.startEMV.intent.KEY_isQPBOCForceOnline_boolean,
-            ConstIPBOC.startEMV.intent.VALUE_unforced
-        )
-        emvIntent.putBoolean("isForceOffline", false)
-        if (type == ConstIPBOC.startEMV.intent.VALUE_cardType_contactless) {
-            emvIntent.putByte(ConstIPBOC.startEMV.intent.KEY_transProcessCode_byte, 0x00.toByte())
-        }
+                ProcessingCode.CASH_AT_POS.code -> emvIntent.putByte(
+                    ConstIPBOC.startEMV.intent.KEY_transProcessCode_byte,
+                    0x01.toByte()
+                ) //------> For Cash Transaction
 
-        //Below we are setting 9C for all Type of Transaction CTLS & EMV:-
-        when (cardProcessedDataModal.getProcessingCode()) {
-            ProcessingCode.REFUND.code -> emvIntent.putByte(
-                ConstIPBOC.startEMV.intent.KEY_transProcessCode_byte,
-                0x20.toByte()
-            ) //------> For Refund Transaction
+                else -> emvIntent.putByte(
+                    ConstIPBOC.startEMV.intent.KEY_transProcessCode_byte,
+                    0x00.toByte()
+                ) //------> For Sale Transaction
+            }
 
-            ProcessingCode.SALE_WITH_CASH.code -> emvIntent.putByte(
-                ConstIPBOC.startEMV.intent.KEY_transProcessCode_byte,
-                0x09.toByte()
-            ) //------> For Sale with Cash Transaction
-
-            ProcessingCode.CASH_AT_POS.code -> emvIntent.putByte(
-                ConstIPBOC.startEMV.intent.KEY_transProcessCode_byte,
-                0x01.toByte()
-            ) //------> For Cash Transaction
-
-            else -> emvIntent.putByte(
-                ConstIPBOC.startEMV.intent.KEY_transProcessCode_byte,
-                0x00.toByte()
-            ) //------> For Sale Transaction
-        }
-
-        emvIntent.putBoolean("isSupportPBOCFirst", false)
-        val TRASNSCURRENTCODE = "transCurrCode"
-        val OTHERAMOUNT = "otherAmount"
-        emvIntent.putString(TRASNSCURRENTCODE, "0356")
-        emvIntent.putString(OTHERAMOUNT, "0")
-
-            iemv?.startEMV(ConstIPBOC.startEMV.processType.full_process, emvIntent, emvHandler())
-
-           }
-        catch (ex: DeadObjectException){
+            emvIntent.putBoolean("isSupportPBOCFirst", false)
+            val TRASNSCURRENTCODE = "transCurrCode"
+            val OTHERAMOUNT = "otherAmount"
+            emvIntent.putString(TRASNSCURRENTCODE, "0356")
+            emvIntent.putString(OTHERAMOUNT, "0")
+            iemv.startEMV(ConstIPBOC.startEMV.processType.full_process, emvIntent, emvHandler())
+        } catch (ex: DeadObjectException){
             ex.printStackTrace()
             println("DoEmv card error1"+ex.message)
             Handler(Looper.getMainLooper()).postDelayed(Runnable {
                 GlobalScope.launch {
                     VFService.connectToVFService(VerifoneApp.appContext)
                     delay(200)
-                  //  iemv = VFService.vfIEMV
+                    //  iemv = VFService.vfIEMV
                     delay(100)
                     (activity as VFTransactionActivity).doProcessCard()
                 }
             }, 200)
-        }
-        catch (e: RemoteException) {
+        } catch (e: RemoteException) {
             e.printStackTrace()
             println("DoEmv card error2"+e.message)
             Handler(Looper.getMainLooper()).postDelayed(Runnable {
                 GlobalScope.launch {
                     VFService.connectToVFService(VerifoneApp.appContext)
                     delay(200)
-            //        iemv = VFService.vfIEMV
+                    //        iemv = VFService.vfIEMV
                     delay(100)
                     (activity as VFTransactionActivity).doProcessCard()
                 }
             }, 200)
-        }
-        catch (e: Exception){
+        } catch (e: Exception){
             e.printStackTrace()
             println("DoEmv card error3"+e.message)
             val builder = AlertDialog.Builder(activity)
@@ -131,7 +127,7 @@ class DoEmv(var activity: Activity, var handler: Handler, var cardProcessedDataM
                         }
                         .setNeutralButton("Cancel") { dialog, _ ->
                             dialog.dismiss()
-                            (activity as Activity).finishAffinity()
+                            activity.finishAffinity()
                         }
                     val alert: AlertDialog? = builder.create()
                     alert?.show()

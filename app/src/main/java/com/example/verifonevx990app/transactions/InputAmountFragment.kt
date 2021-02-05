@@ -120,7 +120,6 @@ class InputAmountFragment : Fragment() {
             }
 
         }
-
         if (transactionType == EDashboardItem.EMI_ENQUIRY) {
             proceedToPaybutton?.text = getString(R.string.proceed)
         }
@@ -147,9 +146,6 @@ class InputAmountFragment : Fragment() {
         super.onDestroyView()
         activity?.let { inputAmountEditText?.let { it1 -> toggleSoftKeyboard(it1, it) } }
     }
-
-
-
 
     /**
      * First Check for validation and if all validation found ok

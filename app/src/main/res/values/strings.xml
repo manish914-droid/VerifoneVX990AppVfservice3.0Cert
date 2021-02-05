@@ -13,7 +13,8 @@
     <string name="home">Home</string>
     <string name="settlement">Settlement</string>
     <string name="dynamicLimit_error">Transaction Limit amount exceeds</string>
-    <string name="bank_card_password">Enter Pin</string> //
+    <string name="bank_card_password">Enter Pin</string>
+    //
     <string name="alpha_num_digits">AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789</string>
     <!--Init-->
     <string name="enter_tid_colon">Enter TID :</string>
@@ -350,6 +351,10 @@
     <string name="enter_valid_last_four_digit_of_card">Enter Valid Last 4 Digit of Card</string>
     <string name="success_message">SUCCESS</string>
     <string name="success_transaction">Success Transaction</string>
+
+    <string name="default_amount">0.00</string>
+    <string name="transaction_amount">Transaction Amount</string>
+    <string name="cash_amount">Enter Cash Amount (\u20B9)</string>
 
 
 </resources>

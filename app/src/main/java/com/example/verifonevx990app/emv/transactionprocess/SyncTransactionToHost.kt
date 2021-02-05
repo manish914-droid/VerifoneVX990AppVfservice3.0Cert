@@ -33,7 +33,7 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
                 TransactionType.PRE_AUTH.type ->{ transactionISOData?.mti= Mti.PRE_AUTH_MTI.mti}
                 else ->{ transactionISOData?.mti= Mti.DEFAULT_MTI.mti}
             }
-        //Setting ROC again because if reversal send first and then transaction packet goes to host the ROC is similar in that case because we are creating Trans packet at initial stage(i.e )
+        //Setting ROC again because if reversal send first and then transaction packet goes to host the ROC is similar in that case because we are creating Trans packet at initial stage
         transactionISOData?.addField(11, ROCProviderV2.getRoc(AppPreference.getBankCode()).toString())
         val transactionISOByteArray = transactionISOData?.generateIsoByteRequest()
         if (transactionISOData != null) {

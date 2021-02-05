@@ -486,9 +486,9 @@ object ConnectionTimeStamps {
 
     fun getOtherInfo(): String {
         return try {
-            val imei = VFService.vfDeviceService?.deviceInfo?.imei
-            val batteryStrength = VFService.vfDeviceService?.deviceInfo?.batteryLevel
-            val simNo = VFService.vfDeviceService?.deviceInfo?.iccid
+            val imei = VFService.vfDeviceService.deviceInfo.imei
+            val batteryStrength = VFService.vfDeviceService.deviceInfo.batteryLevel
+            val simNo = VFService.vfDeviceService.deviceInfo.iccid
             Log.e("[1] iemi,battry,simNo", "$imei ,${batteryStrength} -----> ${simNo}  ")
             "~${VerifoneApp.networkStrength}~${batteryStrength}~${imei}~${simNo}~${VerifoneApp.operatorName}"
         } catch (ex: java.lang.Exception) {
@@ -787,7 +787,7 @@ object ROCProviderV2 {
             }
 
             val byteArray = track21.toByteArray(StandardCharsets.ISO_8859_1)
-            encryptedbyteArrrays = VFService.vfPinPad?.encryptTrackData(0, 2, byteArray)
+            encryptedbyteArrrays = VFService.vfPinPad.encryptTrackData(0, 2, byteArray)
 
             /*println(
                 "Track 2 with encyption is --->" + Utility.byte2HexStr(encryptedbyteArrrays)
@@ -818,12 +818,40 @@ object ROCProviderV2 {
         0x9F03,
         0x9F47
     )
+
+    val commonTagListemv = intArrayOf(
+        0x5F2A,
+        0x5F34,
+        0x82,
+        0x84,
+        0x95,
+        0x9A,
+        0x9B,
+        0x9C,
+        0x9F02,
+        0x9F03,
+        0x9F06,
+        0x9F1A,
+        0x9F6E,
+        0x9F26,
+        0x9F27,
+        0x9F33,
+        0x9F34,
+        0x9F35,
+        0x9F36,
+        0x9F37,
+        0x9F10,
+        //   0x9F21 to "9F21"
+        //  0x9F47 to "9F47"
+        /// 0x9A03 to "9A03"
+    )
+
     //Below method is used to make and return Field55 Data:-
     fun getField55(isAmex: Boolean = true): String {
         val sb = StringBuilder()
-        for (f in mField55) {
-            val v = VFService.vfIEMV?.getCardData(Integer.toHexString(f).toUpperCase(Locale.ROOT))
-            if(v !=null) {
+        for (f in commonTagListemv) {
+            val v = VFService.vfIEMV.getCardData(Integer.toHexString(f).toUpperCase(Locale.ROOT))
+            if (v != null) {
                 sb.append(Integer.toHexString(f))
                 var l = Integer.toHexString(v.size)
                 if (l.length < 2) {
@@ -1041,6 +1069,8 @@ fun transactionType2Name(code: Int): String {
     }
 }
 
+
+//Create the bundle with the types of Card Supported by the hardware
 fun getCardOptionBundle(): Bundle {
     val cardOption = Bundle()
     cardOption.putBoolean(
@@ -1077,7 +1107,7 @@ fun getEncryptedField57DataForManualSale(panNumber: String, expDate: String): St
         }
         logger("Field57_Manual", " -->$dataDescription", "e")
         val byteArray = dataDescription.toByteArray(StandardCharsets.ISO_8859_1)
-        encryptedByteArray = VFService.vfPinPad?.encryptTrackData(0, 2, byteArray)
+        encryptedByteArray = VFService.vfPinPad.encryptTrackData(0, 2, byteArray)
         /*println(
             "Track 2 with encryption in manual sale is --->" + Utility.byte2HexStr(
                 encryptedByteArray
@@ -1127,7 +1157,7 @@ fun getEncryptedField57DataForOfflineSale(
         }
         logger("Field57_Manual", " -->$dataDescription", "e")
         val byteArray = dataDescription.toByteArray(StandardCharsets.ISO_8859_1)
-        encryptedByteArrray = VFService.vfPinPad?.encryptTrackData(0, 2, byteArray)
+        encryptedByteArrray = VFService.vfPinPad.encryptTrackData(0, 2, byteArray)
         //println("Track 2 with encryption is --->" + Utility.byte2HexStr(encryptedByteArrray))
         return Utility.byte2HexStr(encryptedByteArrray)
     } else return "TRACK57_LENGTH<8"
@@ -1465,7 +1495,7 @@ private fun navigateToMain(context: Context) {
 fun txnSuccessToast(context: Context, msg: String = "Transaction Approved") {
     try {
         GlobalScope.launch(Dispatchers.Main) {
-            VFService.vfBeeper?.startBeep(200)
+            VFService.vfBeeper.startBeep(200)
             val layout = (context as Activity).layoutInflater.inflate(
                 R.layout.success_toast,
                 context.findViewById<LinearLayout>(R.id.custom_toast_layout)

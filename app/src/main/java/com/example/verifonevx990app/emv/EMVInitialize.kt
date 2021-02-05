@@ -4,10 +4,10 @@ import android.os.Bundle
 import android.os.RemoteException
 import android.util.Log
 import android.util.SparseArray
-import com.example.verifonevx990app.utils.IsoPackageWriter
 import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.main.TransType
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
+import com.example.verifonevx990app.utils.IsoPackageWriter
 import com.example.verifonevx990app.vxUtils.ROCProviderV2
 import com.example.verifonevx990app.vxUtils.VFService
 import com.example.verifonevx990app.vxUtils.VFService.showToast
@@ -16,13 +16,14 @@ import com.vfi.smartpos.deviceservice.aidl.IEMV
 import com.vfi.smartpos.deviceservice.constdefine.ConstCheckCardListener
 import com.vfi.smartpos.deviceservice.constdefine.ConstIPBOC
 
+// Commenting (Unused file By luckysingh)
 object EMVInitialize {
 
     var savedPan = "8880197100005603384"
     var data8583: SparseArray<String>? = null
-   /* var terminalID = "01020304"
-    var merchantName = "X990 EMV Demo"
-    var merchantID = "ABCDE0123456789"*/
+    /* var terminalID = "01020304"
+     var merchantName = "X990 EMV Demo"
+     var merchantID = "ABCDE0123456789"*/
 
     private var terminalParameterTable: TerminalParameterTable? = null
     private var isoPackageWriter : IsoPackageWriter?   = null
@@ -67,10 +68,7 @@ object EMVInitialize {
         }
     }
 
-    
-    
-    
-    
+
     private fun doSearchCard(transType: TransType?, iemv: IEMV?, transactionalAmmount: Long) {
         showToast("start check card\nUse you card please")
         val cardOption = Bundle()
@@ -88,14 +86,14 @@ object EMVInitialize {
         )
 
         try {
-            iemv?.checkCard(cardOption, 30, object : CheckCardListener.Stub() {
+            iemv.checkCard(cardOption, 30, object : CheckCardListener.Stub() {
 
                 @Throws(RemoteException::class)
                 override fun onCardSwiped(track: Bundle) {
                     Log.d(MainActivity.TAG, "onCardSwiped ...")
                     //                            iemv.stopCheckCard();
-//                            iemv.abortPBOC();
-                    VFService.vfBeeper?.startBeep(200)
+                    //                            iemv.abortPBOC();
+                    VFService.vfBeeper.startBeep(200)
                     val pan =
                         track.getString(ConstCheckCardListener.onCardSwiped.track.KEY_PAN_String)
                     val track1 =
@@ -118,7 +116,8 @@ object EMVInitialize {
                     if (!bIsKeyExist!!) {
                         Log.e(MainActivity.TAG, "no key exist type: 12, @: 1")
                     }
-                    val enctypted: ByteArray? = VFService.getDupkt(1, 1, 1, bytes, byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
+                    val enctypted: ByteArray? =
+                        VFService.getDupkt(1, 1, 1, bytes, byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
                     if (null == enctypted) {
                         Log.e(MainActivity.TAG, "NO DUKPT Encrypted got")
                     } else {
@@ -153,17 +152,16 @@ object EMVInitialize {
                     VFEmv.setTrackDataForSwipe(swipeRelatedData) {
                         if (it)
                             VFEmv.onlineMagRequest.run()
-
                         else
                             Log.e("ERROR", "ERROR IN TRACK SETTING")
                     }
 
 
-                   // showToast("response:" + Arrays.toString(VFEmv.isoResponse?.getField(ISO8583u.F_ResponseCode_39)))
+                    // showToast("response:" + Arrays.toString(VFEmv.isoResponse?.getField(ISO8583u.F_ResponseCode_39)))
                     /*  transType?.let {
-                          doEMV(ConstIPBOC.startEMV.intent.VALUE_cardType_smart_card,
-                              it, iemv)
-                      }*/
+                                  doEMV(ConstIPBOC.startEMV.intent.VALUE_cardType_smart_card,
+                                      it, iemv)
+                              }*/
 
 
                 }
@@ -172,9 +170,14 @@ object EMVInitialize {
                 override fun onCardPowerUp() {
                     iemv.stopCheckCard()
                     iemv.abortEMV()
-                    VFService.vfBeeper?.startBeep(200)
+                    VFService.vfBeeper.startBeep(200)
                     if (transType != null) {
-                        doEMV(ConstIPBOC.startEMV.intent.VALUE_cardType_smart_card, transType , iemv,transactionalAmmount)
+                        doEMV(
+                            ConstIPBOC.startEMV.intent.VALUE_cardType_smart_card,
+                            transType,
+                            iemv,
+                            transactionalAmmount
+                        )
 
                     }
 
@@ -184,9 +187,14 @@ object EMVInitialize {
                 override fun onCardActivate() {
                     iemv.stopCheckCard()
                     iemv.abortEMV()
-                    VFService.vfBeeper?.startBeep(200)
+                    VFService.vfBeeper.startBeep(200)
                     if (transType != null) {
-                        doEMV(ConstIPBOC.startEMV.intent.VALUE_cardType_contactless, transType , iemv,transactionalAmmount)
+                        doEMV(
+                            ConstIPBOC.startEMV.intent.VALUE_cardType_contactless,
+                            transType,
+                            iemv,
+                            transactionalAmmount
+                        )
 
                     }
                 }
@@ -258,7 +266,7 @@ object EMVInitialize {
         emvIntent.putString(KEY_otherAmount_String, "0")
 
         try {
-            iemv?.startEMV(
+            iemv.startEMV(
                 ConstIPBOC.startEMV.processType.full_process,
                 emvIntent,
                 VFEmv.emvHandler

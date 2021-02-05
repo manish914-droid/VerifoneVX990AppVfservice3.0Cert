@@ -125,10 +125,12 @@ object HitServer {
                     } catch (ex: SocketTimeoutException) {
                     println("Read Time out error1" + ex.message)
                     //println("Read Time out error"+ex.message)
+                    ex.printStackTrace()
                     callbackSale(responseStr ?: "", true, ConnectionError.ReadTimeout.errorCode.toString())
                     this@HitServer.callback = null
                     return@openSocketSale
                 } catch (ex: ConnectException) {
+                    ex.printStackTrace()
                     println("Read Time out error2" + ex.message)
                     callbackSale(
                         ex.message ?: "Connection Error",
@@ -139,6 +141,7 @@ object HitServer {
                     this@HitServer.callback = null
                     return@openSocketSale
                 } catch (ex: SocketException) {
+                    ex.printStackTrace()
                     println("Read Time out error3" + ex.message)
                     callbackSale(
                         ex.message ?: "Connection Error",
@@ -150,6 +153,7 @@ object HitServer {
                     return@openSocketSale
                 }
                 catch (ex : Exception) {
+                    ex.printStackTrace()
                     println("Read Time out error4" + ex.message)
                     callbackSale(
                         ex.message ?: "Connection Error",
@@ -171,6 +175,7 @@ object HitServer {
              }
 
         } catch (ex: Exception) {
+            ex.printStackTrace()
             callbackSale(VerifoneApp.appContext.getString(R.string.connection_error), false,"")
             this@HitServer.callback = null
         }

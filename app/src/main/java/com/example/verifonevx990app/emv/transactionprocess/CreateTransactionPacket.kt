@@ -83,7 +83,6 @@ class CreateTransactionPacket(private var cardProcessedData: CardProcessedDataMo
                 }
             }
 
-
             //Below Field57 is Common for Cases Like CTLS + CTLSMAG + EMV + MAG:-
             addField(57, cardProcessedData.getTrack2Data().toString())
 

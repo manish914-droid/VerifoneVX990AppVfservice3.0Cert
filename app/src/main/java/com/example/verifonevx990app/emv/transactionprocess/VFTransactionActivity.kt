@@ -113,10 +113,12 @@ class VFTransactionActivity : BaseActivity() {
     fun doProcessCard() {
         try {
             val printer = VFService.vfPrinter
-            logger("STATUS_P", printer?.status.toString(), "e")
-            if (printer?.status != 0) {
+            logger("STATUS_P", printer.status.toString(), "e")
+            // Checking printer status that the printing roll is present or not and handling that the merchant/user wants proceed the transaction without printing roll
+            if (printer.status != 0) {
                 GlobalScope.launch(Dispatchers.Main) {
-                    alertBoxWithAction(null,
+                    alertBoxWithAction(
+                        null,
                         null,
                         getString(R.string.printer_error),
                         "Want to Proceed SALE with no charge slip",
@@ -255,7 +257,7 @@ class VFTransactionActivity : BaseActivity() {
                         emiCustomerDetails
                     ).createTransactionPacket()
                     logger("Transaction REQUEST PACKET --->>", transactionEMIISO.isoMap, "e")
-                  //  runOnUiThread { showProgress(getString(R.string.sale_data_sync)) }
+                    //  runOnUiThread { showProgress(getString(R.string.sale_data_sync)) }
                     GlobalScope.launch(Dispatchers.IO) {
                         checkReversal(transactionEMIISO, cardProcessedData)
                     }
@@ -264,6 +266,7 @@ class VFTransactionActivity : BaseActivity() {
 
 
             }
+
             DetectCardType.CONTACT_LESS_CARD_TYPE -> {
 
                 if (cardProcessedData.getTransType() == TransactionType.SALE.type || cardProcessedData.getTransType() == TransactionType.PRE_AUTH.type || cardProcessedData.getTransType() == TransactionType.REFUND.type) {
@@ -274,7 +277,7 @@ class VFTransactionActivity : BaseActivity() {
                         emiCustomerDetails
                     ).createTransactionPacket()
                     logger("Transaction REQUEST PACKET --->>", transactionEMIISO.isoMap, "e")
-                   // runOnUiThread { showProgress(getString(R.string.sale_data_sync)) }
+                    // runOnUiThread { showProgress(getString(R.string.sale_data_sync)) }
                     GlobalScope.launch(Dispatchers.IO) {
                         checkReversal(transactionEMIISO, cardProcessedData)
                     }
@@ -331,7 +334,6 @@ class VFTransactionActivity : BaseActivity() {
         binding?.paymentGif?.setOnTouchListener { _, event -> event.action == MotionEvent.ACTION_MOVE }
         val amountValue = "${getString(R.string.rupees_symbol)} $transactionAmountValue"
         findViewById<BHTextView>(R.id.base_amt_tv).text = amountValue
-
         transactionalAmount = transactionAmountValue.replace(".", "").toLong()
         cashAmount = transactionCashAmountValue.replace(".", "").toLong()
 
@@ -341,7 +343,7 @@ class VFTransactionActivity : BaseActivity() {
         binding?.manualEntryButton?.setOnClickListener {
             //have to check
             try {
-                vfIEMV?.stopCheckCard()
+                vfIEMV.stopCheckCard()
             } catch (ex: DeadObjectException) {
                 ex.printStackTrace()
             } catch (ex: RemoteException) {
@@ -419,6 +421,7 @@ class VFTransactionActivity : BaseActivity() {
 
     //Below method is used to Sync Transaction Data To Server:-
     private fun checkReversal(transactionISOByteArray: IsoDataWriter, cardProcessedDataModal: CardProcessedDataModal) {
+        // If case Sale data sync to server
         if (TextUtils.isEmpty(AppPreference.getString(AppPreference.GENERIC_REVERSAL_KEY))) {
             val msg: String = getString(R.string.sale_data_sync)
            /* when (cardProcessedDataModal.getTransType()) {
@@ -517,7 +520,7 @@ class VFTransactionActivity : BaseActivity() {
                     }
                     //Condition for having a reversal(EMV CASE)
                     else if (!TextUtils.isEmpty(AppPreference.getString(AppPreference.GENERIC_REVERSAL_KEY))) {
-                        checkForPrintReversalReceipt(this@VFTransactionActivity) {
+                        //   checkForPrintReversalReceipt(this@VFTransactionActivity) {
                             GlobalScope.launch(Dispatchers.Main) {
                                 alertBoxWithAction(null,
                                     null,
@@ -526,17 +529,19 @@ class VFTransactionActivity : BaseActivity() {
                                     false,
                                     getString(R.string.positive_button_ok),
                                     { alertPositiveCallback ->
-                                        if (alertPositiveCallback)
+                                        if (alertPositiveCallback) {
+                                            checkForPrintReversalReceipt(this@VFTransactionActivity) {}
                                             syncOfflineSaleAndAskAutoSettlement(
                                                 autoSettlementCheck.substring(
                                                     0,
                                                     1
                                                 )
                                             )
+                                        }
                                     },
                                     {})
                             }
-                        }
+                        //  }
                     }
                 } else {
                     runOnUiThread { hideProgress() }
@@ -595,7 +600,7 @@ class VFTransactionActivity : BaseActivity() {
                 }
             }
         }
-        //Below else case is to Sync Reversal data Packet to Host:-
+        //Else case is to Sync Reversal data Packet to Host:-
         else {
             if (!TextUtils.isEmpty(AppPreference.getString(AppPreference.GENERIC_REVERSAL_KEY))) {
                 runOnUiThread { showProgress(getString(R.string.reversal_data_sync)) }
@@ -645,7 +650,7 @@ class VFTransactionActivity : BaseActivity() {
     //Below method is used to handle Transaction Declined case:-
     fun declinedTransaction() {
         try {
-           vfIEMV?.stopCheckCard()
+            vfIEMV.stopCheckCard()
             finish()
             startActivity(Intent(this, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -1081,26 +1086,45 @@ class VFTransactionActivity : BaseActivity() {
                         DetectCardType.MAG_CARD_TYPE -> {
                             // for Mag
                             if (globalCardProcessedModel.getIsOnline() == 1) {
-                                initializePinInputListener(globalCardProcessedModel,emiCustomerDetails)
+                                initializePinInputListener(
+                                    globalCardProcessedModel,
+                                    emiCustomerDetails
+                                )
                                 val param = Bundle()
                                 val globleparam = Bundle()
                                 val panBlock: String? = globalCardProcessedModel.getPanNumberData()
-                                val pinLimit = byteArrayOf(4, 5, 6) // byteArrayOf(Utility.HEX2DEC(retryTimes))
-                                param.putByteArray(ConstIPinpad.startPinInput.param.KEY_pinLimit_ByteArray, pinLimit)
+                                val pinLimit =
+                                    byteArrayOf(4, 5, 6) // byteArrayOf(Utility.HEX2DEC(retryTimes))
+                                param.putByteArray(
+                                    ConstIPinpad.startPinInput.param.KEY_pinLimit_ByteArray,
+                                    pinLimit
+                                )
                                 param.putInt(ConstIPinpad.startPinInput.param.KEY_timeout_int, 20)
                                 when (globalCardProcessedModel.getIsOnline()) {
-                                    1 -> param.putBoolean(ConstIPinpad.startPinInput.param.KEY_isOnline_boolean, true)
-                                    2 -> param.putBoolean(ConstIPinpad.startPinInput.param.KEY_isOnline_boolean, false)
+                                    1 -> param.putBoolean(
+                                        ConstIPinpad.startPinInput.param.KEY_isOnline_boolean,
+                                        true
+                                    )
+                                    2 -> param.putBoolean(
+                                        ConstIPinpad.startPinInput.param.KEY_isOnline_boolean,
+                                        false
+                                    )
                                 }
 
-                                param.putString(ConstIPinpad.startPinInput.param.KEY_pan_String, panBlock)
-                                param.putString(ConstIPinpad.startPinInput.param.KEY_promptString_String, "Enter PIN")
+                                param.putString(
+                                    ConstIPinpad.startPinInput.param.KEY_pan_String,
+                                    panBlock
+                                )
+                                param.putString(
+                                    ConstIPinpad.startPinInput.param.KEY_promptString_String,
+                                    "Enter PIN"
+                                )
                                 param.putInt(
                                     ConstIPinpad.startPinInput.param.KEY_desType_int,
                                     ConstIPinpad.startPinInput.param.Value_desType_3DES
                                 )
                                 try {
-                                    VFService.vfPinPad?.startPinInput(
+                                    VFService.vfPinPad.startPinInput(
                                         VFEmv.workKeyId, param, globleparam,
                                         VFService.pinInputListener
                                     )
@@ -1109,8 +1133,7 @@ class VFTransactionActivity : BaseActivity() {
                                 }
 
 
-
-                          /*      if (null != pinHandler) {
+                                /*      if (null != pinHandler) {
                                     pinHandler.postDelayed(Runnable {
                                         var dialog = PinpadPopUpWindow(
                                             this@VFTransactionActivity,
@@ -1155,9 +1178,16 @@ class VFTransactionActivity : BaseActivity() {
                                 }*/
                             } else {
 
-                                val transactionEMIISO = CreateEMITransactionPacket(globalCardProcessedModel, emiCustomerDetails).createTransactionPacket()
-                                logger("Transaction REQUEST PACKET --->>", transactionEMIISO.isoMap, "e")
-                               // runOnUiThread { showProgress(getString(R.string.sale_data_sync)) }
+                                val transactionEMIISO = CreateEMITransactionPacket(
+                                    globalCardProcessedModel,
+                                    emiCustomerDetails
+                                ).createTransactionPacket()
+                                logger(
+                                    "Transaction REQUEST PACKET --->>",
+                                    transactionEMIISO.isoMap,
+                                    "e"
+                                )
+                                // runOnUiThread { showProgress(getString(R.string.sale_data_sync)) }
                                 GlobalScope.launch(Dispatchers.IO) {
                                     checkReversal(transactionEMIISO, globalCardProcessedModel)
                                 }
@@ -1165,7 +1195,7 @@ class VFTransactionActivity : BaseActivity() {
 
                         }
                         else -> {
-                            VFService.vfIEMV?.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed) // to import card detail data
+                            VFService.vfIEMV.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed) // to import card detail data
                         }
                     }
 
@@ -1183,30 +1213,53 @@ class VFTransactionActivity : BaseActivity() {
                                     initializePinInputListenerSale(globalCardProcessedModel)
                                     val param = Bundle()
                                     val globleparam = Bundle()
-                                    val panBlock: String? = globalCardProcessedModel.getPanNumberData()
-                                    val pinLimit = byteArrayOf(4, 5, 6) // byteArrayOf(Utility.HEX2DEC(retryTimes))
-                                    param.putByteArray(ConstIPinpad.startPinInput.param.KEY_pinLimit_ByteArray, pinLimit)
-                                    param.putInt(ConstIPinpad.startPinInput.param.KEY_timeout_int, 20)
+                                    val panBlock: String? =
+                                        globalCardProcessedModel.getPanNumberData()
+                                    val pinLimit = byteArrayOf(
+                                        4,
+                                        5,
+                                        6
+                                    ) // byteArrayOf(Utility.HEX2DEC(retryTimes))
+                                    param.putByteArray(
+                                        ConstIPinpad.startPinInput.param.KEY_pinLimit_ByteArray,
+                                        pinLimit
+                                    )
+                                    param.putInt(
+                                        ConstIPinpad.startPinInput.param.KEY_timeout_int,
+                                        20
+                                    )
                                     when (globalCardProcessedModel.getIsOnline()) {
-                                        1 -> param.putBoolean(ConstIPinpad.startPinInput.param.KEY_isOnline_boolean, true)
-                                        2 -> param.putBoolean(ConstIPinpad.startPinInput.param.KEY_isOnline_boolean, false)
+                                        1 -> param.putBoolean(
+                                            ConstIPinpad.startPinInput.param.KEY_isOnline_boolean,
+                                            true
+                                        )
+                                        2 -> param.putBoolean(
+                                            ConstIPinpad.startPinInput.param.KEY_isOnline_boolean,
+                                            false
+                                        )
                                     }
 
-                                    param.putString(ConstIPinpad.startPinInput.param.KEY_pan_String, panBlock)
-                                    param.putString(ConstIPinpad.startPinInput.param.KEY_promptString_String, "Enter PIN")
+                                    param.putString(
+                                        ConstIPinpad.startPinInput.param.KEY_pan_String,
+                                        panBlock
+                                    )
+                                    param.putString(
+                                        ConstIPinpad.startPinInput.param.KEY_promptString_String,
+                                        "Enter PIN"
+                                    )
                                     param.putInt(
                                         ConstIPinpad.startPinInput.param.KEY_desType_int,
                                         ConstIPinpad.startPinInput.param.Value_desType_3DES
                                     )
                                     try {
-                                        VFService.vfPinPad?.startPinInput(
+                                        VFService.vfPinPad.startPinInput(
                                             VFEmv.workKeyId, param, globleparam,
                                             VFService.pinInputListener
                                         )
                                     } catch (e: RemoteException) {
                                         e.printStackTrace()
                                     }
-                                  /*  if (null != pinHandler) {
+                                    /*  if (null != pinHandler) {
                                         pinHandler.postDelayed(Runnable {
                                             var dialog = PinpadPopUpWindow(this@VFTransactionActivity, R.style.popup_dialog, pinHandler, globalCardProcessedModel, this@VFTransactionActivity.getString(R.string.bank_card_password), "")
                                             val pwdListener: PinpadPopUpWindow.OnPwdListener = object : PinpadPopUpWindow.OnPwdListener {
@@ -1245,9 +1298,14 @@ class VFTransactionActivity : BaseActivity() {
                                     }*/
                                 } else {
 
-                                    val transactionISO = CreateTransactionPacket(globalCardProcessedModel).createTransactionPacket()
-                                    logger("Transaction REQUEST PACKET --->>", transactionISO.isoMap, "e")
-                                  //  runOnUiThread { showProgress(getString(R.string.sale_data_sync)) }
+                                    val transactionISO =
+                                        CreateTransactionPacket(globalCardProcessedModel).createTransactionPacket()
+                                    logger(
+                                        "Transaction REQUEST PACKET --->>",
+                                        transactionISO.isoMap,
+                                        "e"
+                                    )
+                                    //  runOnUiThread { showProgress(getString(R.string.sale_data_sync)) }
                                     GlobalScope.launch(Dispatchers.IO) {
                                         checkReversal(transactionISO, globalCardProcessedModel)
                                     }
@@ -1262,7 +1320,7 @@ class VFTransactionActivity : BaseActivity() {
                             val iDialog = this@VFTransactionActivity as IDialog
                             iDialog.getMsgDialog("EMI", msg, "Yes", "No", {
                                 globalCardProcessedModel.setTransType(TransactionType.SALE.type)
-                                VFService.vfIEMV?.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed) // to import card detail data
+                                VFService.vfIEMV.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed) // to import card detail data
                                 //  emvProcessNext(cardProcessedData)
                             }, {
                                 declinedTransaction()
@@ -1276,6 +1334,7 @@ class VFTransactionActivity : BaseActivity() {
 
     }
 
+    // Creating transaction packet and
     private fun emvProcessNext(cardProcessedData: CardProcessedDataModal?) {
         val transactionISO = CreateTransactionPacket(cardProcessedData!!).createTransactionPacket()
         // logger("Transaction REQUEST PACKET --->>", transactionISO.isoMap, "e")
@@ -1380,8 +1439,11 @@ class VFTransactionActivity : BaseActivity() {
             @Throws(RemoteException::class)
             override fun onConfirm(data: ByteArray, isNonePin: Boolean) {
                 Log.d("Data", "PinPad onConfirm")
-                VFService.vfIEMV?.importPin(1, data)
-                Log.d(MainActivity.TAG, "PinPad hex encrypted data ---> " + Utility.byte2HexStr(data))
+                VFService.vfIEMV.importPin(1, data)
+                Log.d(
+                    MainActivity.TAG,
+                    "PinPad hex encrypted data ---> " + Utility.byte2HexStr(data)
+                )
                 VFEmv.savedPinblock = data
                 globalCardProcessedModel.setGeneratePinBlock(Utility.byte2HexStr(data))
 
@@ -1414,6 +1476,7 @@ class VFTransactionActivity : BaseActivity() {
             }
         }
     }
+
     private fun initializePinInputListenerSale(globalCardProcessedModel: CardProcessedDataModal) {
         VFService.pinInputListener = object : PinInputListener.Stub() {
             @Throws(RemoteException::class)
@@ -1424,8 +1487,11 @@ class VFTransactionActivity : BaseActivity() {
             @Throws(RemoteException::class)
             override fun onConfirm(data: ByteArray, isNonePin: Boolean) {
                 Log.d("Data", "PinPad onConfirm")
-                VFService.vfIEMV?.importPin(1, data)
-                Log.d(MainActivity.TAG, "PinPad hex encrypted data ---> " + Utility.byte2HexStr(data))
+                VFService.vfIEMV.importPin(1, data)
+                Log.d(
+                    MainActivity.TAG,
+                    "PinPad hex encrypted data ---> " + Utility.byte2HexStr(data)
+                )
                 VFEmv.savedPinblock = data
                 globalCardProcessedModel.setGeneratePinBlock(Utility.byte2HexStr(data))
 
@@ -1459,13 +1525,4 @@ class VFTransactionActivity : BaseActivity() {
         }
     }
 
-
-    /*private fun txnSuccessToast(){
-            val layout = layoutInflater.inflate(R.layout.success_toast, custom_toast_layout)
-            val myToast = Toast(applicationContext)
-            myToast.duration = Toast.LENGTH_LONG
-            myToast.setGravity(Gravity.CENTER_VERTICAL, 0, 0)
-            myToast.view = layout//setting the view of custom toast layout
-            myToast.show()
-    }*/
 }

@@ -23,7 +23,7 @@ import com.example.verifonevx990app.vxUtils.AppPreference
 import com.example.verifonevx990app.vxUtils.BHTextView
 import com.example.verifonevx990app.vxUtils.VFService
 import java.util.*
-
+// Commenting (Unused file By luckysingh)
 class TransactionActivity : AppCompatActivity(), OnXmlDataParsed {
     private var mXmlModel: HashMap<String, XmlFieldModel>? = null
     private var transactionalAmount: Long = 0L
