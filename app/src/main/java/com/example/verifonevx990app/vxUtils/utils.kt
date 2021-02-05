@@ -849,7 +849,7 @@ object ROCProviderV2 {
     )
 
     //Below method is used to make and return Field55 Data:-
-    fun getField55(isAmex: Boolean = true): String {
+    fun getField55(isAmex: Boolean = false): String {
         val sb = StringBuilder()
         for (f in commonTagListemv) {
             val v = VFService.vfIEMV?.getCardData(Integer.toHexString(f).toUpperCase(Locale.ROOT))

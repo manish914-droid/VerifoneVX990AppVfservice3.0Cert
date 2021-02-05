@@ -9,7 +9,7 @@ import com.vfi.smartpos.deviceservice.aidl.IEMV
 import com.vfi.smartpos.deviceservice.constdefine.ConstIPBOC
 
 
-class EmvSetAidRid(private var ipboc: IEMV? , private var updateCVMValue : String , private var ctlsUpdateTransLimit : String) {
+class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String, private var ctlsUpdateTransLimit: String) {
     private val TAG = "EMV-SetAidRid"
     private var ctlsVal: String? = null
     private var cvmVal: String? = null
@@ -52,15 +52,15 @@ class EmvSetAidRid(private var ipboc: IEMV? , private var updateCVMValue : Strin
         try {
             val drlDataList = DRLUtil(updateCVMValue, ctlsUpdateTransLimit).amexdrl
             for (drlData in drlDataList) {
-                isSuccess = ipboc!!.updateVisaAPID(2,drlData)
+                isSuccess = ipboc!!.updateVisaAPID(2, drlData)
                 Log.d("TAG", "Clear UpdateVisAPIDAID:$isSuccess")
             }
             for (drlData in drlDataList) {
-                isSuccess = ipboc!!.updateVisaAPID(1,drlData )
+                isSuccess = ipboc!!.updateVisaAPID(1, drlData)
                 Log.d("TAG", "Add UpdateVisAPIDAID:$isSuccess")
             }
         }
-        catch (ex : Exception){
+        catch (ex: Exception){
             ex.printStackTrace()
         }
 
@@ -69,24 +69,26 @@ class EmvSetAidRid(private var ipboc: IEMV? , private var updateCVMValue : Strin
         // hardcoding the AID string
         val AID_SmartCard =
             arrayOf(
+// =============================================Visa Contact card Aids starts============================================================================================
                 // Visa credit or debit	10 10
                 // Visa credit or debit	10 10
-                "9F3303E020C8" +     //Terminal capability
+
+                        "9F3303E020C8" +     //Terminal capability
                         "DF1A06000000012000" +
                         "9F0607A0000000031010" + //Application Aid
                         "9F40056F00F0F001" +  //Additional terminal cpability
                         "DF010100" +
                         "DF2006009999999999" +
                         "DF14039F3704" +
-                        "9F09020096" +//Application version number
                         "9F660432004000" + //Terminal transaction qualifier(TTQ)
                         "DF170101" +   // DDA public module length
+                        "9F09020096" + //Application version number
                         "5F2A020901" + // Transaction currency code
                         "DF1B06000000000000" +
                         "9F350122" +   //Terminal type
                         "DF1205FC60ACF800" +
                         "9F1B0400000000" + //Terminal floor limit
-                        "9F1A020356" +     //Terminal country code
+                        "9F1A020158" +     //Terminal country code
                         "DF2106009999999999" +
                         "DF160199" +
                         "DF150400049444" +
@@ -94,6 +96,7 @@ class EmvSetAidRid(private var ipboc: IEMV? , private var updateCVMValue : Strin
                         "9F08020140" +      //Application version
                         "DF1906000000000000" +
                         "DF13050010000000",  //Public modulus
+
                 // Visa credit or debit	10 10
                 // Visa credit or debit	10 10
                 "9F0607A0000000031010" +
@@ -103,7 +106,6 @@ class EmvSetAidRid(private var ipboc: IEMV? , private var updateCVMValue : Strin
                         "DF170101" +
                         "9F09020096" + //Application version number
                         "DF180101" +
-                        "9F1A020356" +
                         "DF12050000000000" +
                         "9F1B0400000000" + //Terminal floor limit
                         "DF160101" +
@@ -112,6 +114,7 @@ class EmvSetAidRid(private var ipboc: IEMV? , private var updateCVMValue : Strin
                         "DF1906000000000000" +
                         "9F7B06000000000000" + //Terminal transaction limit
                         "DF13050000000000",  //DDA public module
+
                 // Visa credit or debit	10 10
                 // Visa credit or debit	10 10
                 "9F0608A000000003101001" +
@@ -119,9 +122,8 @@ class EmvSetAidRid(private var ipboc: IEMV? , private var updateCVMValue : Strin
                         "DF010100" +
                         "DF140111" +
                         "DF170101" +
-                        "9F09020096" +
+                        "9F09020096" + //Application version number
                         "DF180101" +
-                        "9F1A020356" +
                         "DF1205D84000F800" +
                         "9F1B0400000000" +
                         "DF160101" +
@@ -130,6 +132,7 @@ class EmvSetAidRid(private var ipboc: IEMV? , private var updateCVMValue : Strin
                         "DF1906000000000000" +
                         "9F7B06000000000000" +
                         "DF13050010000000",
+
                 // Visa credit or debit	10 10
                 // Visa credit or debit	10 10
                 "9F0608A000000003101002" +
@@ -137,9 +140,8 @@ class EmvSetAidRid(private var ipboc: IEMV? , private var updateCVMValue : Strin
                         "DF010100" +
                         "DF140111" +
                         "DF170101" +
-                        "9F09020096" +
+                        "9F09020096" + //Application version number
                         "DF180101" +
-                        "9F1A020356" +
                         "DF1205D84000F800" +
                         "9F1B0400000000" +
                         "DF160101" +
@@ -148,6 +150,7 @@ class EmvSetAidRid(private var ipboc: IEMV? , private var updateCVMValue : Strin
                         "DF1906000000000000" +
                         "9F7B06000000000000" +
                         "DF13050010000000",
+
                 // Visa Electron	20 10
                 // Visa Electron	20 10
                 "9F0607A0000000032010" +
@@ -155,18 +158,17 @@ class EmvSetAidRid(private var ipboc: IEMV? , private var updateCVMValue : Strin
                         "DF010100" +
                         "DF140111" +
                         "DF170101" +
-                        "9F09020096" +
+                        "9F09020096" + //Application version number
                         "DF180101" +
                         "DF1205D84000F800" +
                         "9F1B0400000000" +
                         "DF160101" +
-                        "9F1A020356" +
                         "DF150400000000" +
                         "DF1105D84004A800" +
                         "DF1906000000000000" +
                         "9F7B06000000000000" +
                         "DF13050010000000",
-
+// =============================================Visa Contact card Aids Ends============================================================================================
                 // =================================Masters card Aids starts========================================================
                 // MasterCard credit or debit	10 10
                 "9F0607A0000000041010" +
@@ -238,13 +240,112 @@ class EmvSetAidRid(private var ipboc: IEMV? , private var updateCVMValue : Strin
                     "DF13050000000000",    //TAC Refuse
 
             /*  "9f0607A0000001523010"+*/
-              "9F0607A0000003241010" +
+            "9F0607A0000003241010" +
                     "DF0306009999999999" +
                     "DF2006009999999999" +
-                    "DF010100DF14039F37049F6601265F2A020356DF1701999F09020001DF180101DF1205FCE09CF8009F1B04000000009F1A020356DF2106000000000000DF160199DF150400000000DF1105DC00002000DF0406000000000000DF1906000000000000DF13050010000000"
-/*            "DF1A06000000012000" +
-                    "9F0607A00000000" +
-                    "32010DF0306009999999999DF2006009999999999DF010100DF14039F37049F6601265F2A020356DF1B06000000000000DF1701019F09020140DF180101DF1205D84004F8009F1B04000000009F1A0203569F5A054001560156DF2106000000000000DF160101DF150400000000DF1105D84004A800DF0406000000000000DF1906000000000000DF13050010000000"*/
+                    "DF010100DF14039F37049F6601265F2A020356DF1701999F09020001DF180101DF1205FCE09CF8009F1B04000000009F1A020356DF2106000000000000DF160199DF150400000000DF1105DC00002000DF0406000000000000DF1906000000000000DF13050010000000",
+
+//=============================================Visa Contactless card Aids starts============================================================================================
+                    // Visa, Plus	80 10
+                   // Visa, Plus	80 10
+
+                    "9F3303E0F0C8"+
+                    "9F40056200002001"+
+                    "97099F02065F2A029A0390"+
+                    "9F40056F00F0F001" + //additional terminal capability
+                    "9F0607A0000000038010" +
+                    "DF0306009999999999" +
+                    "DF2006009999999999" +
+                    "DF010100" +
+                    "DF14039F3704" +
+                    "9F660100" +
+                    "5F2A020356" +
+                    "DF170101" +
+                            "9F09020096" + //Application version number
+                    "DF180101" +
+                    "DF1205D84004F800" + //Tac online
+                    "9F1B0400000000" +
+                    "9F1A020356" +
+                    "DF2106000000000000" +
+                    "DF160101" +
+                    "DF150400000000" +
+                    "DF1105D84004A800" +
+                    "DF0406000000000000" +
+                    "DF1906000000000000" +
+                    "DF13050010000000",
+
+
+                    "9F3303E0F0C8"+
+                    "9F40056200002001"+
+                    "97099F02065F2A029A0390"+
+                    "9F0607A0000000031010" +
+                    "DF0306009999999999" +
+                    "DF2006009999999999" + //Contact less Maximum Transaction Limit
+                    "DF010100" +           //Application id
+                    "DF14039F3704" +       //DDOL (Dynamic data authetication...)
+                    "9F6604F6004000" +           //Teminal transaction qualifier
+                    "5F2A020356" +         //  Transaction currency code
+                    "DF170101" +           //The target percentage randomly choosen
+                            "9F09020096" + //Application version number
+                    "DF180101" +           //Online pin
+                    "DF1205A0109C9800" +   //TAC online
+                    "9F1B0400000000" +      //Minimum Limit //floor limit
+                    "9F1A020356" +          //Terminal Country code
+                    "DF2106000000001000" +  //Terminal cvm(cardholder verification methods) quota
+                    "DF160101" +             //Bias select the maximum percentage of target
+                    "DF150400000000" +       //offset Randomly selected thresold
+                    "DF1105A4109C0000" +     //TAC Default
+                    "DF0406000000000000" +
+                    "DF1906000000000000" +    //Contact less offline minimum
+                    "DF13055C40000000",       //TAC Refuse
+
+                    "9F3303E0F0C8"+
+                    "9F40056200002001"+
+                     "97099F02065F2A029A0390"+
+                    "9F0608A000000003101001" +
+                    "DF2006009999999999" +
+                    "DF010100" +
+                    "DF14039F3704" +
+                    "9F660100" +
+                    "5F2A020156" +
+                    "DF170101" +
+                            "9F09020096" + //Application version number
+                    "DF180101" +
+                    "DF1205A0109C9800" +
+                    "9F1B0400000000" +
+                    "9F1A020356" +
+                    "DF2106000000001000" +
+                    "DF160101" +
+                    "DF150400000000" +
+                    "DF1105A4109C0000" +
+                    "DF0406000000000000" +
+                    "DF1906000000000000" +
+                    "DF13055C40000000",
+
+                    "9F3303E0F0C8"+
+                    "9F40056200002001"+
+                    "97099F02065F2A029A0390"+
+                    "9F0608A000000003101002" +
+                    "DF2006009999999999" +
+                    "DF010100" +
+                    "DF14039F3704" +
+                    "9F660100" +
+                    "5F2A020156" +
+                    "DF170101" +
+                            "9F09020096" + //Application version number
+                    "DF180101" +
+                    "DF1205A0109C9800" +
+                    "9F1B0400000000" +
+                    "9F1A020356" +
+                    "DF2106000000001000" +
+                    "DF160101" +
+                    "DF150400000000" +
+                    "DF1105A4109C0000" +
+                    "DF0406000000000000" +
+                    "DF1906000000000000" +
+                    "DF13055C40000000"
+// =============================================Visa Conatcless card Aids Ends============================================================================================
+
         )
 
         try {
@@ -259,45 +360,8 @@ class EmvSetAidRid(private var ipboc: IEMV? , private var updateCVMValue : Strin
             e.printStackTrace()
         }
 
-            // Visa, Plus	80 10
-            // Visa, Plus	80 10
-            "9F3303E0F0C8"+ //terminal capability
-                    "9F40056F00F0F001" + //additional terminal capability
-                    "9F0607A0000000038010" +
-                    "DF0306009999999999" +
-                    "DF2006009999999999" +
-                    "DF010100" +
-                    "DF14039F3704" +
-                    "9F660100" +
-                    "5F2A020156" +
-                    "DF170101" +
-                    "9F09020140" +
-                    "DF180101" +
-                    "DF1205D84004F800" + //Tac online
-                    "9F1B0400000000" +
-                    "9F1A020156" +
-                    "DF2106000000000000" +
-                    "DF160101" +
-                    "DF150400000000" +
-                    "DF1105D84004A800" +
-                    "DF0406000000000000" +
-                    "DF1906000000000000" +
-                    "DF13050010000000"
-            // Visa credit or debit	10 10
-            // Visa credit or debit	10 10
-          /*  "DF1A06000000012000" +*/
-                    "9F0607A0000000031010" +
-                    "DF0306009999999999DF2006009999999999DF010100DF14039F37049F6601265F2A020156DF1B06000000000000DF1701019F09020140DF180101DF1205D84004F8009F1B04000000009F1A0201569F5A054001560156DF2106000000000000DF160101DF150400000000DF1105D84004A800DF0406000000000000DF1906000000000000DF13050010000000"
-            // Visa credit or debit	10 10
-            // Visa credit or debit	10 10
-          /*  "DF1A06000000012000" +*/
-                    "9F0608A000000003101001" +
-                    "DF0306009999999999DF2006009999999999DF010100DF14039F37049F6601265F2A020156DF1B06000000000000DF1701019F09020140DF180101DF1205D84004F8009F1B04000000009F1A0201569F5A054001560156DF2106000000000000DF160101DF150400000000DF1105D84004A800DF0406000000000000DF1906000000000000DF13050010000000"
-          /*  "DF1A06000000012000" +*/
-                    "9F0608A000000003101002" +
-                    "DF0306009999999999DF2006009999999999DF010100DF14039F37049F6601265F2A020156DF1B06000000000000DF1701019F09020140DF180101DF1205D84004F8009F1B04000000009F1A0201569F5A054001560156DF2106000000000000DF160101DF150400000000DF1105D84004A800DF0406000000000000DF1906000000000000DF13050010000000"
 
-            // =================================Masters card Aids starts========================================================
+        // =================================Masters card Aids starts========================================================
 
                 // MasterCard credit or debit	10 10
             "9F0607A0000000041010" +
@@ -388,7 +452,7 @@ class EmvSetAidRid(private var ipboc: IEMV? , private var updateCVMValue : Strin
         // hardcoding some rid
         val ridList = arrayOf(
             //Amex Test Cap keys
-         /*   "9F0605A0000000259F2201C8DF0503201231DF060101DF070101DF028190BF0CFCED708FB6B048E3014336EA24AA007D7967B8AA4E613D26D015C4FE7805D9DB131CED0D2A8ED504C3B5CCD48C33199E5A5BF644DA043B54DBF60276F05B1750FAB39098C7511D04BABC649482DDCF7CC42C8C435BAB8DD0EB1A620C31111D1AAAF9AF6571EEBD4CF5A08496D57E7ABDBB5180E0A42DA869AB95FB620EFF2641C3702AF3BE0B0C138EAEF202E21DDF040103DF031433BD7A059FAB094939B90A8F35845C9DC779BD50", //c8
+            /*   "9F0605A0000000259F2201C8DF0503201231DF060101DF070101DF028190BF0CFCED708FB6B048E3014336EA24AA007D7967B8AA4E613D26D015C4FE7805D9DB131CED0D2A8ED504C3B5CCD48C33199E5A5BF644DA043B54DBF60276F05B1750FAB39098C7511D04BABC649482DDCF7CC42C8C435BAB8DD0EB1A620C31111D1AAAF9AF6571EEBD4CF5A08496D57E7ABDBB5180E0A42DA869AB95FB620EFF2641C3702AF3BE0B0C138EAEF202E21DDF040103DF031433BD7A059FAB094939B90A8F35845C9DC779BD50", //c8
             "9F0605A0000000259F2201C9DF0503201231DF060101DF070101DF0281B0B362DB5733C15B8797B8ECEE55CB1A371F760E0BEDD3715BB270424FD4EA26062C38C3F4AAA3732A83D36EA8E9602F6683EECC6BAFF63DD2D49014BDE4D6D603CD744206B05B4BAD0C64C63AB3976B5C8CAAF8539549F5921C0B700D5B0F83C4E7E946068BAAAB5463544DB18C63801118F2182EFCC8A1E85E53C2A7AE839A5C6A3CABE73762B70D170AB64AFC6CA482944902611FB0061E09A67ACB77E493D998A0CCF93D81A4F6C0DC6B7DF22E62DBDF040103DF03148E8DFF443D78CD91DE88821D70C98F0638E51E49", //c9
             "9F0605A0000000259F2201CADF0503201231DF060101DF070101DF0281F8C23ECBD7119F479C2EE546C123A585D697A7D10B55C2D28BEF0D299C01DC65420A03FE5227ECDECB8025FBC86EEBC1935298C1753AB849936749719591758C315FA150400789BB14FADD6EAE2AD617DA38163199D1BAD5D3F8F6A7A20AEF420ADFE2404D30B219359C6A4952565CCCA6F11EC5BE564B49B0EA5BF5B3DC8C5C6401208D0029C3957A8C5922CBDE39D3A564C6DEBB6BD2AEF91FC27BB3D3892BEB9646DCE2E1EF8581EFFA712158AAEC541C0BBB4B3E279D7DA54E45A0ACC3570E712C9F7CDF985CFAFD382AE13A3B214A9E8E1E71AB1EA707895112ABC3A97D0FCB0AE2EE5C85492B6CFD54885CDD6337E895CC70FB3255E3DF040103DF03146BDA32B1AA171444C7E8F88075A74FBFE845765F", //CA,*/
 

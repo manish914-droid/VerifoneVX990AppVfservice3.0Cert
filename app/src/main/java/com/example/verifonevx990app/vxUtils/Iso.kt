@@ -417,7 +417,11 @@ class IsoDataWriter : IsoParent(), IWriter,Serializable {
                     if(fie.fieldType == ISO_FIELD_TYPE.BYTE){
                         add(fie.rawData.hexStr2ByteArr())
                     }else{
-                        add(addPad(fie.rawData, "0", fie.len * 2).str2NibbleArray())
+                        if(fie.fieldNo.toString() == "42"){
+                            add(fie.rawData.hexStr2ByteArr())
+                        }
+                        else
+                            add(addPad(fie.rawData, "0", fie.len * 2).str2NibbleArray())
                     }
                 } else {
                     add(addPad(fie.rawData.length / 2, "0", fie.len * 2).str2NibbleArray())

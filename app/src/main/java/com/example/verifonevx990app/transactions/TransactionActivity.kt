@@ -74,13 +74,13 @@ class TransactionActivity : AppCompatActivity(), OnXmlDataParsed {
             transactionalAmount, 0L, 4
         )
 
-        EMVInitialize.doBalance(
+     /*   EMVInitialize.doBalance(
             VFService.vfIEMV,
             terminalParameterTable,
             isoPackageWriter!!,
             transactionalAmount
         )
-
+*/
     }
 
     override fun onXmlError(message: String?) {
