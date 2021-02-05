@@ -306,17 +306,17 @@ class SyncAuthTransToHost(activityContext: BaseActivity) {
             ) { offlineSaleStatus, validationMsg ->
                 if (offlineSaleStatus == 1)
                     GlobalScope.launch(Dispatchers.Main) {
-                        (activityContext as BaseActivity).hideProgress()
+                        activityContext.hideProgress()
                         delay(1000)
                         if (autoSettleCode == "1") {
-                            (activityContext as BaseActivity).alertBoxWithAction(
+                            activityContext.alertBoxWithAction(
                                 null, null,
                                 activityContext.getString(R.string.batch_settle),
                                 activityContext.getString(R.string.do_you_want_to_settle_batch),
                                 true, activityContext.getString(R.string.positive_button_yes), {
                                     activityContext.startActivity(
                                         Intent(
-                                            (activityContext as BaseActivity),
+                                            activityContext,
                                             MainActivity::class.java
                                         ).apply {
                                             putExtra("appUpdateFromSale", true)
@@ -324,9 +324,9 @@ class SyncAuthTransToHost(activityContext: BaseActivity) {
                                                 Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                         })
                                 }, {
-                                    activityContext. startActivity(
+                                    activityContext.startActivity(
                                         Intent(
-                                            (activityContext as BaseActivity),
+                                            activityContext,
                                             MainActivity::class.java
                                         ).apply {
                                             flags =
@@ -335,21 +335,22 @@ class SyncAuthTransToHost(activityContext: BaseActivity) {
                                 })
                         } else {
                             activityContext.startActivity(
-                                Intent((activityContext as BaseActivity), MainActivity::class.java).apply {
-                                    flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                Intent(activityContext, MainActivity::class.java).apply {
+                                    flags =
+                                        Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                 })
                         }
                     }
                 else
                     GlobalScope.launch(Dispatchers.Main) {
-                        (activityContext as BaseActivity).hideProgress()
+                        activityContext.hideProgress()
                         //VFService.showToast(validationMsg)
-                        (activityContext as BaseActivity).alertBoxWithAction(null, null,
+                        activityContext.alertBoxWithAction(null, null,
                             activityContext.getString(R.string.offline_sale_uploading),
-                            activityContext.getString(R.string.fail)+validationMsg,
+                            activityContext.getString(R.string.fail) + validationMsg,
                             false, activityContext.getString(R.string.positive_button_ok), {
                                 activityContext.startActivity(
-                                    Intent((activityContext as BaseActivity), MainActivity::class.java).apply {
+                                    Intent(activityContext, MainActivity::class.java).apply {
                                         flags =
                                             Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                     })
@@ -363,19 +364,19 @@ class SyncAuthTransToHost(activityContext: BaseActivity) {
         } else {
             GlobalScope.launch(Dispatchers.Main) {
                 if (autoSettleCode == "1") {
-                    (activityContext as BaseActivity).alertBoxWithAction(null, null,
-                        activityContext. getString(R.string.batch_settle),
-                        activityContext.  getString(R.string.do_you_want_to_settle_batch),
-                        true,   activityContext. getString(R.string.positive_button_yes), {
-                            activityContext. startActivity(
-                                Intent((  activityContext), MainActivity::class.java).apply {
+                    activityContext.alertBoxWithAction(null, null,
+                        activityContext.getString(R.string.batch_settle),
+                        activityContext.getString(R.string.do_you_want_to_settle_batch),
+                        true, activityContext.getString(R.string.positive_button_yes), {
+                            activityContext.startActivity(
+                                Intent((activityContext), MainActivity::class.java).apply {
                                     putExtra("appUpdateFromSale", true)
                                     flags =
                                         Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                 })
                         }, {
-                            activityContext. startActivity(
-                                Intent((  activityContext), MainActivity::class.java).apply {
+                            activityContext.startActivity(
+                                Intent((activityContext), MainActivity::class.java).apply {
                                     flags =
                                         Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                 })
@@ -383,7 +384,7 @@ class SyncAuthTransToHost(activityContext: BaseActivity) {
                 } else {
                     GlobalScope.launch(Dispatchers.Main) {
                         activityContext.startActivity(
-                            Intent(( activityContext  as BaseActivity), MainActivity::class.java).apply {
+                            Intent(activityContext, MainActivity::class.java).apply {
                                 flags =
                                     Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
                             })

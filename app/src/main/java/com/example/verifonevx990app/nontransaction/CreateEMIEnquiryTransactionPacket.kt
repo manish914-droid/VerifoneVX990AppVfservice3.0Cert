@@ -1,12 +1,10 @@
 package com.example.verifonevx990app.nontransaction
 
-import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.realmtables.IssuerParameterTable
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
 import com.example.verifonevx990app.utils.HexStringConverter
 import com.example.verifonevx990app.vxUtils.*
-import java.text.SimpleDateFormat
 import java.util.*
 
 class CreateEMIEnquiryTransactionPacket(var data: HashMap<String, String>) : ITransactionPacketExchange {
@@ -48,7 +46,6 @@ class CreateEMIEnquiryTransactionPacket(var data: HashMap<String, String>) : ITr
 
 
             //adding field 61
-            val buildDate: String = SimpleDateFormat("yyMMdd", Locale.getDefault()).format(Date(BuildConfig.TIMESTAMP))
             val issuerParameterTable =
                 IssuerParameterTable.selectFromIssuerParameterTable(AppPreference.WALLET_ISSUER_ID)
             val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)

@@ -54,7 +54,7 @@ class VoidOfRefund : Fragment() {
         invoiceNumberET = view.findViewById(R.id.invoiceNumberET)
         voidRefundBT = view.findViewById(R.id.voidRefundBT)
         backImageButton = view.findViewById(R.id.back_image_button)
-        backImageButton?.setOnClickListener { fragmentManager?.popBackStackImmediate() }
+        backImageButton?.setOnClickListener { parentFragmentManager.popBackStackImmediate() }
 
         //OnClick of VoidOfflineSale Button to find the matching result of the entered Invoice Number:-
         voidRefundBT?.setOnClickListener {

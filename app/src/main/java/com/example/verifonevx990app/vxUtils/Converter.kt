@@ -364,7 +364,7 @@ fun wrapText(input: String, maxLength: Int): String {
                 if (x != pointer)
                     output.append(" ")
             }
-            output.appendln()
+            output.appendLine()
             pointer++
             helper()
         }

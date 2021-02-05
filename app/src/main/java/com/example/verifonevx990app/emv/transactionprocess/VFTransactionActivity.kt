@@ -113,9 +113,9 @@ class VFTransactionActivity : BaseActivity() {
     fun doProcessCard() {
         try {
             val printer = VFService.vfPrinter
-            logger("STATUS_P", printer.status.toString(), "e")
+            logger("STATUS_P", printer?.status.toString(), "e")
             // Checking printer status that the printing roll is present or not and handling that the merchant/user wants proceed the transaction without printing roll
-            if (printer.status != 0) {
+            if (printer?.status != 0) {
                 GlobalScope.launch(Dispatchers.Main) {
                     alertBoxWithAction(
                         null,
@@ -343,7 +343,7 @@ class VFTransactionActivity : BaseActivity() {
         binding?.manualEntryButton?.setOnClickListener {
             //have to check
             try {
-                vfIEMV.stopCheckCard()
+                vfIEMV?.stopCheckCard()
             } catch (ex: DeadObjectException) {
                 ex.printStackTrace()
             } catch (ex: RemoteException) {
@@ -650,7 +650,7 @@ class VFTransactionActivity : BaseActivity() {
     //Below method is used to handle Transaction Declined case:-
     fun declinedTransaction() {
         try {
-            vfIEMV.stopCheckCard()
+            vfIEMV?.stopCheckCard()
             finish()
             startActivity(Intent(this, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -1124,7 +1124,7 @@ class VFTransactionActivity : BaseActivity() {
                                     ConstIPinpad.startPinInput.param.Value_desType_3DES
                                 )
                                 try {
-                                    VFService.vfPinPad.startPinInput(
+                                    VFService.vfPinPad?.startPinInput(
                                         VFEmv.workKeyId, param, globleparam,
                                         VFService.pinInputListener
                                     )
@@ -1195,7 +1195,7 @@ class VFTransactionActivity : BaseActivity() {
 
                         }
                         else -> {
-                            VFService.vfIEMV.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed) // to import card detail data
+                            VFService.vfIEMV?.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed) // to import card detail data
                         }
                     }
 
@@ -1252,7 +1252,7 @@ class VFTransactionActivity : BaseActivity() {
                                         ConstIPinpad.startPinInput.param.Value_desType_3DES
                                     )
                                     try {
-                                        VFService.vfPinPad.startPinInput(
+                                        VFService.vfPinPad?.startPinInput(
                                             VFEmv.workKeyId, param, globleparam,
                                             VFService.pinInputListener
                                         )
@@ -1320,7 +1320,7 @@ class VFTransactionActivity : BaseActivity() {
                             val iDialog = this@VFTransactionActivity as IDialog
                             iDialog.getMsgDialog("EMI", msg, "Yes", "No", {
                                 globalCardProcessedModel.setTransType(TransactionType.SALE.type)
-                                VFService.vfIEMV.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed) // to import card detail data
+                                VFService.vfIEMV?.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed) // to import card detail data
                                 //  emvProcessNext(cardProcessedData)
                             }, {
                                 declinedTransaction()
@@ -1439,7 +1439,7 @@ class VFTransactionActivity : BaseActivity() {
             @Throws(RemoteException::class)
             override fun onConfirm(data: ByteArray, isNonePin: Boolean) {
                 Log.d("Data", "PinPad onConfirm")
-                VFService.vfIEMV.importPin(1, data)
+                VFService.vfIEMV?.importPin(1, data)
                 Log.d(
                     MainActivity.TAG,
                     "PinPad hex encrypted data ---> " + Utility.byte2HexStr(data)
@@ -1487,7 +1487,7 @@ class VFTransactionActivity : BaseActivity() {
             @Throws(RemoteException::class)
             override fun onConfirm(data: ByteArray, isNonePin: Boolean) {
                 Log.d("Data", "PinPad onConfirm")
-                VFService.vfIEMV.importPin(1, data)
+                VFService.vfIEMV?.importPin(1, data)
                 Log.d(
                     MainActivity.TAG,
                     "PinPad hex encrypted data ---> " + Utility.byte2HexStr(data)

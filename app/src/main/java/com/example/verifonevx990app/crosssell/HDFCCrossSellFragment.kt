@@ -59,7 +59,7 @@ class HDFCCrossSellFragment : Fragment(R.layout.cross_sell_view) {
         //endregion
 
         //region Attaching Click Events START==========
-        backImageButton?.setOnClickListener { fragmentManager?.popBackStackImmediate() }
+        backImageButton?.setOnClickListener { parentFragmentManager.popBackStackImmediate() }
         hdfcCreditCard?.setOnClickListener {
             inflateCrossSellProcessFragment(
                 CrossSellOptions.HDFC_CREDIT_CARD.heading,

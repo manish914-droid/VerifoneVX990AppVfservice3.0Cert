@@ -23,10 +23,10 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
-import androidx.multidex.BuildConfig
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.appupdate.*
 import com.example.verifonevx990app.crosssell.HDFCCrossSellFragment
@@ -73,7 +73,10 @@ class MainActivity : BaseActivity(), IFragmentRequest,
     private var offlineTransactionAmountLimit: Double? = 0.0
     private val alertDialog by lazy { AlertDialog.Builder(this).create() }
     private val subCatogoryDashBoardAdapter by lazy {
-        SubCatagoryDashboardAdapter(this, alertDialog)
+        SubCatagoryDashboardAdapter(
+            this,
+            alertDialog
+        )
     }
 
     companion object {
@@ -336,13 +339,24 @@ class MainActivity : BaseActivity(), IFragmentRequest,
         ).forEach { _ -> }
 
         //Displaying the Version Name of App:-
-        findViewById<BHTextView>(R.id.version_name).text = "App Version: v${BuildConfig.VERSION_NAME}"
+        binding?.mainDrawerView?.versionName?.text = "App Version: v${BuildConfig.VERSION_NAME}"
 
         bottomNavigationView.setOnNavigationItemSelectedListener(this)
         setDrawerClick()
         UserProvider.refresh()
         refreshSide()
     }
+
+    //region=================Show help Desk Number in Navigation Footer after Init:-
+    fun showHelpDeskNumber() {
+        val hdfcTpt = runBlocking(Dispatchers.IO) { getHDFCTptData() }
+        if (hdfcTpt != null) {
+            val helplineNumber = "HelpLine: ${hdfcTpt.helpDeskNumber.replace("F", "")}"
+            binding?.mainDrawerView?.helpDeskTV?.text = helplineNumber
+            binding?.mainDrawerView?.helpDeskTV?.visibility = View.VISIBLE
+        }
+    }
+    //endregion
 
     //Below method is used to update App Through FTP:-
     private fun startFTPAppUpdate(

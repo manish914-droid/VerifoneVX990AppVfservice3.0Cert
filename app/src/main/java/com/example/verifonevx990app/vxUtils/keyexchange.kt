@@ -2,7 +2,6 @@ package com.example.verifonevx990app.vxUtils
 
 import android.content.Context
 import android.util.Log
-import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.main.PrefConstant
@@ -11,7 +10,6 @@ import com.example.verifonevx990app.realmtables.TerminalParameterTable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.util.*
 
 interface IKeyExchangeInit {
@@ -82,13 +80,12 @@ class KeyExchanger(
 
             //val deviceModel = VerifoneApp.getDeviceModel()
             //Getting Device Modal from VF Service AIDL:-
-            val deviceModel = addPad(AppPreference.getString("deviceModel") , "*" , 6 , false)
-
-            val buildDate: String = SimpleDateFormat("yyMMdd", Locale.getDefault()).format(Date(BuildConfig.TIMESTAMP))
-            val version = addPad("${ BuildConfig.VERSION_NAME}.$buildDate" , "0" , 15 , false)
+            val deviceModel = addPad(AppPreference.getString("deviceModel"), "*", 6, false)
+            val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)
             val connectionType = ConnectionType.GPRS.code
-            val pccNo = addPad(/*AppPreference.getString(AppPreference.PC_NUMBER_KEY, VerifoneApp.appContext) ?:*/ "0", "0", 9)
-            return "$connectionType$deviceModel$appName$version$pccNo$pccNo"
+            val pccNo = addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY), "0", 9)
+            val pcNo2 = addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY_2), "0", 9)
+            return "$connectionType$deviceModel$appName$version$pccNo$pcNo2"
         }
 
     }
@@ -342,7 +339,7 @@ class KeyExchanger(
         addField(11, ROCProviderV2.getRoc(AppPreference.AMEX_BANK_CODE).toString())
 
         //adding nii
-        addField(24, Nii.DEFAULT.nii)
+        addField(24, getNII())
 
         //adding tid
         addFieldByHex(41, tid)
@@ -352,9 +349,7 @@ class KeyExchanger(
 
         //region=========adding field 61=============
         //adding Field 61
-        val buildDate: String =
-            SimpleDateFormat("yyMMdd", Locale.getDefault()).format(Date(BuildConfig.TIMESTAMP))
-        val version = addPad("${BuildConfig.VERSION_NAME}.$buildDate", "0", 15, false)
+        val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)
         val pcNumber = addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY), "0", 9)
         val data = ConnectionType.GPRS.code + addPad(
             AppPreference.getString("deviceModel"), " ", 6, false

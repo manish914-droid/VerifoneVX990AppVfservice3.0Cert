@@ -1,7 +1,6 @@
 package com.example.verifonevx990app.transactions
 
 import android.util.Log
-import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.realmtables.BatchFileDataTable
 import com.example.verifonevx990app.realmtables.IssuerParameterTable
@@ -566,9 +565,7 @@ fun getField61(ipt: IssuerParameterTable): String {
 
     val deviceModel = VerifoneApp.getDeviceModel()
 
-    val buildDate: String =
-        SimpleDateFormat("yyMMdd", Locale.getDefault()).format(Date(BuildConfig.TIMESTAMP))
-    val version = "${BuildConfig.VERSION_NAME}.$buildDate"
+    val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)
     val connectionType = ConnectionType.GPRS.code
     val pccNo = addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY), "0", 9)
     val pcNo2 = addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY_2), "0", 9)
@@ -586,9 +583,7 @@ fun getField61(ipt: IssuerParameterTable, bankcode: String): String {
 
     val deviceModel = VerifoneApp.getDeviceModel()
 
-    val buildDate: String =
-        SimpleDateFormat("yyMMdd", Locale.getDefault()).format(Date(BuildConfig.TIMESTAMP))
-    val version = "${BuildConfig.VERSION_NAME}.$buildDate"
+    val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)
     val connectionType = ConnectionType.GPRS.code
     val pccNo = addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY), "0", 9)
     val pcNo2 = addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY_2), "0", 9)
@@ -610,11 +605,7 @@ fun addField61ToBatch(ipt: IssuerParameterTable, bfdt: BatchFileDataTable) {
             mn.length < 6 -> addPad(mn, " ", 6, false)  // right padding of 6 byte for device model
             else -> mn
         }
-        val bt = SimpleDateFormat(
-            "yyMMdd",
-            Locale.getDefault()
-        ).format(Date(BuildConfig.TIMESTAMP))  //buildDate
-        appVersion = "${BuildConfig.VERSION_NAME}.$bt"  //version
+        appVersion = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)  //version
         connectionType = ConnectionType.GPRS.code  //connectionType
         AppPreference.getString(AppPreference.PC_NUMBER_KEY)//pccNo
     }
@@ -622,9 +613,7 @@ fun addField61ToBatch(ipt: IssuerParameterTable, bfdt: BatchFileDataTable) {
 
 fun BatchFileDataTable.getField61(): String {
     val deviceModel = VerifoneApp.getDeviceModel()
-    val buildDate: String =
-        SimpleDateFormat("yyMMdd", Locale.getDefault()).format(Date(BuildConfig.TIMESTAMP))
-    val version = "${BuildConfig.VERSION_NAME}.$buildDate"
+    val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)
 
     val apName = addPad(appName, " ", 10, false)
 
@@ -874,14 +863,9 @@ fun doEmiEnquiry(
 
 
                         //adding field 61
-                        val buildDate: String = SimpleDateFormat(
-                            "yyMMdd",
-                            Locale.getDefault()
-                        ).format(Date(BuildConfig.TIMESTAMP))
                         val issuerParameterTable =
                             IssuerParameterTable.selectFromIssuerParameterTable(AppPreference.WALLET_ISSUER_ID)
-                        val version =
-                            addPad("${BuildConfig.VERSION_NAME}.$buildDate", "0", 15, false)
+                        val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)
                         val pcNumber =
                             addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY), "0", 9)
                         val data = ConnectionType.GPRS.code + addPad(

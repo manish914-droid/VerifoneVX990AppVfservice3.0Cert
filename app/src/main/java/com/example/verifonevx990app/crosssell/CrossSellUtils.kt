@@ -1,15 +1,12 @@
 package com.example.verifonevx990app.crosssell
 
 import android.util.Log
-import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
 import com.example.verifonevx990app.vxUtils.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.*
 
 class SyncCrossSellToHost(
     var field57Data: String,
@@ -87,10 +84,7 @@ class CreateCrossSellPackets(var field57Data: String) : ICrossSellPacketExchange
             addFieldByHex(57, field57Data)
 
             //adding Field 61
-            val buildDate: String =
-                SimpleDateFormat("yyMMdd", Locale.getDefault()).format(Date(BuildConfig.TIMESTAMP))
-            val version =
-                addPad("${BuildConfig.VERSION_NAME}.${BuildConfig.REVISION_ID}", "0", 15, false)
+            val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)
             val pcNumber = addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY), "0", 9)
             val pcNumber2 = addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY_2), "0", 9)
             val data = ConnectionType.GPRS.code + addPad(

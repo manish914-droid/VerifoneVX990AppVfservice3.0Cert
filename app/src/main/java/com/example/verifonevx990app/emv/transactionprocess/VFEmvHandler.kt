@@ -109,7 +109,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
         var count = 0
         try {
             for (tag in tagList) {
-                tlv = iemv.getCardData(Integer.toHexString(tag).toUpperCase(Locale.ROOT))
+                tlv = iemv?.getCardData(Integer.toHexString(tag).toUpperCase(Locale.ROOT))
                 if (null != tlv && tlv.isNotEmpty()) {
                     Log.d(""+Integer.toHexString(tag), Utility.byte2HexStr(tlv))
                     val length = Integer.toHexString(tlv.size)
@@ -144,7 +144,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                      Log.i(TAG, "AID Name=$aidName | AID Label=$aidLabel | AID=$aid")
                  }*/
                 inflateAppsDialog(appList){ multiAppPosition ->
-                    iemv.importAppSelection(multiAppPosition)
+                    iemv?.importAppSelection(multiAppPosition)
                 }
             }
         }
@@ -186,7 +186,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
     override fun onConfirmCertInfo(certType: String?, certInfo: String?) {
         //VFService.showToast("onConfirmCertInfo, type:$certType,info:$certInfo")
         try {
-            iemv.importCertConfirmResult(ConstIPBOC.importCertConfirmResult.option.CONFIRM)
+            iemv?.importCertConfirmResult(ConstIPBOC.importCertConfirmResult.option.CONFIRM)
             logger("onConfirmCertInfo","certInfo--->"+certInfo.toString()+"certType---> "+certType.toString(),"e")
             }
         catch (ex: DeadObjectException){
@@ -241,7 +241,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                       CARD_TYPE:${info?.getInt(ConstPBOCHandler.onConfirmCardInfo.info.KEY_CARD_TYPE_String)}
                     """.trimIndent()
 
-        val tlv = iemv.getCardData("5F20")   // CardHolder Name TAG
+        val tlv = iemv?.getCardData("5F20")   // CardHolder Name TAG
         if(null != tlv && !(tlv.isEmpty())){
             var cardholderName = Utility.byte2HexStr(tlv)
             cardProcessedDataModal.setCardHolderName(hexString2String(cardholderName))
@@ -304,7 +304,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                     }
                     val byteArray = track21.toByteArray(StandardCharsets.ISO_8859_1)
                     val encryptedTrack2ByteArray: ByteArray? =
-                        VFService.vfPinPad.encryptTrackData(0, 2, byteArray)
+                        VFService.vfPinPad?.encryptTrackData(0, 2, byteArray)
                     /*println(
                         "Track 2 with encyption is --->" + Utility.byte2HexStr(
                             encryptedTrack2ByteArray
@@ -323,15 +323,15 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                             if (cardProcessedDataModal.getTransType() == TransactionType.EMI_SALE.type) {
                                  //  iemv?.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed)
                             } else if (cardProcessedDataModal.getTransType() == TransactionType.SALE.type) {
-                                iemv.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed)
+                                iemv?.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed)
                             }
                         }
                     } else if (cardProcessedDataModal.getTransType() == TransactionType.EMI_SALE.type) {
                         (activity as VFTransactionActivity).checkEmiBankEmi(cardProcessedDataModal) {
-                            iemv.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed)
+                            iemv?.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed)
                         }
                     } else {
-                        iemv.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed)
+                        iemv?.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed)
                     }
                 }
             }
@@ -811,7 +811,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                 this.findViewById<BHButton>(R.id.cancel_btnn)?.setOnClickListener {
                     logger("cancel_Btn", "$appSelectedPosition  ", "e")
                     dismiss()
-                    iemv.stopCheckCard()
+                    iemv?.stopCheckCard()
                     multiAppCB(0)
                     val intent = Intent(activity, MainActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK

@@ -1,6 +1,5 @@
 package com.example.verifonevx990app.offlinemanualsale
 
-import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.main.PosEntryModeType
 import com.example.verifonevx990app.realmtables.BatchFileDataTable
@@ -8,8 +7,6 @@ import com.example.verifonevx990app.realmtables.IssuerParameterTable
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
 import com.example.verifonevx990app.utils.HexStringConverter
 import com.example.verifonevx990app.vxUtils.*
-import java.text.SimpleDateFormat
-import java.util.*
 
 class CreateOfflineSalePacket(private var offlineBatchTableData: BatchFileDataTable) :
     IOfflineSalePacketExchange {
@@ -60,8 +57,6 @@ class CreateOfflineSalePacket(private var offlineBatchTableData: BatchFileDataTa
             addFieldByHex(60, addPad(terminalData.batchNumber, "0", 6, true))
 
             //adding Field 61
-            val buildDate: String =
-                SimpleDateFormat("yyMMdd", Locale.getDefault()).format(Date(BuildConfig.TIMESTAMP))
             val issuerParameterTable =
                 IssuerParameterTable.selectFromIssuerParameterTable(AppPreference.WALLET_ISSUER_ID)
             val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)

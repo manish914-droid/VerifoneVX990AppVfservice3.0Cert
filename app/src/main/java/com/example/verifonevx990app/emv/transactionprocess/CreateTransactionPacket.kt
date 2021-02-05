@@ -1,7 +1,6 @@
 package com.example.verifonevx990app.emv.transactionprocess
 
 import android.text.TextUtils
-import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.main.DetectCardType
 import com.example.verifonevx990app.realmtables.CardDataTable
@@ -125,8 +124,6 @@ class CreateTransactionPacket(private var cardProcessedData: CardProcessedDataMo
             }
 
             //adding field 61
-            val buildDate: String =
-                SimpleDateFormat("yyMMdd", Locale.getDefault()).format(Date(BuildConfig.TIMESTAMP))
             val issuerParameterTable =
                 IssuerParameterTable.selectFromIssuerParameterTable(AppPreference.WALLET_ISSUER_ID)
             val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)

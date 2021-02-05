@@ -1,12 +1,10 @@
 package com.example.verifonevx990app.voidrefund
 
-import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.realmtables.BatchFileDataTable
 import com.example.verifonevx990app.realmtables.IssuerParameterTable
 import com.example.verifonevx990app.utils.HexStringConverter
 import com.example.verifonevx990app.vxUtils.*
-import java.text.SimpleDateFormat
 import java.util.*
 
 class CreateVoidRefundPacket(private var batch: BatchFileDataTable) :
@@ -56,8 +54,6 @@ class CreateVoidRefundPacket(private var batch: BatchFileDataTable) :
         addFieldByHex(60, batch.batchNumber)
 
         //adding Field 61
-        val buildDate: String =
-            SimpleDateFormat("yyMMdd", Locale.getDefault()).format(Date(BuildConfig.TIMESTAMP))
         val issuerParameterTable =
             IssuerParameterTable.selectFromIssuerParameterTable(AppPreference.WALLET_ISSUER_ID)
         val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)

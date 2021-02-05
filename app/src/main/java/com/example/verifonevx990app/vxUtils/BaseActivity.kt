@@ -6,6 +6,7 @@ import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.text.TextUtils
 import android.view.Gravity
 import android.view.View
@@ -160,7 +161,7 @@ abstract class BaseActivity : AppCompatActivity(), IDialog {
         val alert: androidx.appcompat.app.AlertDialog = builder.create()
         //Below Handler will execute to auto cancel Alert Dialog Pop-Up when positiveButtonText isEmpty:-
         if (TextUtils.isEmpty(positiveButtonText)) {
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 alert.dismiss()
                 alert.cancel()
                 startActivity(Intent(this, MainActivity::class.java).apply {

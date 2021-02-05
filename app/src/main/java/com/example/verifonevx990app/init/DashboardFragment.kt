@@ -26,14 +26,10 @@ import com.example.verifonevx990app.appupdate.SyncAppUpdateConfirmation
 import com.example.verifonevx990app.databinding.FragmentDashboardBinding
 import com.example.verifonevx990app.main.IFragmentRequest
 import com.example.verifonevx990app.main.MainActivity
-import com.example.verifonevx990app.realmtables.BHDashboardItem
-import com.example.verifonevx990app.realmtables.EDashboardItem
-import com.example.verifonevx990app.realmtables.TerminalParameterTable
+import com.example.verifonevx990app.realmtables.*
 import com.example.verifonevx990app.vxUtils.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import java.lang.Runnable
 import java.util.*
 
 
@@ -116,6 +112,14 @@ class DashboardFragment : Fragment() {
             }
             setUpDashBoardItems()
         }
+
+        runBlocking(Dispatchers.IO) {
+            val hdfcTptData = HdfcTpt.selectAllHDFCTPTData()
+            val hdfcCdt = HdfcCdt.selectAllHDFCCDTData()
+            Log.d("HDFCTPT Data:- ", hdfcTptData.toString())
+            Log.d("HDFCCDT Data:- ", hdfcCdt.toString())
+        }
+        (activity as MainActivity).showHelpDeskNumber()
     }
 
     private fun scheduleTimer() {
@@ -183,7 +187,7 @@ class DashboardFragment : Fragment() {
         Log.d("Update Value:- ", isUpdate.toString())
 
         //Below method is only called once after App is Updated to newer version:-
-        sendConfirmationToHost()
+        //sendConfirmationToHost()
 
         if (toRefresh || itemList.isEmpty()) {
             itemList.clear()

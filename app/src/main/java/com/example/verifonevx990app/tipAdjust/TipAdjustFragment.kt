@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.databinding.FragmentTipAdjustBinding
 import com.example.verifonevx990app.emv.transactionprocess.SyncReversalToHost
@@ -540,11 +539,6 @@ fun createTipAdjustISO(tipAmt: Float, batch: BatchFileDataTable): IsoDataWriter 
         addFieldByHex(60, batchNm)
 
         //adding field 61
-        val buildDate: String = SimpleDateFormat("yyMMdd", Locale.getDefault()).format(
-            Date(
-                BuildConfig.TIMESTAMP
-            )
-        )
         val issuerParameterTable =
             IssuerParameterTable.selectFromIssuerParameterTable(AppPreference.WALLET_ISSUER_ID)
         val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)

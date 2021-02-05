@@ -21,7 +21,7 @@ import com.example.verifonevx990app.R;
 
 public class CustomToast {
     private static final String TAG = "Bonushub";
-    private Context context;
+    private final Context context;
     private int backColor;
     private int textColor;
 
@@ -71,7 +71,6 @@ public class CustomToast {
     }
 
     public void showSuccessToast(String text) {
-
         if (context != null) {
             LayoutInflater inflater = ((Activity) context).getLayoutInflater();
             View toastRoot = inflater.inflate(R.layout.custom_toast, null);
@@ -91,7 +90,6 @@ public class CustomToast {
             toast.setDuration(Toast.LENGTH_SHORT);
             toast.show();
         }
-
     }
 
 

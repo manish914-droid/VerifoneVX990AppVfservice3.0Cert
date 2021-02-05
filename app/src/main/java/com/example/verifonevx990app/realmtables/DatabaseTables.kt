@@ -194,6 +194,17 @@ open class BatchFileDataTable() : RealmObject(), Parcelable {
     var isVoidPreAuth = false
     var isPreAuthComplete = false
 
+    //Host Response Fields:-
+    var hostAutoSettleFlag: String = ""
+    var hostBankID: String = ""
+    var hostIssuerID: String = ""
+    var hostMID: String = ""
+    var hostTID: String = ""
+    var hostBatchNumber: String = ""
+    var hostRoc: String = ""
+    var hostInvoice: String = ""
+    var hostCardType: String = ""
+
     private constructor(parcel: Parcel) : this() {
         authCode = parcel.readString().toString()
         isChecked = parcel.readByte() != 0.toByte()
@@ -294,8 +305,6 @@ open class BatchFileDataTable() : RealmObject(), Parcelable {
         processingFee = parcel.readString().toString()
         cashBackPercent=parcel.readString().toString()
         isCashBackInPercent = parcel.readByte() != 0.toByte()
-
-
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -4020,6 +4029,7 @@ open class HdfcTpt() : RealmObject(), Parcelable {
     var isActive = ""
 
     @field:BHFieldParseIndex(4)
+    @PrimaryKey
     var recordId = ""
 
     @field:BHFieldParseIndex(5)
@@ -4133,12 +4143,19 @@ open class HdfcTpt() : RealmObject(), Parcelable {
             override fun newArray(size: Int): Array<HdfcTpt> = Array(size) { HdfcTpt() }
         }
 
-        fun insertOrUpdate(param: HdfcTpt) =
+        fun performOperation(param: HdfcTpt, callback: () -> Unit) =
             withRealm {
-                it.executeTransaction { i -> i.insertOrUpdate(param) }
+                when (param.actionId) {
+                    "1", "2" -> it.executeTransaction { i -> i.insertOrUpdate(param) }
+                    "3" -> it.executeTransaction { i ->
+                        i.where(HdfcTpt::class.java)
+                            .equalTo("recordId", param.recordId).findAll()
+                    }
+                }
+                callback()
             }
 
-        fun selectAllHDFCtpt(): List<HdfcTpt> = runBlocking {
+        fun selectAllHDFCTPTData(): List<HdfcTpt> = runBlocking {
             var result = listOf<HdfcTpt>()
             getRealm {
                 result = it.copyFromRealm(
@@ -4190,6 +4207,7 @@ open class HdfcCdt() : RealmObject(), Parcelable {
     var isActive = ""
 
     @field:BHFieldParseIndex(4)
+    @PrimaryKey
     var recordId = ""
 
     @field:BHFieldParseIndex(5)
@@ -4331,12 +4349,19 @@ open class HdfcCdt() : RealmObject(), Parcelable {
 
         }
 
-        fun insertOrUpdate(param: HdfcCdt) =
+        fun performOperation(param: HdfcCdt, callback: () -> Unit) =
             withRealm {
-                it.executeTransaction { i -> i.insertOrUpdate(param) }
+                when (param.actionId) {
+                    "1", "2" -> it.executeTransaction { i -> i.insertOrUpdate(param) }
+                    "3" -> it.executeTransaction { i ->
+                        i.where(HdfcCdt::class.java)
+                            .equalTo("recordId", param.recordId).findAll()
+                    }
+                }
+                callback()
             }
 
-        fun select(): List<HdfcCdt> = runBlocking {
+        fun selectAllHDFCCDTData(): List<HdfcCdt> = runBlocking {
             var result = listOf<HdfcCdt>()
             getRealm {
                 result = it.copyFromRealm(

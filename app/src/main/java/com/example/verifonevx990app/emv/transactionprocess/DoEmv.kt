@@ -5,7 +5,10 @@ import android.app.AlertDialog
 import android.os.*
 import android.util.Log
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
-import com.example.verifonevx990app.vxUtils.*
+import com.example.verifonevx990app.vxUtils.ProcessingCode
+import com.example.verifonevx990app.vxUtils.VFService
+import com.example.verifonevx990app.vxUtils.VerifoneApp
+import com.example.verifonevx990app.vxUtils.forceStart
 import com.vfi.smartpos.deviceservice.aidl.IEMV
 import com.vfi.smartpos.deviceservice.constdefine.ConstIPBOC
 import kotlinx.coroutines.GlobalScope
@@ -85,7 +88,7 @@ class DoEmv(var activity: Activity, var handler: Handler, var cardProcessedDataM
             val OTHERAMOUNT = "otherAmount"
             emvIntent.putString(TRASNSCURRENTCODE, "0356")
             emvIntent.putString(OTHERAMOUNT, "0")
-            iemv.startEMV(ConstIPBOC.startEMV.processType.full_process, emvIntent, emvHandler())
+            iemv?.startEMV(ConstIPBOC.startEMV.processType.full_process, emvIntent, emvHandler())
         } catch (ex: DeadObjectException){
             ex.printStackTrace()
             println("DoEmv card error1"+ex.message)
@@ -138,10 +141,10 @@ class DoEmv(var activity: Activity, var handler: Handler, var cardProcessedDataM
     }
 
     //Below Method is a Handler for EMV CardType:-
-    private fun emvHandler(): VFEmvHandler? {
+    private fun emvHandler(): VFEmvHandler {
         println("DoEmv VfemvHandler is calling")
-        println("iemv value is"+iemv.toString())
-        return VFEmvHandler(activity,handler,iemv, cardProcessedDataModal) { cardProcessedData ->
+        println("iemv value is" + iemv.toString())
+        return VFEmvHandler(activity, handler, iemv, cardProcessedDataModal) { cardProcessedData ->
             transactionCallback(cardProcessedData)
             Log.d("Track2Data:- ", cardProcessedData.getTrack2Data() ?: "")
             Log.d("PanNumber:- ", cardProcessedData.getPanNumberData() ?: "")

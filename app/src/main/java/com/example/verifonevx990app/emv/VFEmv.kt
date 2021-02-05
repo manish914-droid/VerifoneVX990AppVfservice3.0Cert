@@ -312,7 +312,7 @@ object VFEmv : ISO8583(), OnXmlDataParsed {
                 val tagList = intArrayOf(0x9F26, 0x9F27, 0x9F10, 0x9F37, 0x9F36, 0x95, 0x9A, 0x9C, 0x9F02, 0x5F2A, 0x5F34, 0x82, 0x9F1A, 0x9F03, 0x9F33, 0x9F74, 0x9F24)
                 var count = 0
                 for (tag in tagList) {
-                    tlv = iemv!!.getCardData(Integer.toHexString(tag).toUpperCase())
+                    tlv = iemv?.getCardData(Integer.toHexString(tag).toUpperCase(Locale.ROOT))
                     if (null != tlv && tlv.size > 0) {
                         Log.d(MainActivity.TAG, Utility.byte2HexStr(tlv))
                         val length = Integer.toHexString(tlv.size)
@@ -376,7 +376,7 @@ object VFEmv : ISO8583(), OnXmlDataParsed {
             @Throws(RemoteException::class)
             override fun onConfirm(data: ByteArray, isNonePin: Boolean) {
                 Log.d(MainActivity.TAG, "PinPad onConfirm")
-                iemv!!.importPin(1, data)
+                iemv?.importPin(1, data)
                 savedPinblock = data
             }
 
@@ -770,7 +770,7 @@ object VFEmv : ISO8583(), OnXmlDataParsed {
 
                                 //println("91 value is ---> " + "9108" + Utility.byte2HexStr(ba))
 
-                                iemv!!.inputOnlineResult(
+                                iemv?.inputOnlineResult(
                                     onlineResult,
                                     object : OnlineResultHandler.Stub() {
                                         @Throws(RemoteException::class)
@@ -1478,10 +1478,8 @@ object VFEmv : ISO8583(), OnXmlDataParsed {
                 10,
                 context!!.getString(R.string.app_name)
             )///Build.//"BonusHub  "
-            val buildDate: String =
-                SimpleDateFormat("yyMMdd", Locale.getDefault()).format(Date(BuildConfig.TIMESTAMP))
-            val version = addPad("${BuildConfig.VERSION_NAME}.$buildDate", "0", 15, false)
-            isoPackageWriter.appVersion = "$version.$buildDate"//"01.01.10"
+            isoPackageWriter.appVersion =
+                addPad(getAppVersionNameAndRevisionID(), "0", 15, false)//"01.01.10"
             if (TextUtils.isEmpty(AppPreference.getString(AppPreference.PC_NUMBER_KEY)))
                 isoPackageWriter.pcNumber = HexStringConverter.addPreFixer("0", 9)
             else
@@ -1513,7 +1511,7 @@ object VFEmv : ISO8583(), OnXmlDataParsed {
                             10,
                             false
                         ) +
-                        version +
+                        addPad(getAppVersionNameAndRevisionID(), "0", 15, false) +
                         addPad("0", "0", 9)
             )//"3VX675 BonusHub  01.01.01.161001000000000")//isoPackageWriter.terminalSerialNumber+isoPackageWriter.bankCode+isoPackageWriter.customerId+isoPackageWriter.walletIssuerId+isoPackageWriter.connectionType+isoPackageWriter.modelName+isoPackageWriter.appName+isoPackageWriter.appVersion+isoPackageWriter.pcNumber
             isoPackageWriter.setFieldValues("63", "1")

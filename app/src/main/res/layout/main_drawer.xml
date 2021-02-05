@@ -217,17 +217,26 @@
                 android:background="@drawable/top_shadow" />
 
         <com.example.verifonevx990app.vxUtils.BHTextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="@dimen/pad_16"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:gravity="center"
+            android:padding="@dimen/pad_4"
             android:textSize="@dimen/text_size_regular"
-            android:contentDescription="@string/app_name"
-                android:id="@+id/version_name"
-                android:textColor="@color/colorPrimary"
-                app:fname="bold"
-                android:hint="@string/versionHint"
-            />
+            android:id="@+id/version_name"
+            android:textColor="@color/colorPrimary"
+            app:fname="bold"
+            android:hint="@string/versionHint" />
+
+        <com.example.verifonevx990app.vxUtils.BHTextView
+            android:id="@+id/helpDeskTV"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/pad_16"
+            android:gravity="center"
+            android:hint="@string/versionHint"
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/text_size_regular"
+            app:fname="bold" />
 
 
     </LinearLayout>

@@ -198,7 +198,7 @@ class InitiateCrossSellProcessFragment : Fragment(R.layout.fragment_initiate_cro
                     field57Data =
                         "${CROSS_SELL_REQUEST_TYPE + 1}~~${binding?.mobileNoET?.text?.trim()}~${transactionReferenceNumber}~${otpET.text?.trim()}~"
                     (activity as MainActivity).showProgress()
-                    SyncCrossSellToHost(field57Data ?: "") { crossSellCB, responseMsg, reportData ->
+                    SyncCrossSellToHost(field57Data ?: "") { crossSellCB, responseMsg, _ ->
                         GlobalScope.launch(Dispatchers.Main) {
                             (activity as MainActivity).hideProgress()
                             if (crossSellCB) {
@@ -206,7 +206,8 @@ class InitiateCrossSellProcessFragment : Fragment(R.layout.fragment_initiate_cro
                                 mCountDown?.cancel()
                                 mCountDown = null
                                 dialog.dismiss()
-                                (activity as MainActivity).alertBoxWithAction(null,
+                                (activity as MainActivity).alertBoxWithAction(
+                                    null,
                                     null,
                                     getString(R.string.success_message),
                                     getString(R.string.success_transaction),
@@ -251,7 +252,7 @@ class InitiateCrossSellProcessFragment : Fragment(R.layout.fragment_initiate_cro
                     field57Data =
                         "${CROSS_SELL_REQUEST_TYPE + 1}~${binding?.lastFourCardDigitET?.text?.trim()}~${binding?.mobileNoET?.text?.trim()}~${transactionReferenceNumber}~${otpET.text?.trim()}~"
                     (activity as MainActivity).showProgress()
-                    SyncCrossSellToHost(field57Data ?: "") { crossSellCB, responseMsg, reportData ->
+                    SyncCrossSellToHost(field57Data ?: "") { crossSellCB, responseMsg, _ ->
                         GlobalScope.launch(Dispatchers.Main) {
                             (activity as MainActivity).hideProgress()
                             if (crossSellCB) {
@@ -259,7 +260,8 @@ class InitiateCrossSellProcessFragment : Fragment(R.layout.fragment_initiate_cro
                                 mCountDown?.cancel()
                                 mCountDown = null
                                 dialog.dismiss()
-                                (activity as MainActivity).alertBoxWithAction(null,
+                                (activity as MainActivity).alertBoxWithAction(
+                                    null,
                                     null,
                                     getString(R.string.success_message),
                                     getString(R.string.success_transaction),
@@ -349,12 +351,13 @@ class InitiateCrossSellProcessFragment : Fragment(R.layout.fragment_initiate_cro
             if (selectedOption == 1) {
                 field57Data = "${CROSS_SELL_REQUEST_TYPE}~${whichMonth}"
                 (activity as MainActivity).showProgress()
-                SyncCrossSellToHost(field57Data ?: "") { mailReportCB, responseMsg, reportData ->
+                SyncCrossSellToHost(field57Data ?: "") { mailReportCB, responseMsg, _ ->
                     GlobalScope.launch(Dispatchers.Main) {
                         (activity as MainActivity).hideProgress()
                         if (mailReportCB) {
                             dialog.dismiss()
-                            (activity as MainActivity).alertBoxWithAction(null,
+                            (activity as MainActivity).alertBoxWithAction(
+                                null,
                                 null,
                                 getString(R.string.success_message),
                                 getString(R.string.success_transaction),
@@ -406,7 +409,7 @@ class InitiateCrossSellProcessFragment : Fragment(R.layout.fragment_initiate_cro
     private fun downloadReportOnPos(whichMonth: String, dialog: Dialog) {
         field57Data = "${CROSS_SELL_REQUEST_TYPE}~${whichMonth}~${dataCounter}"
         (activity as MainActivity).showProgress()
-        SyncCrossSellToHost(field57Data ?: "") { mailReportCB, responseMsg, reportData ->
+        SyncCrossSellToHost(field57Data ?: "") { _, responseMsg, _ ->
             GlobalScope.launch(Dispatchers.Main) {
                 (activity as MainActivity).hideProgress()
                 val reportData =

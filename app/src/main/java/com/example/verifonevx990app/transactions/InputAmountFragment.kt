@@ -65,7 +65,7 @@ class InputAmountFragment : Fragment() {
         back_image_button = view.findViewById(R.id.back_image_button)
         sub_header_text = view.findViewById(R.id.sub_header_text)
         back_image_button?.setOnClickListener {
-            fragmentManager?.popBackStackImmediate()
+            parentFragmentManager.popBackStackImmediate()
         }
         sub_header_text?.text = title
         context?.let { inputAmountEditText?.let { it1 -> toggleSoftKeyboard(it1, it) } }

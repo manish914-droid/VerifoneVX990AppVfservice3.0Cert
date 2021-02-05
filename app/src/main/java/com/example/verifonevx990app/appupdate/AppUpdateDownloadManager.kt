@@ -20,14 +20,6 @@ class AppUpdateDownloadManager(private var onDownloadCompleteListener: OnDownloa
         var output: OutputStream? = null
         val PATH = Environment.getExternalStorageDirectory().path + "/Download/"
         val connection: HttpURLConnection
-        val disposer: () -> Unit = {
-            try {
-                output?.close()
-                input?.close()
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-            }
-        }
         try {
             val url = URL(url)
             connection = url.openConnection() as HttpURLConnection

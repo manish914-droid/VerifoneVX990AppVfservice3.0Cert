@@ -44,14 +44,14 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
 
         try {
             //Below checkCard process is happening with the help of IEMV AIDL Interface:-
-            iemv.checkCard(getCardOptionBundle(), 30, object : CheckCardListener.Stub() {
+            iemv?.checkCard(getCardOptionBundle(), 30, object : CheckCardListener.Stub() {
                 override fun onCardSwiped(track: Bundle) {
                     try {
-                        iemv.stopCheckCard()
+                        iemv?.stopCheckCard()
                         println("Mag is calling")
                         if (fallbackType != EFallbackCode.Swipe_fallback.fallBackCode) {
                             Log.d(MainActivity.TAG, "onCardSwiped ...")
-                            VFService.vfBeeper.startBeep(200)
+                            VFService.vfBeeper?.startBeep(200)
                             val pan =
                                 track.getString(ConstCheckCardListener.onCardSwiped.track.KEY_PAN_String)
                             val track1 =
@@ -326,7 +326,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                         )
 
 
-                        VFService.vfPinPad.startPinInput(
+                        VFService.vfPinPad?.startPinInput(
                             2, param, globleparam,
                             object : PinInputListener.Stub() {
                                 override fun onInput(len: Int, key: Int) {
@@ -389,10 +389,10 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                 override fun onCardPowerUp() {
                     try {
                         println("Contact is calling")
-                        iemv.stopCheckCard()
-                        iemv.abortEMV()
+                        iemv?.stopCheckCard()
+                        iemv?.abortEMV()
                         cardProcessedDataModal.setReadCardType(DetectCardType.EMV_CARD_TYPE)
-                        VFService.vfBeeper.startBeep(200)
+                        VFService.vfBeeper?.startBeep(200)
                         println("Transactionamount is calling" + transactionalAmount.toString() + "Handler is" + handler)
                         if (transactionalAmount != null) {
                             DoEmv(
@@ -469,10 +469,10 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                 override fun onCardActivate() {
                     try {
                         println("Contactless is calling")
-                        iemv.stopCheckCard()
-                        iemv.abortEMV()
+                        iemv?.stopCheckCard()
+                        iemv?.abortEMV()
                         cardProcessedDataModal.setReadCardType(DetectCardType.CONTACT_LESS_CARD_TYPE)
-                        VFService.vfBeeper.startBeep(200)
+                        VFService.vfBeeper?.startBeep(200)
                         println("Transactionamount is calling" + transactionalAmount.toString() + "Handler is" + handler)
                         if (transactionalAmount != null) {
                             DoEmv(
@@ -554,7 +554,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                     try {
                         when (error) {
                             EFallbackCode.Swipe_fallback.fallBackCode -> {
-                                iemv.stopCheckCard()
+                                iemv?.stopCheckCard()
                                 (activity as VFTransactionActivity).handleEMVFallbackFromError(
                                     activity.getString(
                                         R.string.fallback
@@ -572,7 +572,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                             }
                             CardErrorCode.EMV_FALLBACK_ERROR_CODE.errorCode -> {
                                 //EMV Fallback case when we insert card from other side then chip side:-
-                                iemv.stopCheckCard()
+                                iemv?.stopCheckCard()
                                 (activity as VFTransactionActivity).handleEMVFallbackFromError(
                                     activity.getString(
                                         R.string.fallback

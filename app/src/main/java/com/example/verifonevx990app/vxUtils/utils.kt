@@ -175,6 +175,9 @@ suspend fun readInitServer(data: ArrayList<ByteArray>, callback: (Boolean, Strin
 
 private val pc2Tables = arrayOf(108, 110, 111, 112, 113, 115, 116)
 
+//For Terminal Purpose
+private val pc1Tables = arrayOf(101, 102, 107, 106, 109)
+
 /**
  * savePcs takes take pc number and table id and as per table id
  * it save largest pc number 1 and 2 in the system.
@@ -187,8 +190,8 @@ private fun savePcs(pcNum: String, table: String) {
             if (pcNum.toInt() > ppc) {
                 AppPreference.saveString(AppPreference.PC_NUMBER_KEY_2, pcNum)
             }
-
-        } else {
+        }
+        if (tn in pc1Tables) {
             val ppc = AppPreference.getString(AppPreference.PC_NUMBER_KEY).toInt()
             if (pcNum.toInt() > ppc) {
                 AppPreference.saveString(AppPreference.PC_NUMBER_KEY, pcNum)
@@ -269,7 +272,6 @@ suspend fun saveToDB(spliter: List<String>) {
             IssuerParameterTable.performOperation(issuerParameterTable) {
                 logger("saveToDB", "ipt")
             }
-
         }
         spliter[2] == "106" -> {
             val terminalParameterTable = TerminalParameterTable()
@@ -376,20 +378,20 @@ suspend fun saveToDB(spliter: List<String>) {
         spliter[2] == "201" -> {  // HDFC TPT
             val hdfcTpt = HdfcTpt()
             parseData(hdfcTpt, spliter)
-            HdfcTpt.insertOrUpdate(hdfcTpt)
-            logger(HdfcTpt.TAG, "====HdfcTpt has been updated====")
+            HdfcTpt.performOperation(hdfcTpt) {
+                logger(HdfcTpt.TAG, "====HdfcTpt has been Inserted====")
+            }
         }
 
         spliter[2] == "202" -> {   // HDFC CDT
             val hdfcCdt = HdfcCdt()
             parseData(hdfcCdt, spliter)
-            HdfcCdt.insertOrUpdate(hdfcCdt)
-            logger(HdfcTpt.TAG, "====HdfcCdt has been updated====")
+            HdfcCdt.performOperation(hdfcCdt) {
+                logger(HdfcTpt.TAG, "====HdfcCdt has been Inserted====")
+            }
         }
         //endregion
-
     }
-
 }
 
 fun unzipZipedBytes(ba: ByteArray) {
@@ -486,9 +488,9 @@ object ConnectionTimeStamps {
 
     fun getOtherInfo(): String {
         return try {
-            val imei = VFService.vfDeviceService.deviceInfo.imei
-            val batteryStrength = VFService.vfDeviceService.deviceInfo.batteryLevel
-            val simNo = VFService.vfDeviceService.deviceInfo.iccid
+            val imei = VFService.vfDeviceService?.deviceInfo?.imei
+            val batteryStrength = VFService.vfDeviceService?.deviceInfo?.batteryLevel
+            val simNo = VFService.vfDeviceService?.deviceInfo?.iccid
             Log.e("[1] iemi,battry,simNo", "$imei ,${batteryStrength} -----> ${simNo}  ")
             "~${VerifoneApp.networkStrength}~${batteryStrength}~${imei}~${simNo}~${VerifoneApp.operatorName}"
         } catch (ex: java.lang.Exception) {
@@ -787,7 +789,7 @@ object ROCProviderV2 {
             }
 
             val byteArray = track21.toByteArray(StandardCharsets.ISO_8859_1)
-            encryptedbyteArrrays = VFService.vfPinPad.encryptTrackData(0, 2, byteArray)
+            encryptedbyteArrrays = VFService.vfPinPad?.encryptTrackData(0, 2, byteArray)
 
             /*println(
                 "Track 2 with encyption is --->" + Utility.byte2HexStr(encryptedbyteArrrays)
@@ -850,7 +852,7 @@ object ROCProviderV2 {
     fun getField55(isAmex: Boolean = true): String {
         val sb = StringBuilder()
         for (f in commonTagListemv) {
-            val v = VFService.vfIEMV.getCardData(Integer.toHexString(f).toUpperCase(Locale.ROOT))
+            val v = VFService.vfIEMV?.getCardData(Integer.toHexString(f).toUpperCase(Locale.ROOT))
             if (v != null) {
                 sb.append(Integer.toHexString(f))
                 var l = Integer.toHexString(v.size)
@@ -1107,7 +1109,7 @@ fun getEncryptedField57DataForManualSale(panNumber: String, expDate: String): St
         }
         logger("Field57_Manual", " -->$dataDescription", "e")
         val byteArray = dataDescription.toByteArray(StandardCharsets.ISO_8859_1)
-        encryptedByteArray = VFService.vfPinPad.encryptTrackData(0, 2, byteArray)
+        encryptedByteArray = VFService.vfPinPad?.encryptTrackData(0, 2, byteArray)
         /*println(
             "Track 2 with encryption in manual sale is --->" + Utility.byte2HexStr(
                 encryptedByteArray
@@ -1157,7 +1159,7 @@ fun getEncryptedField57DataForOfflineSale(
         }
         logger("Field57_Manual", " -->$dataDescription", "e")
         val byteArray = dataDescription.toByteArray(StandardCharsets.ISO_8859_1)
-        encryptedByteArrray = VFService.vfPinPad.encryptTrackData(0, 2, byteArray)
+        encryptedByteArrray = VFService.vfPinPad?.encryptTrackData(0, 2, byteArray)
         //println("Track 2 with encryption is --->" + Utility.byte2HexStr(encryptedByteArrray))
         return Utility.byte2HexStr(encryptedByteArrray)
     } else return "TRACK57_LENGTH<8"
@@ -1495,7 +1497,7 @@ private fun navigateToMain(context: Context) {
 fun txnSuccessToast(context: Context, msg: String = "Transaction Approved") {
     try {
         GlobalScope.launch(Dispatchers.Main) {
-            VFService.vfBeeper.startBeep(200)
+            VFService.vfBeeper?.startBeep(200)
             val layout = (context as Activity).layoutInflater.inflate(
                 R.layout.success_toast,
                 context.findViewById<LinearLayout>(R.id.custom_toast_layout)
@@ -1645,7 +1647,7 @@ fun convertValue2BCD(optionValue: String): String {
 
 //getHDFCTptData
 fun getHDFCTptData(): HdfcTpt? {
-    val hdfcTptRecords = HdfcTpt.selectAllHDFCtpt()
+    val hdfcTptRecords = HdfcTpt.selectAllHDFCTPTData()
     return if (!hdfcTptRecords.isNullOrEmpty())
         hdfcTptRecords[0]
     else null
@@ -1724,6 +1726,13 @@ private fun getHDFCTPTAdminPasswordDialog(
         }
     }
 }
+
+//region==============================Getting NII From TerminalCommunicationTable :-
+fun getNII(): String {
+    val tctData = runBlocking(Dispatchers.IO) { TerminalCommunicationTable.selectFromSchemeTable() }
+    return tctData?.nii ?: Nii.DEFAULT.nii
+}
+//endregion
 //endregion
 /*
 App Update Through FTP Steps:-

@@ -86,14 +86,14 @@ object EMVInitialize {
         )
 
         try {
-            iemv.checkCard(cardOption, 30, object : CheckCardListener.Stub() {
+            iemv?.checkCard(cardOption, 30, object : CheckCardListener.Stub() {
 
                 @Throws(RemoteException::class)
                 override fun onCardSwiped(track: Bundle) {
                     Log.d(MainActivity.TAG, "onCardSwiped ...")
                     //                            iemv.stopCheckCard();
                     //                            iemv.abortPBOC();
-                    VFService.vfBeeper.startBeep(200)
+                    VFService.vfBeeper?.startBeep(200)
                     val pan =
                         track.getString(ConstCheckCardListener.onCardSwiped.track.KEY_PAN_String)
                     val track1 =
@@ -170,7 +170,7 @@ object EMVInitialize {
                 override fun onCardPowerUp() {
                     iemv.stopCheckCard()
                     iemv.abortEMV()
-                    VFService.vfBeeper.startBeep(200)
+                    VFService.vfBeeper?.startBeep(200)
                     if (transType != null) {
                         doEMV(
                             ConstIPBOC.startEMV.intent.VALUE_cardType_smart_card,
@@ -187,7 +187,7 @@ object EMVInitialize {
                 override fun onCardActivate() {
                     iemv.stopCheckCard()
                     iemv.abortEMV()
-                    VFService.vfBeeper.startBeep(200)
+                    VFService.vfBeeper?.startBeep(200)
                     if (transType != null) {
                         doEMV(
                             ConstIPBOC.startEMV.intent.VALUE_cardType_contactless,
@@ -266,7 +266,7 @@ object EMVInitialize {
         emvIntent.putString(KEY_otherAmount_String, "0")
 
         try {
-            iemv.startEMV(
+            iemv?.startEMV(
                 ConstIPBOC.startEMV.processType.full_process,
                 emvIntent,
                 VFEmv.emvHandler

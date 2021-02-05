@@ -108,7 +108,7 @@ class StubBatchData(
         batchFileData.appName = VerifoneApp.appContext.getString(R.string.app_name)
         val buildDate: String =
             SimpleDateFormat("yyMMdd", Locale.getDefault()).format(Date(BuildConfig.TIMESTAMP))
-        batchFileData.appVersion = "${BuildConfig.VERSION_NAME}.$buildDate"
+        batchFileData.appVersion = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)
         batchFileData.pcNumber = AppPreference.getString(AppPreference.PC_NUMBER_KEY)
         //batchFileData.operationType = isoPackageWriter.operationType(Need to Discuss by Ajay)
         batchFileData.transationName =

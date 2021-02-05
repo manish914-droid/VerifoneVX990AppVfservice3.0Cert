@@ -1,6 +1,5 @@
 package com.example.verifonevx990app.offlinemanualsale
 
-import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.main.PosEntryModeType
 import com.example.verifonevx990app.realmtables.BatchFileDataTable
@@ -72,9 +71,7 @@ class StubOfflineBatchData(
         batchFileData.connectionType = ConnectionType.GPRS.code
         batchFileData.modelName = AppPreference.getString("deviceModel")
         batchFileData.appName = VerifoneApp.appContext.getString(R.string.app_name)
-        val buildDate: String =
-            SimpleDateFormat("yyMMdd", Locale.getDefault()).format(Date(BuildConfig.TIMESTAMP))
-        batchFileData.appVersion = "${BuildConfig.VERSION_NAME}.$buildDate"
+        batchFileData.appVersion = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)
         batchFileData.pcNumber = AppPreference.getString(AppPreference.PC_NUMBER_KEY)
         batchFileData.authCode = this.authCode
         //batchFileData.operationType = isoPackageWriter.operationType(Need to Discuss by Ajay)

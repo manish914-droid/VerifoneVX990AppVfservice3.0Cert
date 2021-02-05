@@ -1,11 +1,8 @@
 package com.example.verifonevx990app.appupdate
 
-import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
 import com.example.verifonevx990app.vxUtils.*
-import java.text.SimpleDateFormat
-import java.util.*
 
 class CreatePacketForAppUpdate(
     private var appUpdateProcessingCode: String, private var chunkValue: String,
@@ -47,8 +44,6 @@ class CreatePacketForAppUpdate(
             }
 
             //adding Field 61
-            val buildDate: String =
-                SimpleDateFormat("yyMMdd", Locale.getDefault()).format(Date(BuildConfig.TIMESTAMP))
             val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)
             val pcNumber = addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY), "0", 9)
             val data = ConnectionType.GPRS.code + addPad(

@@ -1,6 +1,5 @@
 package com.example.verifonevx990app.preAuth
 
-import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.emv.transactionprocess.CardProcessedDataModal
 import com.example.verifonevx990app.realmtables.IssuerParameterTable
@@ -87,11 +86,6 @@ class CreateAuthPacket {
                 addFieldByHex(60, addPad(terminalData.batchNumber, "0", 6, true))
 
                 //adding field 61
-                val buildDate: String = SimpleDateFormat("yyMMdd", Locale.getDefault()).format(
-                    Date(
-                        BuildConfig.TIMESTAMP
-                    )
-                )
                 val issuerParameterTable = IssuerParameterTable.selectFromIssuerParameterTable(
                     AppPreference.WALLET_ISSUER_ID
                 )
@@ -169,7 +163,6 @@ class CreateAuthPacket {
                 addFieldByHex(60, addPad(terminalData.batchNumber, "0", 6, true))
 
                 //adding field 61
-                val buildDate: String = SimpleDateFormat("yyMMdd", Locale.getDefault()).format(Date(BuildConfig.TIMESTAMP))
                 val issuerParameterTable =
                     IssuerParameterTable.selectFromIssuerParameterTable(AppPreference.WALLET_ISSUER_ID)
                 val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)
