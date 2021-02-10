@@ -71,7 +71,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
             aaResult?.getInt(ConstPBOCHandler.onRequestOnlineProcess.aaResult.KEY_RESULT_int)
         val signature =
             aaResult?.getBoolean(ConstPBOCHandler.onRequestOnlineProcess.aaResult.KEY_SIGNATURE_boolean)
-     //   VFService.showToast("onRequestOnlineProcess result=$result signal=$signature")
+        //   VFService.showToast("onRequestOnlineProcess result=$result signal=$signature")
         when (result) {
             ConstPBOCHandler.onRequestOnlineProcess.aaResult.VALUE_RESULT_AARESULT_ARQC, ConstPBOCHandler.onRequestOnlineProcess.aaResult.VALUE_RESULT_QPBOC_ARQC ->
                 aaResult.getString(
@@ -281,19 +281,24 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
             try {
                 if (track22 != null) {
                     cardProcessedDataModal.setPanNumberData(track22)
-                  //  cardProcessedDataModal.setPanNumberData("8909878")
+                    //  cardProcessedDataModal.setPanNumberData("8909878")
                     cardProcessedDataModal.getPanNumberData()?.let {
-                        logger("CTLS_EMV",
-                            it,"e")
+                        logger(
+                            "CTLS_EMV",
+                            it, "e"
+                        )
                     }
+                }
 
-                }
-                if(!cardProcessedDataModal.getPanNumberData()?.let { cardLuhnCheck(it) }!!){
-                    val bun=Bundle()
-                    bun.putString("ERROR","Invalid Card Number")
-                    onTransactionResult(DetectError.IncorrectPAN.errorCode,bun)
-                }
-                else {
+                //Here we make a callback for first time card read in case of bank emi:-
+                if (isFirstBankEMICardRead)
+                    vfEmvHandlerCallback(cardProcessedDataModal)
+
+                if (!cardProcessedDataModal.getPanNumberData()?.let { cardLuhnCheck(it) }!!) {
+                    val bun = Bundle()
+                    bun.putString("ERROR", "Invalid Card Number")
+                    onTransactionResult(DetectError.IncorrectPAN.errorCode, bun)
+                } else {
                     var track21 = "35|" + track2.replace("D", "=").replace("F", "")
                     //println("Track 2 data is$track21")
                     val DIGIT_8 = 8

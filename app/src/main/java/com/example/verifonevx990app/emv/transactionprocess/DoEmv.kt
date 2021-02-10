@@ -32,7 +32,7 @@ class DoEmv(
         startEMVProcess(valueCardTypeSmartCard, transactionalAmount)
     }
 
-    // First GEN AC
+    // region ========================== First GEN AC
     private fun startEMVProcess(type: Int, transactionalAmount: Long) {
         try {
             val terminalParameterTable = TerminalParameterTable.selectFromSchemeTable()
@@ -151,8 +151,9 @@ class DoEmv(
             }.start()
         }
     }
+    //endregion
 
-    //Below Method is a Handler for EMV CardType:-
+    //region========================================Below Method is a Handler for EMV CardType:-
     private fun emvHandler(): VFEmvHandler {
         println("DoEmv VfemvHandler is calling")
         println("iemv value is" + iemv.toString())
@@ -162,4 +163,5 @@ class DoEmv(
             Log.d("PanNumber:- ", cardProcessedData.getPanNumberData() ?: "")
         }
     }
+    //endregion
 }

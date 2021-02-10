@@ -327,6 +327,12 @@ class NewInputAmountFragment : Fragment() {
                         )
                     }
                 }
+                EDashboardItem.BANK_EMI -> {
+                    iFrReq?.onFragmentRequest(
+                        UiAction.BANK_EMI,
+                        Pair(binding?.saleAmount?.text.toString().trim(), "0")
+                    )
+                }
                 EDashboardItem.CASH_ADVANCE -> {
                     iFrReq?.onFragmentRequest(
                         UiAction.CASH_ADVANCE,
@@ -358,7 +364,6 @@ class NewInputAmountFragment : Fragment() {
                     )
                 }
                 else -> {
-
                 }
             }
         }

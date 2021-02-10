@@ -238,16 +238,17 @@ class VFTransactionActivity : BaseActivity() {
     private fun processAccordingToCardType(cardProcessedData: CardProcessedDataModal) {
         when (cardProcessedData.getReadCardType()) {
             DetectCardType.MAG_CARD_TYPE -> {
-                if (cardProcessedData.getTransType() == TransactionType.SALE.type || cardProcessedData.getTransType() == TransactionType.PRE_AUTH.type || cardProcessedData.getTransType() == TransactionType.REFUND.type) {
-                    emvProcessNext(cardProcessedData)
-                } else {
-                    /* val transactionEMIISO = CreateEMITransactionPacket(cardProcessedData, emiCustomerDetails).createTransactionPacket()
-                     logger("Transaction REQUEST PACKET --->>", transactionEMIISO.isoMap, "e")
-                     runOnUiThread { showProgress(getString(R.string.emi_data_sync)) }
-                     GlobalScope.launch(Dispatchers.IO) {
-                         checkReversal(transactionEMIISO, cardProcessedData)
-                      }*/
+                //region============Below When Condition is used to check Transaction Types Based Process Execution:-
+                when (cardProcessedData.getTransType()) {
+                    TransactionType.SALE.type, TransactionType.PRE_AUTH.type, TransactionType.REFUND.type -> emvProcessNext(
+                        cardProcessedData
+                    )
+                    TransactionType.EMI_SALE.type -> {
+                    }
+                    else -> {
+                    }
                 }
+                //endregion
             }
 
             DetectCardType.EMV_CARD_TYPE -> {
@@ -836,7 +837,6 @@ class VFTransactionActivity : BaseActivity() {
     }
 
     fun checkEmiBankEmi(cardProcessedDataModal: CardProcessedDataModal, transactionCallback: (CardProcessedDataModal) -> Unit) {
-
         cardProcessedDataModal.setProcessingCode(transactionProcessingCode)
         cardProcessedDataModal.setTransactionAmount(transactionalAmount)
         cardProcessedDataModal.setOtherAmount(otherTransAmount)
@@ -911,7 +911,6 @@ class VFTransactionActivity : BaseActivity() {
     }
 
     fun checkEmiInstaEmi(cardProcessedDataModal: CardProcessedDataModal, transactionCallback: (CardProcessedDataModal) -> Unit) {
-
         cardProcessedDataModal.setProcessingCode(transactionProcessingCode)
         cardProcessedDataModal.setTransactionAmount(transactionalAmount)
         cardProcessedDataModal.setOtherAmount(otherTransAmount)

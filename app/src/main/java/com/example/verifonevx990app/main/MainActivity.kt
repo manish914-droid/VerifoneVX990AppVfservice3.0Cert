@@ -597,7 +597,6 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                     //  val amt = data as String
                     val amt = (data as Pair<*, *>).first.toString()
                     val otherAmount = data.second.toString()
-
                     startActivityForResult(Intent(this, VFTransactionActivity::class.java).apply {
                         putExtra("amt", amt)
                         putExtra("type", TransactionType.SALE.type)
@@ -612,7 +611,8 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
             UiAction.BANK_EMI -> {
                 if (checkInternetConnection()) {
-                    val amt = data as String
+                    isFirstBankEMICardRead = true
+                    val amt = (data as Pair<*, *>).first.toString()
                     startActivityForResult(Intent(this, VFTransactionActivity::class.java).apply {
                         putExtra("amt", amt)
                         putExtra("type", TransactionType.EMI_SALE.type) //EMI //UiAction.BANK_EMI
@@ -989,7 +989,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
         //   NeptuneService.beepNormal()
         isDashboardOpen = false
         when (action) {
-            EDashboardItem.SALE, EDashboardItem.SALE_WITH_CASH, EDashboardItem.CASH_ADVANCE, EDashboardItem.PREAUTH -> {
+            EDashboardItem.SALE, EDashboardItem.BANK_EMI, EDashboardItem.SALE_WITH_CASH, EDashboardItem.CASH_ADVANCE, EDashboardItem.PREAUTH -> {
                 /* val bundle = Bundle()
                 bundle.putSerializable("type", action)
                 navHostFragment?.navController?.navigate(R.id.inputAmountFragment, bundle)*/
@@ -1126,7 +1126,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                 }
             }
 
-            EDashboardItem.CROSS_SELL ->
+            EDashboardItem.CROSS_SELL -> {
                 if (checkInternetConnection()) {
                     val tpt = TerminalParameterTable.selectFromSchemeTable()
                     if (tpt != null) {
@@ -1146,6 +1146,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                 } else {
                     VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
                 }
+            }
 
             EDashboardItem.EMI_ENQUIRY -> {
                 val tpt = TerminalParameterTable.selectFromSchemeTable()
@@ -1155,9 +1156,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                 )
             }
 
-            else -> {
-                showToast("To be implemented...")
-            }
+            else -> showToast("To be implemented...")
         }
     }
 

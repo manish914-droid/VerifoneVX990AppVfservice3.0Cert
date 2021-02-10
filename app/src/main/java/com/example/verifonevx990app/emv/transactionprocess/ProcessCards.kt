@@ -29,15 +29,10 @@ class ProcessCard(
     var cardProcessedDataModal: CardProcessedDataModal,
     var transactionCallback: (CardProcessedDataModal) -> Unit
 ) {
-    //  private var iemv: IEMV? = VFService.vfIEMV
-
-    //  private val cardProcessedDataModal: CardProcessedDataModal by lazy { CardProcessedDataModal() }
-
     var transactionalAmt = cardProcessedDataModal.getTransactionAmount() ?: 0
     var otherAmt = cardProcessedDataModal.getOtherAmount() ?: 0
 
     init {
-        //VFService.showToast("Please Insert/Swipe/Tap Card")
         detectCard()
 
     }
@@ -409,21 +404,40 @@ class ProcessCard(
                         cardProcessedDataModal.setReadCardType(DetectCardType.EMV_CARD_TYPE)
                         VFService.vfBeeper?.startBeep(200)
                         println("Transactionamount is calling" + transactionalAmt.toString() + "Handler is" + handler)
-                        DoEmv(
-                            activity,
-                            handler,
-                            cardProcessedDataModal,
-                            ConstIPBOC.startEMV.intent.VALUE_cardType_smart_card
-                        ) { cardProcessedDataModal ->
-                            /*    if (cardProcessedDataModal.getFallbackType() != EFallbackCode.EMV_fallback.fallBackCode) {
-                                            println("Contact is calling in fallback")
-                                            iemv?.stopCheckCard()
-                                            detectCard(cardProcessedDataModal.getTransactionAmount(), cardProcessedDataModal.getFallbackType())
-                                        } else {
-                                            println("Contact is calling in fallback1")
-                                            transactionCallback(cardProcessedDataModal)
-                                        }*/
-                            transactionCallback(cardProcessedDataModal)
+                        when (cardProcessedDataModal.getTransType()) {
+                            TransactionType.EMI_SALE.type -> {
+                                VFService.vfIEMV?.startEMV(ConstIPBOC.startEMV.processType.full_process,
+                                    Bundle(),
+                                    VFEmvHandler(
+                                        activity,
+                                        handler,
+                                        VFService.vfIEMV,
+                                        cardProcessedDataModal
+                                    ) { cardProcessedData ->
+                                        isFirstBankEMICardRead = false
+                                        Log.d(
+                                            "Track2Data:- ",
+                                            cardProcessedData.getTrack2Data() ?: ""
+                                        )
+                                        Log.d(
+                                            "PanNumber:- ",
+                                            cardProcessedData.getPanNumberData() ?: ""
+                                        )
+                                    })
+                                /* BankEMIThinClientApproach(activity , cardProcessedDataModal) {
+                                     GlobalScope.launch(Dispatchers.Main) {
+                                         VFService.showToast("SuccessFully Fetched Tenure of BankEMI........")
+                                     }
+                                 }*/
+                            }
+                            else -> {
+                                DoEmv(
+                                    activity, handler, cardProcessedDataModal,
+                                    ConstIPBOC.startEMV.intent.VALUE_cardType_smart_card
+                                ) { cardProcessedDataModal ->
+                                    transactionCallback(cardProcessedDataModal)
+                                }
+                            }
                         }
                     } catch (ex: DeadObjectException) {
                         ex.printStackTrace()
@@ -645,7 +659,7 @@ class ProcessCard(
         } catch (ex: DeadObjectException) {
             ex.printStackTrace()
             println("Process card error19"+ex.message)
-            Handler(Looper.getMainLooper()).postDelayed(Runnable {
+            Handler(Looper.getMainLooper()).postDelayed({
                 GlobalScope.launch {
                     VFService.connectToVFService(VerifoneApp.appContext)
                     delay(100)
@@ -658,7 +672,7 @@ class ProcessCard(
         } catch (ex: RemoteException) {
             ex.printStackTrace()
             println("Process card error20"+ex.message)
-            Handler(Looper.getMainLooper()).postDelayed(Runnable {
+            Handler(Looper.getMainLooper()).postDelayed({
                 GlobalScope.launch {
                     VFService.connectToVFService(VerifoneApp.appContext)
                     delay(100)
@@ -670,7 +684,7 @@ class ProcessCard(
         } catch (ex: Exception) {
             ex.printStackTrace()
             println("Process card error21"+ex.message)
-            Handler(Looper.getMainLooper()).postDelayed(Runnable {
+            Handler(Looper.getMainLooper()).postDelayed({
                 GlobalScope.launch {
                     VFService.connectToVFService(VerifoneApp.appContext)
                     delay(100)

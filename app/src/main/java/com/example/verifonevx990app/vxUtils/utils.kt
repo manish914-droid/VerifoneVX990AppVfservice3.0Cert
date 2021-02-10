@@ -46,6 +46,7 @@ import kotlin.experimental.and
 
 var isDashboardOpen = false
 var isExpanded = false
+var isFirstBankEMICardRead = true
 
 open class OnTextChange(private val cb: (String) -> Unit) : TextWatcher {
 
@@ -1736,6 +1737,10 @@ fun getNII(): String {
     return tctData?.nii ?: Nii.DEFAULT.nii
 }
 //endregion
+//endregion
+
+//region=============================Get Time in Millis==================
+fun getTimeInMillis(): Long = System.currentTimeMillis()
 //endregion
 /*
 App Update Through FTP Steps:-

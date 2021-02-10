@@ -105,7 +105,8 @@ enum class Mti(val mti: String) {
     DEFAULT_MTI("0200"),
     REVERSAL("0400"),
     APP_UPDATE_MTI("0800"),
-    CROSS_SELL_MTI("0800")
+    CROSS_SELL_MTI("0800"),
+    BANKI_EMI("0800"),
 }
 
 enum class ProcessingCode(val code: String) {
@@ -142,7 +143,8 @@ enum class ProcessingCode(val code: String) {
     CASH_AT_POS("923001"),
     SALE_WITH_CASH("922001"),
     PRE_AUTH("920000"),
-    CROSS_SELL("982001")
+    CROSS_SELL("982001"),
+    BANK_EMI("982002")
 }
 
 enum class Nii(val nii: String) {

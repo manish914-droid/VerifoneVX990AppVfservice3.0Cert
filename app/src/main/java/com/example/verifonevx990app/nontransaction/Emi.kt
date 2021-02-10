@@ -39,7 +39,7 @@ import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
 
-
+/* This Class is of No Use Now , Please Ignore it*/
 class EmiActivity : BaseActivity(), IBenefitTable, View.OnClickListener {
 
     private lateinit var iptList: List<IssuerParameterTable>

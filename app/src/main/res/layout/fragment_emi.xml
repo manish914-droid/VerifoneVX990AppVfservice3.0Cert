@@ -83,7 +83,6 @@
         android:layout_marginBottom="@dimen/pad_60"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:background="@drawable/theme_btn_bg"
         android:text="@string/proceed_txn"
         android:textColor="@color/white"
         android:textSize="@dimen/text_size_xregular"

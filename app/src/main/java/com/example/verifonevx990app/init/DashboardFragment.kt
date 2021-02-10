@@ -47,14 +47,17 @@ class DashboardFragment : Fragment() {
     /* private val mAdapter by lazy {
          DashBoardAdapter(iFragmentRequest, ::onItemLessMoreClick)
      }*/
+
     private val dashBoardAdapter by lazy {
-        DashBoardAdapter(iFragmentRequest, ::onItemLessMoreClick)
+        DashBoardAdapter(
+            iFragmentRequest,
+            ::onItemLessMoreClick
+        )
     }
     private var animShow: Animation? = null
     private var animHide: Animation? = null
 
     private val imageArr: IntArray by lazy {
-        //  intArrayOf(R.drawable.mybann3, R.drawable.mybann5, R.drawable.mybann2, R.drawable.mybannr)
         intArrayOf(
             R.drawable.banner_3,
             R.drawable.banner_1,
@@ -62,9 +65,7 @@ class DashboardFragment : Fragment() {
             R.drawable.banner_4
         )
     }
-    private val imageAdapter by lazy {
-        activity?.let { ImagePagerAdapterEMI(it, imageArr) }
-    }
+    private val imageAdapter by lazy { activity?.let { ImagePagerAdapterEMI(it, imageArr) } }
     private var counter = 0
     private var isUpdate = false
     private var binding: FragmentDashboardBinding? = null
@@ -79,6 +80,8 @@ class DashboardFragment : Fragment() {
     private val PERIOD_MS: Long = 3000
     private val handler = Handler(Looper.getMainLooper())
     private var runnable: Runnable? = null
+    private var tptData: TerminalParameterTable? = null
+    private var batchData: MutableList<BatchFileDataTable> = mutableListOf()
 
     // For view pager scrolling
     var update: Runnable? = null
@@ -90,8 +93,6 @@ class DashboardFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentDashboardBinding.inflate(inflater, container, false)
-
-
         return binding?.root
     }
 
@@ -117,10 +118,17 @@ class DashboardFragment : Fragment() {
         runBlocking(Dispatchers.IO) {
             val hdfcTptData = HdfcTpt.selectAllHDFCTPTData()
             val hdfcCdt = HdfcCdt.selectAllHDFCCDTData()
+            tptData = TerminalParameterTable.selectFromSchemeTable()
+            batchData = BatchFileDataTable.selectBatchData()
             Log.d("HDFCTPT Data:- ", hdfcTptData.toString())
             Log.d("HDFCCDT Data:- ", hdfcCdt.toString())
         }
         (activity as MainActivity).showHelpDeskNumber()
+        Log.d("Current Time:- ", getTimeInMillis().toString())
+
+        //region===================Check and Perform AutoSettle Operation on Dashboard Fragment:-
+
+        //endregion
     }
 
     private fun scheduleTimer() {
@@ -144,11 +152,9 @@ class DashboardFragment : Fragment() {
         runnable?.let { handler.removeCallbacks(it) }
     }
 
-
     private suspend fun setUpImageViewPager() {
         binding?.photosViewpager?.adapter = imageAdapter
         binding?.tabLL?.setupWithViewPager(binding?.photosViewpager)
-
     }
 
     private suspend fun initAnimation() {
@@ -178,7 +184,6 @@ class DashboardFragment : Fragment() {
             }
         }
     }
-
 
     // region ======SetUp DashBoard items
     private suspend fun setUpDashBoardItems() {

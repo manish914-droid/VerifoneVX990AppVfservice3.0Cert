@@ -233,6 +233,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/pad_16"
             android:gravity="center"
+            android:visibility="invisible"
             android:hint="@string/versionHint"
             android:textColor="@color/colorPrimary"
             android:textSize="@dimen/text_size_regular"

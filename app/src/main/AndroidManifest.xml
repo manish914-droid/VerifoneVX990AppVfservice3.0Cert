@@ -8,6 +8,9 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- Receiver Permission declaration -->
+    <permission android:name="my.app.PERMISSION" />
+
     <uses-permission
         android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"
         tools:ignore="ProtectedPermissions" />
@@ -55,6 +58,17 @@
             android:windowSoftInputMode="adjustNothing" />
 
         <activity android:name=".nontransaction.EmiActivity" />
+
+        <!-- registering the receiver -->
+        <receiver
+            android:name=".utils.AutoSettleBroadcast"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="my.app.PERMISSION"> <!-- Permission enforcement for delivering intents to this receiver -->
+            <intent-filter>
+                <action android:name="my.app.Action" />
+            </intent-filter>
+        </receiver>
 
         <receiver android:name=".main.AutoSettleReceiver">
             <intent-filter>
