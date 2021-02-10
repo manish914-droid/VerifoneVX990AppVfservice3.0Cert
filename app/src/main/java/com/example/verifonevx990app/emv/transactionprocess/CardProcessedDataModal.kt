@@ -30,7 +30,7 @@ class CardProcessedDataModal : Serializable {
     private var tc: String? = null
     private var retryTimes: Int = 0
     private var emitype: Int = 0
-    private var cashAmount: Long? = 0
+    private var otherAmount: Long? = 0
     private var transactionType: Int = 0
 
     private var authRoc: String? = null
@@ -204,6 +204,7 @@ class CardProcessedDataModal : Serializable {
     fun getTC(): String? {
         return tc
     }
+
     fun setRetryTimes(retryTimes: Int) {
         this.retryTimes = retryTimes
     }
@@ -212,12 +213,12 @@ class CardProcessedDataModal : Serializable {
         return retryTimes
     }
 
-    fun getCashAmount(): Long? {
-        return cashAmount
+    fun getOtherAmount(): Long? {
+        return otherAmount
     }
 
-    fun setCashAmount(cashAmount: Long) {
-        this.cashAmount = cashAmount
+    fun setOtherAmount(otherAmount: Long) {
+        this.otherAmount = otherAmount
     }
 
     fun setTransType(transType: Int) {

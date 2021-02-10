@@ -11,7 +11,6 @@ import com.example.verifonevx990app.R
 import com.example.verifonevx990app.database.OnXmlDataParsed
 import com.example.verifonevx990app.database.XmlFieldModel
 import com.example.verifonevx990app.databinding.ActivityTransactionBinding
-import com.example.verifonevx990app.emv.EMVInitialize
 import com.example.verifonevx990app.emv.VFEmv
 import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.realmtables.*
@@ -27,12 +26,12 @@ import java.util.*
 class TransactionActivity : AppCompatActivity(), OnXmlDataParsed {
     private var mXmlModel: HashMap<String, XmlFieldModel>? = null
     private var transactionalAmount: Long = 0L
-    private var cashBackAmount: Long = 0L
+    private var otherTransAmount: Long = 0L
     private var isoPackageWriter: IsoPackageWriter? = null
     private var packageWriterModel: PackageWriterModel? = null
     private var context: Context? = null
     private val transactionAmountValue by lazy { intent.getStringExtra("amt") ?: "0" }
-    private val cashBackAmountValue by lazy { intent.getStringExtra("cashBack") ?: "0" }
+    private val otherTransAmountValue by lazy { intent.getStringExtra("otherAmount") ?: "0" }
     private var cardDataTable: CardDataTable? = null
     private var binding: ActivityTransactionBinding? = null
 
@@ -54,7 +53,7 @@ class TransactionActivity : AppCompatActivity(), OnXmlDataParsed {
         findViewById<BHTextView>(R.id.base_amt_tv).text = amountValue
 
         transactionalAmount = transactionAmountValue.replace(".", "").toLong()
-        cashBackAmount = cashBackAmountValue.replace(".", "").toLong()
+        otherTransAmount = otherTransAmountValue.replace(".", "").toLong()
 
     }
 

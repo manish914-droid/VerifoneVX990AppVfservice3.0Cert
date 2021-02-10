@@ -45,7 +45,105 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
         try {
             //Below checkCard process is happening with the help of IEMV AIDL Interface:-
             iemv?.checkCard(getCardOptionBundle(), 30, object : CheckCardListener.Stub() {
+
+                //This Override Function will only execute in case of Mag stripe card type:-
                 override fun onCardSwiped(track: Bundle) {
+                    // Process Swipe card with or without PIN .
+                    fun processSwipeCardWithPINorWithoutPIN(
+                        ispin: Boolean,
+                        cardProcessedDataModal: CardProcessedDataModal
+                    ) {
+                        if (ispin) {
+
+                            val param = Bundle()
+                            val globleparam = Bundle()
+                            val panBlock: String? = cardProcessedDataModal.getPanNumberData()
+                            val pinLimit = byteArrayOf(4, 5, 6)
+                            param.putByteArray(
+                                ConstIPinpad.startPinInput.param.KEY_pinLimit_ByteArray,
+                                pinLimit
+                            )
+                            param.putInt(ConstIPinpad.startPinInput.param.KEY_timeout_int, 20)
+                            param.putBoolean(
+                                ConstIPinpad.startPinInput.param.KEY_isOnline_boolean,
+                                ispin
+                            )
+                            param.putString(
+                                ConstIPinpad.startPinInput.param.KEY_pan_String,
+                                panBlock
+                            )
+                            param.putString(
+                                ConstIPinpad.startPinInput.param.KEY_promptString_String,
+                                "Enter PIN"
+                            )
+                            param.putInt(
+                                ConstIPinpad.startPinInput.param.KEY_desType_int,
+                                ConstIPinpad.startPinInput.param.Value_desType_3DES
+                            )
+
+
+                            VFService.vfPinPad?.startPinInput(
+                                2, param, globleparam,
+                                object : PinInputListener.Stub() {
+                                    override fun onInput(len: Int, key: Int) {
+                                        Log.d("Data", "PinPad onInput, len:$len, key:$key")
+                                    }
+
+                                    @Throws(RemoteException::class)
+                                    override fun onConfirm(data: ByteArray, isNonePin: Boolean) {
+                                        Log.d("Data", "PinPad onConfirm")
+                                        //   VFEmv.iemv?.importPin(1, data)
+                                        Log.d(
+                                            "SWIPEPIN",
+                                            "PinPad hex encrypted data ---> " + Utility.byte2HexStr(
+                                                data
+                                            )
+                                        )
+                                        //    VFEmv.savedPinblock = data
+                                        /*    if(VFService.isOnlinePin!!) {
+                                                                                                        VFService.mIsoWriter?.genratedPinBlock = Utility.byte2HexStr(data)
+                                                                                                    }*/
+                                        cardProcessedDataModal.setGeneratePinBlock(
+                                            Utility.byte2HexStr(data)
+                                        )
+
+                                        if (cardProcessedDataModal.getFallbackType() == EFallbackCode.EMV_fallback.fallBackCode)
+                                            cardProcessedDataModal.setPosEntryMode(PosEntryModeType.EMV_POS_ENTRY_FALL_MAGPIN.posEntry.toString())
+                                        else
+                                            cardProcessedDataModal.setPosEntryMode(PosEntryModeType.POS_ENTRY_SWIPED_NO4DBC_PIN.posEntry.toString())
+
+                                        cardProcessedDataModal.setApplicationPanSequenceValue("00")
+                                        transactionCallback(cardProcessedDataModal)
+
+                                    }
+
+                                    @Throws(RemoteException::class)
+                                    override fun onCancel() {
+                                        Log.d("Data", "PinPad onCancel")
+                                        GlobalScope.launch(Dispatchers.Main) {
+                                            (activity as VFTransactionActivity).declinedTransaction()
+                                        }
+                                    }
+
+                                    @Throws(RemoteException::class)
+                                    override fun onError(errorCode: Int) {
+                                        Log.d("Data", "PinPad onError, code:$errorCode")
+                                        GlobalScope.launch(Dispatchers.Main) {
+                                            (activity as VFTransactionActivity).declinedTransaction()
+                                        }
+                                    }
+                                })
+                        } else {
+                            if (cardProcessedDataModal.getFallbackType() == EFallbackCode.EMV_fallback.fallBackCode)
+                                cardProcessedDataModal.setPosEntryMode(PosEntryModeType.EMV_POS_ENTRY_FALL_MAGNOPIN.posEntry.toString())
+                            else
+                                cardProcessedDataModal.setPosEntryMode(PosEntryModeType.POS_ENTRY_SWIPED_NO4DBC.posEntry.toString())
+                            cardProcessedDataModal.setApplicationPanSequenceValue("00")
+                            transactionCallback(cardProcessedDataModal)
+                        }
+                    }
+
+                    //Reading data
                     try {
                         iemv?.stopCheckCard()
                         println("Mag is calling")
@@ -294,95 +392,8 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                             }
                         }, 200)
                     }
-                }
-
-                fun processSwipeCardWithPINorWithoutPIN(
-                    ispin: Boolean,
-                    cardProcessedDataModal: CardProcessedDataModal
-                ) {
-                    if (ispin) {
-
-                        val param = Bundle()
-                        val globleparam = Bundle()
-                        val panBlock: String? = cardProcessedDataModal.getPanNumberData()
-                        val pinLimit = byteArrayOf(4, 5, 6)
-                        param.putByteArray(
-                            ConstIPinpad.startPinInput.param.KEY_pinLimit_ByteArray,
-                            pinLimit
-                        )
-                        param.putInt(ConstIPinpad.startPinInput.param.KEY_timeout_int, 20)
-                        param.putBoolean(
-                            ConstIPinpad.startPinInput.param.KEY_isOnline_boolean,
-                            ispin
-                        )
-                        param.putString(ConstIPinpad.startPinInput.param.KEY_pan_String, panBlock)
-                        param.putString(
-                            ConstIPinpad.startPinInput.param.KEY_promptString_String,
-                            "Enter PIN"
-                        )
-                        param.putInt(
-                            ConstIPinpad.startPinInput.param.KEY_desType_int,
-                            ConstIPinpad.startPinInput.param.Value_desType_3DES
-                        )
 
 
-                        VFService.vfPinPad?.startPinInput(
-                            2, param, globleparam,
-                            object : PinInputListener.Stub() {
-                                override fun onInput(len: Int, key: Int) {
-                                    Log.d("Data", "PinPad onInput, len:$len, key:$key")
-                                }
-
-                                @Throws(RemoteException::class)
-                                override fun onConfirm(data: ByteArray, isNonePin: Boolean) {
-                                    Log.d("Data", "PinPad onConfirm")
-                                    //   VFEmv.iemv?.importPin(1, data)
-                                    Log.d(
-                                        "SWIPEPIN",
-                                        "PinPad hex encrypted data ---> " + Utility.byte2HexStr(data)
-                                    )
-                                    //    VFEmv.savedPinblock = data
-                                    /*    if(VFService.isOnlinePin!!) {
-                                                                                                    VFService.mIsoWriter?.genratedPinBlock = Utility.byte2HexStr(data)
-                                                                                                }*/
-                                    cardProcessedDataModal.setGeneratePinBlock(
-                                        Utility.byte2HexStr(data)
-                                    )
-
-                                    if (cardProcessedDataModal.getFallbackType() == EFallbackCode.EMV_fallback.fallBackCode)
-                                        cardProcessedDataModal.setPosEntryMode(PosEntryModeType.EMV_POS_ENTRY_FALL_MAGPIN.posEntry.toString())
-                                    else
-                                        cardProcessedDataModal.setPosEntryMode(PosEntryModeType.POS_ENTRY_SWIPED_NO4DBC_PIN.posEntry.toString())
-
-                                    cardProcessedDataModal.setApplicationPanSequenceValue("00")
-                                    transactionCallback(cardProcessedDataModal)
-
-                                }
-
-                                @Throws(RemoteException::class)
-                                override fun onCancel() {
-                                    Log.d("Data", "PinPad onCancel")
-                                    GlobalScope.launch(Dispatchers.Main) {
-                                        (activity as VFTransactionActivity).declinedTransaction()
-                                    }
-                                }
-
-                                @Throws(RemoteException::class)
-                                override fun onError(errorCode: Int) {
-                                    Log.d("Data", "PinPad onError, code:$errorCode")
-                                    GlobalScope.launch(Dispatchers.Main) {
-                                        (activity as VFTransactionActivity).declinedTransaction()
-                                    }
-                                }
-                            })
-                    } else {
-                        if (cardProcessedDataModal.getFallbackType() == EFallbackCode.EMV_fallback.fallBackCode)
-                            cardProcessedDataModal.setPosEntryMode(PosEntryModeType.EMV_POS_ENTRY_FALL_MAGNOPIN.posEntry.toString())
-                        else
-                            cardProcessedDataModal.setPosEntryMode(PosEntryModeType.POS_ENTRY_SWIPED_NO4DBC.posEntry.toString())
-                        cardProcessedDataModal.setApplicationPanSequenceValue("00")
-                        transactionCallback(cardProcessedDataModal)
-                    }
                 }
 
                 //This Override Function will only execute in case of EMV/Insert card type:-
@@ -466,6 +477,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                     }
                 }
 
+                //This Override Function will only execute in case of CLS card type:-
                 override fun onCardActivate() {
                     try {
                         println("Contactless is calling")
@@ -547,7 +559,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                     VFService.showToast("timeout")
                 }
 
-                //This Override method will call when something went wrong or any kind of exception happen in case of card detect:-
+                //This Override method will call when something went wrong or any kind of exception happen in case of card detecting:-
                 override fun onError(error: Int, message: String) {
                     //  cardProcessedDataModal.setReadCardType(DetectCardType.CARD_ERROR_TYPE)
                     VFService.showToast("error:$error, msg:$message")

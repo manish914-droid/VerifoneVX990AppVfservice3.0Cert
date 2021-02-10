@@ -48,7 +48,6 @@ import com.example.verifonevx990app.realmtables.*
 import com.example.verifonevx990app.tipAdjust.TipAdjustFragment
 import com.example.verifonevx990app.transactions.InputAmountFragment
 import com.example.verifonevx990app.transactions.NewInputAmountFragment
-import com.example.verifonevx990app.transactions.TransactionActivity
 import com.example.verifonevx990app.utils.printerUtils.PrintUtil
 import com.example.verifonevx990app.voidofflinesale.VoidOfflineSale
 import com.example.verifonevx990app.voidrefund.VoidOfRefund
@@ -628,10 +627,13 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
             UiAction.CASH_ADVANCE -> {
                 if (checkInternetConnection()) {
-                    val amt = data as String
-                    startActivityForResult(Intent(this, TransactionActivity::class.java).apply {
+                    val amt = (data as Pair<*, *>).first.toString()
+                    val otherAmount = data.second.toString()
+                    // val amt = data as String
+                    startActivityForResult(Intent(this, VFTransactionActivity::class.java).apply {
                         putExtra("amt", amt)
                         putExtra("type", action)
+                        putExtra("otherAmount", otherAmount)
                     }, EIntentRequest.TRANSACTION.code)
                 } else {
                     VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
@@ -640,16 +642,18 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
             UiAction.SALE_WITH_CASH -> {
                 if (checkInternetConnection()) {
-                    val amts = data as ArrayList<String>
+                    val amt = (data as Pair<*, *>).first.toString()
+                    val otherAmount = data.second.toString()
+                    //    val amts = data as ArrayList<String>
                     startActivityForResult(Intent(this, VFTransactionActivity::class.java).apply {
-                        val totalAmt = (amts[0].toFloat() + amts[1].toFloat()).toString()
+                        val totalAmt = (amt.toFloat() + otherAmount.toFloat()).toString()
                         val formattedTransAmount = "%.2f".format(totalAmt.toDouble())
                         putExtra("amt", formattedTransAmount)
                         putExtra("type", TransactionType.SALE_WITH_CASH.type)
                         putExtra("proc_code", ProcessingCode.SALE_WITH_CASH.code)
                         putExtra("title", TransactionType.SALE_WITH_CASH.txnTitle)
-                        putExtra("saleAmt", amts[0])
-                        putExtra("cashAmt", amts[1])
+                        putExtra("saleAmt", amt)
+                        putExtra("otherAmount", otherAmount)
                     }, EIntentRequest.TRANSACTION.code)
                 } else {
                     VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
