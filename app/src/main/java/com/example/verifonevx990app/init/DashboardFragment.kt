@@ -52,6 +52,7 @@ class DashboardFragment : Fragment() {
     }
     private var animShow: Animation? = null
     private var animHide: Animation? = null
+
     private val imageArr: IntArray by lazy {
         //  intArrayOf(R.drawable.mybann3, R.drawable.mybann5, R.drawable.mybann2, R.drawable.mybannr)
         intArrayOf(

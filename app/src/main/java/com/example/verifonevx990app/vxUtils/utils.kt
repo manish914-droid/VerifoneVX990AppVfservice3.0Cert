@@ -272,6 +272,7 @@ suspend fun saveToDB(spliter: List<String>) {
             IssuerParameterTable.performOperation(issuerParameterTable) {
                 logger("saveToDB", "ipt")
             }
+
         }
         spliter[2] == "106" -> {
             val terminalParameterTable = TerminalParameterTable()
@@ -391,7 +392,9 @@ suspend fun saveToDB(spliter: List<String>) {
             }
         }
         //endregion
+
     }
+
 }
 
 fun unzipZipedBytes(ba: ByteArray) {

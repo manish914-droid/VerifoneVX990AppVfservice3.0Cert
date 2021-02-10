@@ -7,6 +7,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
@@ -57,6 +59,13 @@ class NewInputAmountFragment : Fragment() {
         return binding?.root
     }
 
+    private var animShow: Animation? = null
+    private var animHide: Animation? = null
+    private fun initAnimation() {
+        animShow = AnimationUtils.loadAnimation(activity, R.anim.view_show)
+        animHide = AnimationUtils.loadAnimation(activity, R.anim.view_hide)
+
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -66,6 +75,10 @@ class NewInputAmountFragment : Fragment() {
         val hdfcCDTData = HdfcCdt() ///getHDFCDtData()
         Log.d("HDFCTPTData:- ", hdfcTPTData.toString())
         Log.d("HDFCCDTData:- ", hdfcCDTData.toString())
+        initAnimation()
+
+        binding?.mainKeyBoard?.root?.visibility = View.VISIBLE
+        binding?.mainKeyBoard?.root?.startAnimation(animShow)
 
         cashAmount = view.findViewById(R.id.cashAmount)
         ///  navController = Navigation.findNavController(view)
@@ -89,8 +102,7 @@ class NewInputAmountFragment : Fragment() {
         subHeaderBackButton = view.findViewById(R.id.back_image_button)
         setTxnTypeMsg(transactionType.title)
         subHeaderBackButton?.setOnClickListener {
-            ///    navController?.popBackStack()
-            //todo
+            parentFragmentManager.popBackStackImmediate()
         }
         keyModelSaleAmount.view = binding?.saleAmount
         keyModelSaleAmount.callback = ::onOKClicked
@@ -175,7 +187,6 @@ class NewInputAmountFragment : Fragment() {
     }
 
     private fun onSetKeyBoardButtonClick() {
-        binding?.mainKeyBoard?.key0
 
         binding?.mainKeyBoard?.key0?.setOnClickListener {
             if (inputInSaleAmount) {

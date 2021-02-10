@@ -73,7 +73,7 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
                 // Visa credit or debit	10 10
                 // Visa credit or debit	10 10
 
-                        "9F3303E020C8" +     //Terminal capability
+                "9F3303E020C8" +     //Terminal capability
                         "DF1A06000000012000" +
                         "9F0607A0000000031010" + //Application Aid
                         "9F40056F00F0F001" +  //Additional terminal cpability
@@ -122,7 +122,7 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
                         "DF010100" +
                         "DF140111" +
                         "DF170101" +
-                        "9F09020096" + //Application version number
+                        "9F09020096" + //Application version number(Terminal)
                         "DF180101" +
                         "DF1205D84000F800" +
                         "9F1B0400000000" +
@@ -566,8 +566,6 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
                     "DF040103" + // exponent
                     "DF0314B51EC5F7DE9BB6D8BCE8FB5F69BA57A04221F39BBF010131" + // checksum
                     "DF070101"// ARITH_IND
-
-
         )
         try {
             isSuccess = ipboc!!.updateRID(3, null)
