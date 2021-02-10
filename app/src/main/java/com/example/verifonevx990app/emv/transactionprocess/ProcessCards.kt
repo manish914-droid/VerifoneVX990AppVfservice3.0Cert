@@ -23,21 +23,27 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class ProcessCard(var activity: Activity, var handler: Handler, var cardProcessedDataModal: CardProcessedDataModal, transactionalAmount: Long, var transactionCallback: (CardProcessedDataModal) -> Unit) {
+class ProcessCard(
+    var activity: Activity,
+    var handler: Handler,
+    var cardProcessedDataModal: CardProcessedDataModal,
+    var transactionCallback: (CardProcessedDataModal) -> Unit
+) {
     //  private var iemv: IEMV? = VFService.vfIEMV
 
     //  private val cardProcessedDataModal: CardProcessedDataModal by lazy { CardProcessedDataModal() }
 
-    var transactionalAmounts = transactionalAmount
+    var transactionalAmt = cardProcessedDataModal.getTransactionAmount() ?: 0
+    var otherAmt = cardProcessedDataModal.getOtherAmount() ?: 0
 
     init {
         //VFService.showToast("Please Insert/Swipe/Tap Card")
-        detectCard(transactionalAmount)
+        detectCard()
 
     }
 
-// Detecting the card type ie(emv,cls,mag...)
-    private fun detectCard(transactionalAmount: Long?, fallbackType: Int = 0) {
+    // Detecting the card type ie(emv,cls,mag...)
+    private fun detectCard(fallbackType: Int = 0) {
         //Toast to show for the use card case:-
         //  VFService.showToast("start check card\nUse you card please")
         var iemv: IEMV? = VFService.vfIEMV
@@ -354,7 +360,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                     } catch (ex: NoSuchElementException) {
                         ex.printStackTrace()
                         VFService.showToast("Please use your card again now")
-                        detectCard(transactionalAmounts, fallbackType)
+                        detectCard(fallbackType)
                     } catch (ex: DeadObjectException) {
                         ex.printStackTrace()
                         println("Process card error22" + ex.message)
@@ -364,7 +370,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                 delay(100)
                                 iemv = VFService.vfIEMV
                                 delay(100)
-                                detectCard(transactionalAmounts, 0)
+                                detectCard(0)
                             }
                         }, 200)
                     } catch (ex: RemoteException) {
@@ -376,7 +382,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                 delay(100)
                                 iemv = VFService.vfIEMV
                                 delay(100)
-                                detectCard(transactionalAmounts, 0)
+                                detectCard(0)
                             }
                         }, 200)
                     } catch (ex: Exception) {
@@ -388,12 +394,10 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                 delay(100)
                                 iemv = VFService.vfIEMV
                                 delay(100)
-                                detectCard(transactionalAmounts, 0)
+                                detectCard(0)
                             }
                         }, 200)
                     }
-
-
                 }
 
                 //This Override Function will only execute in case of EMV/Insert card type:-
@@ -404,25 +408,22 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                         iemv?.abortEMV()
                         cardProcessedDataModal.setReadCardType(DetectCardType.EMV_CARD_TYPE)
                         VFService.vfBeeper?.startBeep(200)
-                        println("Transactionamount is calling" + transactionalAmount.toString() + "Handler is" + handler)
-                        if (transactionalAmount != null) {
-                            DoEmv(
-                                activity,
-                                handler,
-                                cardProcessedDataModal,
-                                ConstIPBOC.startEMV.intent.VALUE_cardType_smart_card,
-                                transactionalAmount
-                            ) { cardProcessedDataModal ->
-                                /*    if (cardProcessedDataModal.getFallbackType() != EFallbackCode.EMV_fallback.fallBackCode) {
-                                                println("Contact is calling in fallback")
-                                                iemv?.stopCheckCard()
-                                                detectCard(cardProcessedDataModal.getTransactionAmount(), cardProcessedDataModal.getFallbackType())
-                                            } else {
-                                                println("Contact is calling in fallback1")
-                                                transactionCallback(cardProcessedDataModal)
-                                            }*/
-                                transactionCallback(cardProcessedDataModal)
-                            }
+                        println("Transactionamount is calling" + transactionalAmt.toString() + "Handler is" + handler)
+                        DoEmv(
+                            activity,
+                            handler,
+                            cardProcessedDataModal,
+                            ConstIPBOC.startEMV.intent.VALUE_cardType_smart_card
+                        ) { cardProcessedDataModal ->
+                            /*    if (cardProcessedDataModal.getFallbackType() != EFallbackCode.EMV_fallback.fallBackCode) {
+                                            println("Contact is calling in fallback")
+                                            iemv?.stopCheckCard()
+                                            detectCard(cardProcessedDataModal.getTransactionAmount(), cardProcessedDataModal.getFallbackType())
+                                        } else {
+                                            println("Contact is calling in fallback1")
+                                            transactionCallback(cardProcessedDataModal)
+                                        }*/
+                            transactionCallback(cardProcessedDataModal)
                         }
                     } catch (ex: DeadObjectException) {
                         ex.printStackTrace()
@@ -433,7 +434,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                 delay(100)
                                 iemv = VFService.vfIEMV
                                 delay(100)
-                                detectCard(transactionalAmounts, 0)
+                                detectCard(0)
                             }
                         }, 200)
                     } catch (ex: RemoteException) {
@@ -445,7 +446,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                 delay(100)
                                 iemv = VFService.vfIEMV
                                 delay(100)
-                                detectCard(transactionalAmounts, 0)
+                                detectCard(0)
                             }
                         }, 200)
                     } catch (ex: Exception) {
@@ -485,17 +486,14 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                         iemv?.abortEMV()
                         cardProcessedDataModal.setReadCardType(DetectCardType.CONTACT_LESS_CARD_TYPE)
                         VFService.vfBeeper?.startBeep(200)
-                        println("Transactionamount is calling" + transactionalAmount.toString() + "Handler is" + handler)
-                        if (transactionalAmount != null) {
-                            DoEmv(
-                                activity,
-                                handler,
-                                cardProcessedDataModal,
-                                ConstIPBOC.startEMV.intent.VALUE_cardType_contactless,
-                                transactionalAmount
-                            ) { cardProcessedDataModal ->
-                                transactionCallback(cardProcessedDataModal)
-                            }
+                        println("Transactionamount is calling" + transactionalAmt.toString() + "Handler is" + handler)
+                        DoEmv(
+                            activity,
+                            handler,
+                            cardProcessedDataModal,
+                            ConstIPBOC.startEMV.intent.VALUE_cardType_contactless
+                        ) { cardProcessedDataModal ->
+                            transactionCallback(cardProcessedDataModal)
                         }
                     } catch (ex: DeadObjectException) {
                         ex.printStackTrace()
@@ -506,7 +504,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                 delay(100)
                                 iemv = VFService.vfIEMV
                                 delay(100)
-                                detectCard(transactionalAmounts, 0)
+                                detectCard(0)
                             }
                         }, 200)
                     } catch (ex: RemoteException) {
@@ -518,7 +516,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                 delay(100)
                                 iemv = VFService.vfIEMV
                                 delay(100)
-                                detectCard(transactionalAmounts, 0)
+                                detectCard(0)
                             }
                         }, 200)
                     } catch (ex: Exception) {
@@ -573,7 +571,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                     ), activity.getString(R.string.please_use_another_option), false
                                 ) {
                                     detectCard(
-                                        cardProcessedDataModal.getTransactionAmount() ?: 0,
+
                                         error
                                     )
                                 }
@@ -592,7 +590,6 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                 ) {
                                     cardProcessedDataModal.setFallbackType(EFallbackCode.EMV_fallback.fallBackCode)
                                     detectCard(
-                                        cardProcessedDataModal.getTransactionAmount() ?: 0,
                                         error
                                     )
                                 }
@@ -625,7 +622,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                 delay(100)
                                 iemv = VFService.vfIEMV
                                 delay(100)
-                                detectCard(transactionalAmounts, 0)
+                                detectCard(0)
                             }
                         }, 200)
 
@@ -638,7 +635,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                                 delay(100)
                                 iemv = VFService.vfIEMV
                                 delay(100)
-                                detectCard(transactionalAmounts, 0)
+                                detectCard(0)
                             }
                         }, 200)
                     }
@@ -654,7 +651,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                     delay(100)
                     iemv = VFService.vfIEMV
                     delay(100)
-                    detectCard(transactionalAmounts, 0)
+                    detectCard(0)
                 }
             }, 200)
 
@@ -667,7 +664,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                     delay(100)
                     iemv = VFService.vfIEMV
                     delay(100)
-                    detectCard(transactionalAmounts, 0)
+                    detectCard(0)
                 }
             }, 200)
         } catch (ex: Exception) {
@@ -679,7 +676,7 @@ class ProcessCard(var activity: Activity, var handler: Handler, var cardProcesse
                     delay(100)
                     iemv = VFService.vfIEMV
                     delay(100)
-                    detectCard(transactionalAmounts, 0)
+                    detectCard(0)
                 }
             }, 200)
         }

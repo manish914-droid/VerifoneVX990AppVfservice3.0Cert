@@ -135,7 +135,6 @@ class VFTransactionActivity : BaseActivity() {
                                     this@VFTransactionActivity,
                                     pinHandler,
                                     globalCardProcessedModel,
-                                    transactionalAmount
                                 ) { localCardProcessedData ->
                                     localCardProcessedData.setProcessingCode(
                                         transactionProcessingCode
@@ -178,7 +177,7 @@ class VFTransactionActivity : BaseActivity() {
                         })
                 }
             } else {
-                ProcessCard(this, pinHandler, globalCardProcessedModel, transactionalAmount) { localCardProcessedData ->
+                ProcessCard(this, pinHandler, globalCardProcessedModel) { localCardProcessedData ->
                     localCardProcessedData.setProcessingCode(transactionProcessingCode)
                     localCardProcessedData.setTransactionAmount(transactionalAmount)
                     localCardProcessedData.setOtherAmount(otherTransAmount)
@@ -341,6 +340,8 @@ class VFTransactionActivity : BaseActivity() {
         findViewById<BHTextView>(R.id.base_amt_tv).text = amountValue
         transactionalAmount = transactionAmountValue.replace(".", "").toLong()
         otherTransAmount = transactionOtherAmountValue.replace(".", "").toLong()
+        globalCardProcessedModel.setOtherAmount(otherTransAmount)
+        globalCardProcessedModel.setTransactionAmount(transactionalAmount)
 
         if (isManualEntryAllowed) binding?.manualEntryButton?.visibility =
             View.VISIBLE else binding?.manualEntryButton?.visibility = View.GONE

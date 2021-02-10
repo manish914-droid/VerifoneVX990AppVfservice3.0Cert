@@ -16,11 +16,20 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class DoEmv(var activity: Activity, var handler: Handler, var cardProcessedDataModal: CardProcessedDataModal, valueCardTypeSmartCard: Int, transactionalAmount: Long, var transactionCallback : (CardProcessedDataModal) -> Unit) {
-    private val iemv : IEMV? by lazy { VFService.vfIEMV }
- //    private var iemv: IEMV? = VFService.vfIEMV
+class DoEmv(
+    var activity: Activity,
+    var handler: Handler,
+    var cardProcessedDataModal: CardProcessedDataModal,
+    valueCardTypeSmartCard: Int,
+    var transactionCallback: (CardProcessedDataModal) -> Unit
+) {
+    private val iemv: IEMV? by lazy { VFService.vfIEMV }
+
+    //    private var iemv: IEMV? = VFService.vfIEMV
+    var transactionalAmount = cardProcessedDataModal.getTransactionAmount() ?: 0
+
     init {
-        startEMVProcess(valueCardTypeSmartCard , transactionalAmount)
+        startEMVProcess(valueCardTypeSmartCard, transactionalAmount)
     }
 
     // First GEN AC
@@ -90,9 +99,9 @@ class DoEmv(var activity: Activity, var handler: Handler, var cardProcessedDataM
             emvIntent.putString(TRASNSCURRENTCODE, "0356")
             emvIntent.putString(OTHERAMOUNT, "0")
             iemv?.startEMV(ConstIPBOC.startEMV.processType.full_process, emvIntent, emvHandler())
-        } catch (ex: DeadObjectException){
+        } catch (ex: DeadObjectException) {
             ex.printStackTrace()
-            println("DoEmv card error1"+ex.message)
+            println("DoEmv card error1" + ex.message)
             Handler(Looper.getMainLooper()).postDelayed(Runnable {
                 GlobalScope.launch {
                     VFService.connectToVFService(VerifoneApp.appContext)
@@ -104,7 +113,7 @@ class DoEmv(var activity: Activity, var handler: Handler, var cardProcessedDataM
             }, 200)
         } catch (e: RemoteException) {
             e.printStackTrace()
-            println("DoEmv card error2"+e.message)
+            println("DoEmv card error2" + e.message)
             Handler(Looper.getMainLooper()).postDelayed(Runnable {
                 GlobalScope.launch {
                     VFService.connectToVFService(VerifoneApp.appContext)
@@ -114,17 +123,19 @@ class DoEmv(var activity: Activity, var handler: Handler, var cardProcessedDataM
                     (activity as VFTransactionActivity).doProcessCard()
                 }
             }, 200)
-        } catch (e: Exception){
+        } catch (e: Exception) {
             e.printStackTrace()
-            println("DoEmv card error3"+e.message)
+            println("DoEmv card error3" + e.message)
             val builder = AlertDialog.Builder(activity)
             object : Thread() {
                 override fun run() {
                     Looper.prepare()
                     builder.setTitle("Alert...!!")
                     builder.setCancelable(false)
-                    builder.setMessage("Service stopped , " +
-                            "Please reinitiate the transaction.")
+                    builder.setMessage(
+                        "Service stopped , " +
+                                "Please reinitiate the transaction."
+                    )
                         .setCancelable(false)
                         .setPositiveButton("Start") { _, _ ->
                             forceStart(activity)
