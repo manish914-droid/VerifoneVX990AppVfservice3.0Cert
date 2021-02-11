@@ -4,6 +4,7 @@ package com.example.verifonevx990app.utils
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
+import com.example.verifonevx990app.vxUtils.VFService
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -18,7 +19,7 @@ class KeyboardModel {
 
     fun onKeyClicked(str: String) {
         GlobalScope.launch(Dispatchers.IO) {
-            //    NeptuneService.beepNormal()
+            VFService.vfBeeper?.startBeep(100)
             try {
                 if (view != null) {
                     when (view) {

@@ -229,11 +229,11 @@ interface IDeviceService {
      * \cn_
      * @brief 设备操作对象
      *
-     * @return IDeviceInfo对象，参见IDeviceInfo.aidl类 | @return IDeviceInfo, please refer IDeviceInfo.aidl
+     * @return IDeviceInfo对象，参见IdeviceInfo?.aidl类 | @return IDeviceInfo, please refer IdeviceInfo?.aidl
      * \_en_
      * @brief get IDeviceInfo for device information
      *
-     * @return IDeviceInfo, please refer IDeviceInfo.aidl
+     * @return IDeviceInfo, please refer IdeviceInfo?.aidl
      * \en_e
      * \code{.java}
      * \endcode
@@ -295,11 +295,11 @@ interface IDeviceService {
      * \cn_
      * @brief 获取EMV流程操作对象
      *
-     * @return IEMV对象，参见IEMV.aidl类 | @ return IEMV, please refer IEMV.aidl
+     * @return IEMV对象，参见IEMV.aidl类 | @ return IEMV, please referiemv?.aidl
      * \_en_
      * @brief get IEMV
      *
-     * @return IEMV, please refer IEMV.aidl
+     * @return IEMV, please referiemv?.aidl
      * \en_e
      * \code{.java}
      * \endcode

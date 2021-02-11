@@ -52,7 +52,7 @@ interface EMVHandler {
             //check the cancel flag
             Boolean cancelSelectApplication = false;
             if (cancelSelectApplication) {
-                iemv.abortEMV();
+               iemv?.abortEMV();
                 // ("user cancel");
                 return;
             }
@@ -61,7 +61,7 @@ interface EMVHandler {
                 .....
             }
             //show the application list, get the index
-            iemv.importAppSelection(index);
+           iemv?.importAppSelection(index);
         }
      * \endcode
      * @see IEMV#abortEMV, IEMV#importAppSelection
@@ -98,16 +98,16 @@ interface EMVHandler {
                     "\nEXPIRED_DATE:" + info.getString("EXPIRED_DATE");
 
             if (true) {
-                    byte[] strs = iemv.getCardData("9F51");
+                    byte[] strs =iemv?.getCardData("9F51");
                 } else {
             }
 
             // get the result
             if ( cancel ) {
-                iemv.abortEMV();
-                iemv.importCardConfirmResult(false);
+               iemv?.abortEMV();
+               iemv?.importCardConfirmResult(false);
             } else {
-                iemv.importCardConfirmResult(true);
+               iemv?.importCardConfirmResult(true);
             }
         }
     }

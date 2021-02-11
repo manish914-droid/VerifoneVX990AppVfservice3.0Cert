@@ -1,0 +1,9 @@
+/**
+This File consist WorkFlow Steps and Short Describe Regarding BankEMI Transaction on Android HDFC POS Terminal:-
+**/
+
+//=================BankEMI=================
+1.First Step is to show Amount Input Screen
+2.Next Step is to show MobileNumber/Bill Number Input in Dialog and they are not mandatory to fill
+3.Navigate To Card Accept Screen (Note:- BankEMI will only work for EMV and Swipe Cards)
+4.Fetch PanNumber of Card and Do Host Hit for EMI Tenure , Rates , Amount to be Approved , Discount data

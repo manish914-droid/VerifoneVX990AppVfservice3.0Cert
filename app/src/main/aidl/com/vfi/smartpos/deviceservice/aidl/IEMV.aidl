@@ -1,4 +1,4 @@
-// IEMV.aidl
+//iemv?.aidl
 package com.vfi.smartpos.deviceservice.aidl;
 import com.vfi.smartpos.deviceservice.aidl.CheckCardListener;
 import com.vfi.smartpos.deviceservice.aidl.UPCardListener;
@@ -273,7 +273,7 @@ interface IEMV {
          String[] strlist = {"9F33", "9F40", "9F10", "9F26", "95", "9F37", "9F1E", "9F36",
                  "82", "9F1A", "9A", "9B", "50", "84", "5F2A", "8F"};
 
-         String strs = iemv.getAppTLVList(strlist);
+         String strs =iemv?.getAppTLVList(strlist);
       }
      * \endcode
      * @version
@@ -537,7 +537,7 @@ interface IEMV {
      * @brief set before startEMV(), set callback for request issuer update script(CTLS request second tap)
      * \en_e
      * @version 2.16.0.0
-     * @see iemv.setIssuerUpdateScript()
+     * @seeiemv?.setIssuerUpdateScript()
      */
     void setIssuerUpdateHandler(in IssuerUpdateHandler issuerUpdateHandler);
 

@@ -47,7 +47,7 @@ import com.example.verifonevx990app.preAuth.VoidPreAuthFragment
 import com.example.verifonevx990app.realmtables.*
 import com.example.verifonevx990app.tipAdjust.TipAdjustFragment
 import com.example.verifonevx990app.transactions.InputAmountFragment
-import com.example.verifonevx990app.transactions.TransactionActivity
+import com.example.verifonevx990app.transactions.NewInputAmountFragment
 import com.example.verifonevx990app.utils.printerUtils.PrintUtil
 import com.example.verifonevx990app.voidofflinesale.VoidOfflineSale
 import com.example.verifonevx990app.voidrefund.VoidOfRefund
@@ -594,7 +594,9 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
             UiAction.START_SALE -> {
                 if (checkInternetConnection()) {
-                    val amt = data as String
+                    //  val amt = data as String
+                    val amt = (data as Pair<*, *>).first.toString()
+                    val otherAmount = data.second.toString()
                     startActivityForResult(Intent(this, VFTransactionActivity::class.java).apply {
                         putExtra("amt", amt)
                         putExtra("type", TransactionType.SALE.type)
@@ -609,7 +611,8 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
             UiAction.BANK_EMI -> {
                 if (checkInternetConnection()) {
-                    val amt = data as String
+                    isFirstBankEMICardRead = true
+                    val amt = (data as Pair<*, *>).first.toString()
                     startActivityForResult(Intent(this, VFTransactionActivity::class.java).apply {
                         putExtra("amt", amt)
                         putExtra("type", TransactionType.EMI_SALE.type) //EMI //UiAction.BANK_EMI
@@ -624,10 +627,13 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
             UiAction.CASH_ADVANCE -> {
                 if (checkInternetConnection()) {
-                    val amt = data as String
-                    startActivityForResult(Intent(this, TransactionActivity::class.java).apply {
+                    val amt = (data as Pair<*, *>).first.toString()
+                    val otherAmount = data.second.toString()
+                    // val amt = data as String
+                    startActivityForResult(Intent(this, VFTransactionActivity::class.java).apply {
                         putExtra("amt", amt)
                         putExtra("type", action)
+                        putExtra("otherAmount", otherAmount)
                     }, EIntentRequest.TRANSACTION.code)
                 } else {
                     VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
@@ -636,16 +642,18 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
             UiAction.SALE_WITH_CASH -> {
                 if (checkInternetConnection()) {
-                    val amts = data as ArrayList<String>
+                    val amt = (data as Pair<*, *>).first.toString()
+                    val otherAmount = data.second.toString()
+                    //    val amts = data as ArrayList<String>
                     startActivityForResult(Intent(this, VFTransactionActivity::class.java).apply {
-                        val totalAmt = (amts[0].toFloat() + amts[1].toFloat()).toString()
+                        val totalAmt = (amt.toFloat() + otherAmount.toFloat()).toString()
                         val formattedTransAmount = "%.2f".format(totalAmt.toDouble())
                         putExtra("amt", formattedTransAmount)
                         putExtra("type", TransactionType.SALE_WITH_CASH.type)
                         putExtra("proc_code", ProcessingCode.SALE_WITH_CASH.code)
                         putExtra("title", TransactionType.SALE_WITH_CASH.txnTitle)
-                        putExtra("saleAmt", amts[0])
-                        putExtra("cashAmt", amts[1])
+                        putExtra("saleAmt", amt)
+                        putExtra("otherAmount", otherAmount)
                     }, EIntentRequest.TRANSACTION.code)
                 } else {
                     VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
@@ -685,266 +693,266 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
     }
 
-    //Old Amex
-    override fun onTransactionRequest(action: EDashboardItem) {
-        when (action) {
+    /* //Old Amex
+     override fun onTransactionRequest(action: EDashboardItem) {
+         when (action) {
 
-            EDashboardItem.NONE -> {
-                //AppPreference.saveBoolean(AppPreference.LOGIN, false)
-                decideHome()
-            }
+             EDashboardItem.NONE -> {
+                 //AppPreference.saveBoolean(AppPreference.LOGIN, false)
+                 decideHome()
+             }
 
-            EDashboardItem.SALE -> {
-                if (checkInternetConnection()) {
-                    inflateInputFragment(
-                        InputAmountFragment(),
-                        SubHeaderTitle.SALE_SUBHEADER_VALUE.title,
-                        action
-                    )
-                } else {
-                    VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
-                }
-            }
-            EDashboardItem.SALE_WITH_CASH -> {
-                if (checkInternetConnection()) {
-                    inflateInputFragment(
-                        InputAmountFragment(),
-                        SubHeaderTitle.SALE_WITH_CASH_SUBHEADER_VALUE.title,
-                        action
-                    )
-                } else {
-                    VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
-                }
-            }
-            EDashboardItem.PREAUTH -> {
-                if (checkInternetConnection()) {
-                    inflateInputFragment(
-                        InputAmountFragment(),
-                        SubHeaderTitle.PREAUTH_SUBHEADER_VALUE.title,
-                        action
-                    )
-                } else {
-                    VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
-                }
-            }
-            EDashboardItem.OFFLINE_SALE -> {
-                offlineTransactionAmountLimit =
-                    IssuerParameterTable.selectFromIssuerParameterTable(AppPreference.WALLET_ISSUER_ID)?.transactionAmountLimit?.toDouble()
-                        ?.div(100)
-                if (offlineTransactionAmountLimit!! > 0.0) {
-                    inflateInputFragment(
-                        OfflineManualSaleInputFragment(),
-                        SubHeaderTitle.OFFLINE_SALE_SUBHEADER_VALUE.title,
-                        action
-                    )
-                } else
-                    VFService.showToast(getString(R.string.transaction_limit_exceeds))
-            }
+             EDashboardItem.SALE -> {
+                 if (checkInternetConnection()) {
+                     inflateInputFragment(
+                         NewInputAmountFragment(),
+                         SubHeaderTitle.SALE_SUBHEADER_VALUE.title,
+                         action
+                     )
+                 } else {
+                     VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                 }
+             }
+             EDashboardItem.SALE_WITH_CASH -> {
+                 if (checkInternetConnection()) {
+                     inflateInputFragment(
+                         InputAmountFragment(),
+                         SubHeaderTitle.SALE_WITH_CASH_SUBHEADER_VALUE.title,
+                         action
+                     )
+                 } else {
+                     VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                 }
+             }
+             EDashboardItem.PREAUTH -> {
+                 if (checkInternetConnection()) {
+                     inflateInputFragment(
+                         InputAmountFragment(),
+                         SubHeaderTitle.PREAUTH_SUBHEADER_VALUE.title,
+                         action
+                     )
+                 } else {
+                     VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                 }
+             }
+             EDashboardItem.OFFLINE_SALE -> {
+                 offlineTransactionAmountLimit =
+                     IssuerParameterTable.selectFromIssuerParameterTable(AppPreference.WALLET_ISSUER_ID)?.transactionAmountLimit?.toDouble()
+                         ?.div(100)
+                 if (offlineTransactionAmountLimit!! > 0.0) {
+                     inflateInputFragment(
+                         OfflineManualSaleInputFragment(),
+                         SubHeaderTitle.OFFLINE_SALE_SUBHEADER_VALUE.title,
+                         action
+                     )
+                 } else
+                     VFService.showToast(getString(R.string.transaction_limit_exceeds))
+             }
 
-            EDashboardItem.VOID_OFFLINE_SALE -> {
-                if (checkInternetConnection()) {
-                    inflateInputFragment(
-                        VoidOfflineSale(),
-                        SubHeaderTitle.VOID_OFFLINE_SALE_SUBHEADER_VALUE.title,
-                        action
-                    )
-                } else {
-                    VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
-                }
-            }
+             EDashboardItem.VOID_OFFLINE_SALE -> {
+                 if (checkInternetConnection()) {
+                     inflateInputFragment(
+                         VoidOfflineSale(),
+                         SubHeaderTitle.VOID_OFFLINE_SALE_SUBHEADER_VALUE.title,
+                         action
+                     )
+                 } else {
+                     VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                 }
+             }
 
-            EDashboardItem.CASH_ADVANCE -> {
-                if (!AppPreference.getBoolean(PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString()) &&
-                    !AppPreference.getBoolean(PrefConstant.INSERT_PPK_DPK.keyName.toString()) &&
-                    !AppPreference.getBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString())
-                ) {
-                    if (checkInternetConnection()) {
-                        transactFragment(InputAmountFragment().apply {
-                            arguments = Bundle().apply {
-                                putSerializable("type", action)
-                                putString(INPUT_SUB_HEADING, SubHeaderTitle.CASH_ADVANCE.title)
-                            }
-                        })
-                    } else {
-                        VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
-                    }
-                } else {
-                    checkAndPerformOperation()
-                }
-            }
+             EDashboardItem.CASH_ADVANCE -> {
+                 if (!AppPreference.getBoolean(PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString()) &&
+                     !AppPreference.getBoolean(PrefConstant.INSERT_PPK_DPK.keyName.toString()) &&
+                     !AppPreference.getBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString())
+                 ) {
+                     if (checkInternetConnection()) {
+                         transactFragment(InputAmountFragment().apply {
+                             arguments = Bundle().apply {
+                                 putSerializable("type", action)
+                                 putString(INPUT_SUB_HEADING, SubHeaderTitle.CASH_ADVANCE.title)
+                             }
+                         })
+                     } else {
+                         VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                     }
+                 } else {
+                     checkAndPerformOperation()
+                 }
+             }
 
-            EDashboardItem.VOID_SALE ->
-                if (!AppPreference.getBoolean(PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString()) &&
-                    !AppPreference.getBoolean(PrefConstant.INSERT_PPK_DPK.keyName.toString()) &&
-                    !AppPreference.getBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString())
-                ) {
-                    if (checkInternetConnection()) {
-                        transactFragment(VoidTransactionFragment().apply {
-                            arguments = Bundle().apply {
-                                putSerializable("type", action)
-                                putString(
-                                    INPUT_SUB_HEADING,
-                                    SubHeaderTitle.VOID_SUBHEADER_VALUE.title
-                                )
-                            }
-                        })
-                    } else {
-                        VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
-                    }
-                } else {
-                    checkAndPerformOperation()
-                }
+             EDashboardItem.VOID_SALE ->
+                 if (!AppPreference.getBoolean(PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString()) &&
+                     !AppPreference.getBoolean(PrefConstant.INSERT_PPK_DPK.keyName.toString()) &&
+                     !AppPreference.getBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString())
+                 ) {
+                     if (checkInternetConnection()) {
+                         transactFragment(VoidTransactionFragment().apply {
+                             arguments = Bundle().apply {
+                                 putSerializable("type", action)
+                                 putString(
+                                     INPUT_SUB_HEADING,
+                                     SubHeaderTitle.VOID_SUBHEADER_VALUE.title
+                                 )
+                             }
+                         })
+                     } else {
+                         VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                     }
+                 } else {
+                     checkAndPerformOperation()
+                 }
 
 
-            EDashboardItem.REFUND -> {
-                if (!AppPreference.getBoolean(PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString()) &&
-                    !AppPreference.getBoolean(PrefConstant.INSERT_PPK_DPK.keyName.toString()) &&
-                    !AppPreference.getBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString())
-                ) {
-                    if (checkInternetConnection()) {
-                        verifyAdminPasswordDialog(this) {
-                            if (it) {
-                                transactFragment(InputAmountFragment().apply {
-                                    arguments = Bundle().apply {
-                                        putSerializable("type", action)
-                                        putString(
-                                            INPUT_SUB_HEADING,
-                                            SubHeaderTitle.REFUND_SUBHEADER_VALUE.title
-                                        )
-                                    }
-                                })
-                            }
-                        }
-                    } else {
-                        VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
-                    }
-                } else {
-                    checkAndPerformOperation()
-                }
-            }
+             EDashboardItem.REFUND -> {
+                 if (!AppPreference.getBoolean(PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString()) &&
+                     !AppPreference.getBoolean(PrefConstant.INSERT_PPK_DPK.keyName.toString()) &&
+                     !AppPreference.getBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString())
+                 ) {
+                     if (checkInternetConnection()) {
+                         verifyAdminPasswordDialog(this) {
+                             if (it) {
+                                 transactFragment(InputAmountFragment().apply {
+                                     arguments = Bundle().apply {
+                                         putSerializable("type", action)
+                                         putString(
+                                             INPUT_SUB_HEADING,
+                                             SubHeaderTitle.REFUND_SUBHEADER_VALUE.title
+                                         )
+                                     }
+                                 })
+                             }
+                         }
+                     } else {
+                         VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                     }
+                 } else {
+                     checkAndPerformOperation()
+                 }
+             }
 
-            EDashboardItem.PREAUTH_COMPLETE -> {
-                if (!AppPreference.getBoolean(PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString()) &&
-                    !AppPreference.getBoolean(PrefConstant.INSERT_PPK_DPK.keyName.toString()) &&
-                    !AppPreference.getBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString())
-                ) {
-                    if (checkInternetConnection()) {
-                        transactFragment(PreAuthCompleteInputDetailFragment()
-                            .apply {
-                                arguments = Bundle().apply {
-                                    putSerializable("type", action)
-                                    putString(
-                                        INPUT_SUB_HEADING,
-                                        SubHeaderTitle.PRE_AUTH_COMPLETE.title
-                                    )
-                                }
-                            })
-                    } else {
-                        VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
-                    }
-                } else {
-                    checkAndPerformOperation()
-                }
-            }
+             EDashboardItem.PREAUTH_COMPLETE -> {
+                 if (!AppPreference.getBoolean(PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString()) &&
+                     !AppPreference.getBoolean(PrefConstant.INSERT_PPK_DPK.keyName.toString()) &&
+                     !AppPreference.getBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString())
+                 ) {
+                     if (checkInternetConnection()) {
+                         transactFragment(PreAuthCompleteInputDetailFragment()
+                             .apply {
+                                 arguments = Bundle().apply {
+                                     putSerializable("type", action)
+                                     putString(
+                                         INPUT_SUB_HEADING,
+                                         SubHeaderTitle.PRE_AUTH_COMPLETE.title
+                                     )
+                                 }
+                             })
+                     } else {
+                         VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                     }
+                 } else {
+                     checkAndPerformOperation()
+                 }
+             }
 
-            EDashboardItem.EMI_ENQUIRY, EDashboardItem.BANK_EMI -> {
-                if (!AppPreference.getBoolean(PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString()) &&
-                    !AppPreference.getBoolean(PrefConstant.INSERT_PPK_DPK.keyName.toString()) &&
-                    !AppPreference.getBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString())
-                ) {
-                    if (checkInternetConnection()) {
-                        transactFragment(InputAmountFragment().apply {
-                            arguments = Bundle().apply {
-                                putSerializable("type", action)
-                                if (action == EDashboardItem.EMI_ENQUIRY)
-                                    putString(INPUT_SUB_HEADING, SubHeaderTitle.EMI_CATALOG.title)
-                                if (action == EDashboardItem.BANK_EMI)
-                                    putString(INPUT_SUB_HEADING, SubHeaderTitle.BANK_EMI.title)
-                            }
-                        })
-                    } else {
-                        VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
-                    }
-                } else {
-                    checkAndPerformOperation()
-                }
-            }
+             EDashboardItem.EMI_ENQUIRY, EDashboardItem.BANK_EMI -> {
+                 if (!AppPreference.getBoolean(PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString()) &&
+                     !AppPreference.getBoolean(PrefConstant.INSERT_PPK_DPK.keyName.toString()) &&
+                     !AppPreference.getBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString())
+                 ) {
+                     if (checkInternetConnection()) {
+                         transactFragment(InputAmountFragment().apply {
+                             arguments = Bundle().apply {
+                                 putSerializable("type", action)
+                                 if (action == EDashboardItem.EMI_ENQUIRY)
+                                     putString(INPUT_SUB_HEADING, SubHeaderTitle.EMI_CATALOG.title)
+                                 if (action == EDashboardItem.BANK_EMI)
+                                     putString(INPUT_SUB_HEADING, SubHeaderTitle.BANK_EMI.title)
+                             }
+                         })
+                     } else {
+                         VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                     }
+                 } else {
+                     checkAndPerformOperation()
+                 }
+             }
 
-            EDashboardItem.VOID_REFUND -> {
-                if (!AppPreference.getBoolean(PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString()) &&
-                    !AppPreference.getBoolean(PrefConstant.INSERT_PPK_DPK.keyName.toString()) &&
-                    !AppPreference.getBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString())
-                ) {
-                    if (checkInternetConnection()) {
-                        transactFragment(VoidOfRefund()
-                            .apply {
-                                arguments = Bundle().apply {
-                                    putSerializable("trans_type", TransactionType.VOID_REFUND)
-                                    putSerializable("type", action)
-                                    putString(
-                                        INPUT_SUB_HEADING,
-                                        SubHeaderTitle.VOID_REFUND_SUBHEADER_VALUE.title
-                                    )
-                                }
-                            })
-                    } else {
-                        VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
-                    }
-                } else {
-                    checkAndPerformOperation()
-                }
-            }
+             EDashboardItem.VOID_REFUND -> {
+                 if (!AppPreference.getBoolean(PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString()) &&
+                     !AppPreference.getBoolean(PrefConstant.INSERT_PPK_DPK.keyName.toString()) &&
+                     !AppPreference.getBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString())
+                 ) {
+                     if (checkInternetConnection()) {
+                         transactFragment(VoidOfRefund()
+                             .apply {
+                                 arguments = Bundle().apply {
+                                     putSerializable("trans_type", TransactionType.VOID_REFUND)
+                                     putSerializable("type", action)
+                                     putString(
+                                         INPUT_SUB_HEADING,
+                                         SubHeaderTitle.VOID_REFUND_SUBHEADER_VALUE.title
+                                     )
+                                 }
+                             })
+                     } else {
+                         VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                     }
+                 } else {
+                     checkAndPerformOperation()
+                 }
+             }
 
-            EDashboardItem.PENDING_PREAUTH -> {
-                if (!AppPreference.getBoolean(PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString()) &&
-                    !AppPreference.getBoolean(PrefConstant.INSERT_PPK_DPK.keyName.toString()) &&
-                    !AppPreference.getBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString())
-                )
-                    if (checkInternetConnection()) {
-                        PendingPreauth(this).confirmationAlert(
-                            getString(R.string.confirmation),
-                            getString(R.string.pending_preauth_alert_msg)
-                        )
-                    } else {
-                        VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
-                    }
-                else
-                    checkAndPerformOperation()
-            }
+             EDashboardItem.PENDING_PREAUTH -> {
+                 if (!AppPreference.getBoolean(PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString()) &&
+                     !AppPreference.getBoolean(PrefConstant.INSERT_PPK_DPK.keyName.toString()) &&
+                     !AppPreference.getBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString())
+                 )
+                     if (checkInternetConnection()) {
+                         PendingPreauth(this).confirmationAlert(
+                             getString(R.string.confirmation),
+                             getString(R.string.pending_preauth_alert_msg)
+                         )
+                     } else {
+                         VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                     }
+                 else
+                     checkAndPerformOperation()
+             }
 
-            EDashboardItem.VOID_PREAUTH -> {
-                if (!AppPreference.getBoolean(PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString()) &&
-                    !AppPreference.getBoolean(PrefConstant.INSERT_PPK_DPK.keyName.toString()) &&
-                    !AppPreference.getBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString())
-                ) {
-                    if (checkInternetConnection()) {
-                        transactFragment(
-                            VoidPreAuthFragment()
-                                .apply {
-                                    arguments = Bundle().apply {
-                                        putSerializable("type", TransactionType.VOID_PREAUTH)
-                                        putString(
-                                            INPUT_SUB_HEADING,
-                                            SubHeaderTitle.VOID_PRE_AUTH.title
-                                        )
-                                    }
-                                })
-                    } else {
-                        VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
-                    }
+             EDashboardItem.VOID_PREAUTH -> {
+                 if (!AppPreference.getBoolean(PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString()) &&
+                     !AppPreference.getBoolean(PrefConstant.INSERT_PPK_DPK.keyName.toString()) &&
+                     !AppPreference.getBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString())
+                 ) {
+                     if (checkInternetConnection()) {
+                         transactFragment(
+                             VoidPreAuthFragment()
+                                 .apply {
+                                     arguments = Bundle().apply {
+                                         putSerializable("type", TransactionType.VOID_PREAUTH)
+                                         putString(
+                                             INPUT_SUB_HEADING,
+                                             SubHeaderTitle.VOID_PRE_AUTH.title
+                                         )
+                                     }
+                                 })
+                     } else {
+                         VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                     }
 
-                } else {
-                    checkAndPerformOperation()
-                }
-            }
+                 } else {
+                     checkAndPerformOperation()
+                 }
+             }
 
-            EDashboardItem.PENDING_OFFLINE_SALE -> {
-                /* if (!AppPreference.getBoolean(PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString()) &&
+             EDashboardItem.PENDING_OFFLINE_SALE -> {
+                 *//* if (!AppPreference.getBoolean(PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString()) &&
                      !AppPreference.getBoolean(PrefConstant.INSERT_PPK_DPK.keyName.toString()) &&
                      !AppPreference.getBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString()))
                      transactFragment(PreAuthCompleteInputDetailFragment())
                  else
-                     checkAndPerformOperation()*/
+                     checkAndPerformOperation()*//*
             }
 
             EDashboardItem.SALE_TIP -> {
@@ -975,19 +983,19 @@ class MainActivity : BaseActivity(), IFragmentRequest,
             }
         }
     }
-
+*/
     //New HDFC
     override fun onDashBoardItemClick(action: EDashboardItem) {
         //   NeptuneService.beepNormal()
         isDashboardOpen = false
         when (action) {
-            EDashboardItem.SALE, EDashboardItem.SALE_WITH_CASH, EDashboardItem.CASH_ADVANCE, EDashboardItem.PREAUTH -> {
+            EDashboardItem.SALE, EDashboardItem.BANK_EMI, EDashboardItem.SALE_WITH_CASH, EDashboardItem.CASH_ADVANCE, EDashboardItem.PREAUTH -> {
                 /* val bundle = Bundle()
                 bundle.putSerializable("type", action)
                 navHostFragment?.navController?.navigate(R.id.inputAmountFragment, bundle)*/
                 if (checkInternetConnection()) {
                     inflateInputFragment(
-                        InputAmountFragment(),
+                        NewInputAmountFragment(),
                         SubHeaderTitle.SALE_SUBHEADER_VALUE.title,
                         action
                     )
@@ -1118,8 +1126,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                 }
             }
 
-            EDashboardItem.CROSS_SELL ->
-
+            EDashboardItem.CROSS_SELL -> {
                 if (checkInternetConnection()) {
                     val tpt = TerminalParameterTable.selectFromSchemeTable()
                     if (tpt != null) {
@@ -1139,10 +1146,17 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                 } else {
                     VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
                 }
-
-            else -> {
-                showToast("To be implemented...")
             }
+
+            EDashboardItem.EMI_ENQUIRY -> {
+                val tpt = TerminalParameterTable.selectFromSchemeTable()
+                VFService.setAidRid(
+                    addPad(tpt?.minCtlsTransAmt ?: "", "0", 12, true),
+                    addPad(tpt?.maxCtlsTransAmt ?: "", "0", 12, true)
+                )
+            }
+
+            else -> showToast("To be implemented...")
         }
     }
 
@@ -1978,6 +1992,5 @@ enum class ConnectionError(val errorCode: Int) {
 
 interface IFragmentRequest {
     fun onFragmentRequest(action: UiAction, data: Any, extraPairData: Pair<String, String>? = null)
-    fun onTransactionRequest(action: EDashboardItem)
     fun onDashBoardItemClick(action: EDashboardItem)
 }

@@ -48,24 +48,28 @@ class VFTransactionActivity : BaseActivity() {
     companion object {
         val TAG = VFTransactionActivity::class.java.simpleName
     }
+
     private var userInactivity: Boolean = false
     private val pinHandler = Handler(Looper.getMainLooper())
     private var transactionalAmount: Long = 0L
-    private var cashAmount: Long = 0L
+    private var otherTransAmount: Long = 0L
     private val transactionAmountValue by lazy { intent.getStringExtra("amt") ?: "0" }
+
+    //used for other cash amount
+    private val transactionOtherAmountValue by lazy { intent.getStringExtra("otherAmount") ?: "0" }
+
+    //used in case of sale with cash
+    private val saleAmt by lazy { intent.getStringExtra("saleAmt") ?: "0" }
     private val mobileNumber by lazy { intent.getStringExtra("mobileNumber") ?: "" }
     private val billNumber by lazy { intent.getStringExtra("billNumber") ?: "0" }
 
-    //used for other cash amount
-    private val transactionCashAmountValue by lazy { intent.getStringExtra("cashAmt") ?: "0" }
+
     private val transactionProcessingCode by lazy {
         intent.getStringExtra("proc_code") ?: "92001"
     } //Just for checking purpose
     private val transactionType by lazy { intent.getIntExtra("type", -1947) }
     private val title by lazy { intent.getStringExtra("title") }
 
-    //used in case of sale with cash
-    private val saleAmt by lazy { intent.getStringExtra("saleAmt") ?: "0" }
     private var globalCardProcessedModel = CardProcessedDataModal()
 
     private var tpt: TerminalParameterTable? = null
@@ -95,6 +99,7 @@ class VFTransactionActivity : BaseActivity() {
         tpt = TerminalParameterTable.selectFromSchemeTable()
         isManualEntryAllowed = tpt?.fManEntry == "1"
         globalCardProcessedModel.setTransType(transactionType)
+
         initUI()
 
         if (!TextUtils.isEmpty(AppPreference.getString(AppPreference.GENERIC_REVERSAL_KEY))) {
@@ -130,13 +135,12 @@ class VFTransactionActivity : BaseActivity() {
                                     this@VFTransactionActivity,
                                     pinHandler,
                                     globalCardProcessedModel,
-                                    transactionalAmount
                                 ) { localCardProcessedData ->
                                     localCardProcessedData.setProcessingCode(
                                         transactionProcessingCode
                                     )
                                     localCardProcessedData.setTransactionAmount(transactionalAmount)
-                                    localCardProcessedData.setCashAmount(cashAmount)
+                                    localCardProcessedData.setOtherAmount(otherTransAmount)
                                     localCardProcessedData.setMobileBillExtraData(
                                         Pair(mobileNumber, billNumber)
                                     )
@@ -173,10 +177,10 @@ class VFTransactionActivity : BaseActivity() {
                         })
                 }
             } else {
-                ProcessCard(this, pinHandler, globalCardProcessedModel, transactionalAmount) { localCardProcessedData ->
+                ProcessCard(this, pinHandler, globalCardProcessedModel) { localCardProcessedData ->
                     localCardProcessedData.setProcessingCode(transactionProcessingCode)
                     localCardProcessedData.setTransactionAmount(transactionalAmount)
-                    localCardProcessedData.setCashAmount(cashAmount)
+                    localCardProcessedData.setOtherAmount(otherTransAmount)
                     localCardProcessedData.setMobileBillExtraData(Pair(mobileNumber, billNumber))
                     //    localCardProcessedData.setTransType(transactionType)
                     globalCardProcessedModel = localCardProcessedData
@@ -234,16 +238,17 @@ class VFTransactionActivity : BaseActivity() {
     private fun processAccordingToCardType(cardProcessedData: CardProcessedDataModal) {
         when (cardProcessedData.getReadCardType()) {
             DetectCardType.MAG_CARD_TYPE -> {
-                if (cardProcessedData.getTransType() == TransactionType.SALE.type || cardProcessedData.getTransType() == TransactionType.PRE_AUTH.type || cardProcessedData.getTransType() == TransactionType.REFUND.type) {
-                    emvProcessNext(cardProcessedData)
-                } else {
-                    /* val transactionEMIISO = CreateEMITransactionPacket(cardProcessedData, emiCustomerDetails).createTransactionPacket()
-                     logger("Transaction REQUEST PACKET --->>", transactionEMIISO.isoMap, "e")
-                     runOnUiThread { showProgress(getString(R.string.emi_data_sync)) }
-                     GlobalScope.launch(Dispatchers.IO) {
-                         checkReversal(transactionEMIISO, cardProcessedData)
-                      }*/
+                //region============Below When Condition is used to check Transaction Types Based Process Execution:-
+                when (cardProcessedData.getTransType()) {
+                    TransactionType.SALE.type, TransactionType.PRE_AUTH.type, TransactionType.REFUND.type -> emvProcessNext(
+                        cardProcessedData
+                    )
+                    TransactionType.EMI_SALE.type -> {
+                    }
+                    else -> {
+                    }
                 }
+                //endregion
             }
 
             DetectCardType.EMV_CARD_TYPE -> {
@@ -335,7 +340,9 @@ class VFTransactionActivity : BaseActivity() {
         val amountValue = "${getString(R.string.rupees_symbol)} $transactionAmountValue"
         findViewById<BHTextView>(R.id.base_amt_tv).text = amountValue
         transactionalAmount = transactionAmountValue.replace(".", "").toLong()
-        cashAmount = transactionCashAmountValue.replace(".", "").toLong()
+        otherTransAmount = transactionOtherAmountValue.replace(".", "").toLong()
+        globalCardProcessedModel.setOtherAmount(otherTransAmount)
+        globalCardProcessedModel.setTransactionAmount(transactionalAmount)
 
         if (isManualEntryAllowed) binding?.manualEntryButton?.visibility =
             View.VISIBLE else binding?.manualEntryButton?.visibility = View.GONE
@@ -406,7 +413,7 @@ class VFTransactionActivity : BaseActivity() {
         globalCardProcessedModel.setTransactionAmount(transactionalAmount)
         //In case of swipe no need to send ApplicationPanSequence set "00" here
         globalCardProcessedModel.setApplicationPanSequenceValue("00")
-        globalCardProcessedModel.setCashAmount(cashAmount)
+        globalCardProcessedModel.setOtherAmount(otherTransAmount)
         globalCardProcessedModel.setTrack2Data(
             getEncryptedField57DataForManualSale(
                 track2Data,
@@ -830,10 +837,9 @@ class VFTransactionActivity : BaseActivity() {
     }
 
     fun checkEmiBankEmi(cardProcessedDataModal: CardProcessedDataModal, transactionCallback: (CardProcessedDataModal) -> Unit) {
-
         cardProcessedDataModal.setProcessingCode(transactionProcessingCode)
         cardProcessedDataModal.setTransactionAmount(transactionalAmount)
-        cardProcessedDataModal.setCashAmount(cashAmount)
+        cardProcessedDataModal.setOtherAmount(otherTransAmount)
         cardProcessedDataModal.setTransType(transactionType)
         cardProcessedDataModal.setMobileBillExtraData(Pair(mobileNumber, billNumber))
         globalCardProcessedModel = cardProcessedDataModal
@@ -905,10 +911,9 @@ class VFTransactionActivity : BaseActivity() {
     }
 
     fun checkEmiInstaEmi(cardProcessedDataModal: CardProcessedDataModal, transactionCallback: (CardProcessedDataModal) -> Unit) {
-
         cardProcessedDataModal.setProcessingCode(transactionProcessingCode)
         cardProcessedDataModal.setTransactionAmount(transactionalAmount)
-        cardProcessedDataModal.setCashAmount(cashAmount)
+        cardProcessedDataModal.setOtherAmount(otherTransAmount)
         cardProcessedDataModal.setTransType(transactionType)
         cardProcessedDataModal.setMobileBillExtraData(Pair(mobileNumber, billNumber))
         globalCardProcessedModel = cardProcessedDataModal

@@ -7,6 +7,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
@@ -25,9 +27,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
 
-/**
- * A simple [Fragment] subclass.
- */
 class NewInputAmountFragment : Fragment() {
     private val keyModelSaleAmount: KeyboardModel by lazy {
         KeyboardModel()
@@ -57,29 +56,48 @@ class NewInputAmountFragment : Fragment() {
         return binding?.root
     }
 
+    private var animShow: Animation? = null
+    private var animHide: Animation? = null
+    private fun initAnimation() {
+        animShow = AnimationUtils.loadAnimation(activity, R.anim.view_show)
+        animHide = AnimationUtils.loadAnimation(activity, R.anim.view_hide)
+
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         ///   (activity as NavigationActivity).showBottomNavigationBar(isShow = false)
         val hdfcTPTData = getHDFCTptData()
         //todo change below
-        val hdfcCDTData = HdfcCdt() ///getHDFCDtData()
+        val hdfcCDTData = HdfcCdt.selectAllHDFCCDTData() ///getHDFCDtData()
         Log.d("HDFCTPTData:- ", hdfcTPTData.toString())
         Log.d("HDFCCDTData:- ", hdfcCDTData.toString())
+        initAnimation()
+
+        binding?.mainKeyBoard?.root?.visibility = View.VISIBLE
+        binding?.mainKeyBoard?.root?.startAnimation(animShow)
 
         cashAmount = view.findViewById(R.id.cashAmount)
         ///  navController = Navigation.findNavController(view)
         transactionType = arguments?.getSerializable("type") as EDashboardItem
-        if (transactionType == EDashboardItem.SALE_WITH_CASH ||
-            (checkHDFCTPTFieldsBitOnOff(TransactionType.TIP_SALE) && transactionType == EDashboardItem.SALE)
-        ) {
+        if (transactionType == EDashboardItem.SALE_WITH_CASH) {
+            binding?.enterCashAmountTv?.visibility = View.VISIBLE
             cashAmount?.visibility = View.VISIBLE
+            binding?.enterCashAmountTv?.text =
+                VerifoneApp.appContext.getString(R.string.cash_amount)
+
+        } else if (transactionType == EDashboardItem.SALE) {
             if (checkHDFCTPTFieldsBitOnOff(TransactionType.TIP_SALE)) {
+                binding?.enterCashAmountTv?.visibility = View.VISIBLE
+                cashAmount?.visibility = View.VISIBLE
                 binding?.enterCashAmountTv?.text =
                     VerifoneApp.appContext.getString(R.string.enter_tip_amount)
-            }
-            binding?.enterCashAmountTv?.visibility = View.VISIBLE
 
+            } else {
+                cashAmount?.visibility = View.GONE
+                binding?.enterCashAmountTv?.visibility = View.GONE
+
+            }
         } else {
             cashAmount?.visibility = View.GONE
             binding?.enterCashAmountTv?.visibility = View.GONE
@@ -89,8 +107,7 @@ class NewInputAmountFragment : Fragment() {
         subHeaderBackButton = view.findViewById(R.id.back_image_button)
         setTxnTypeMsg(transactionType.title)
         subHeaderBackButton?.setOnClickListener {
-            ///    navController?.popBackStack()
-            //todo
+            parentFragmentManager.popBackStackImmediate()
         }
         keyModelSaleAmount.view = binding?.saleAmount
         keyModelSaleAmount.callback = ::onOKClicked
@@ -175,8 +192,6 @@ class NewInputAmountFragment : Fragment() {
     }
 
     private fun onSetKeyBoardButtonClick() {
-        binding?.mainKeyBoard?.key0
-
         binding?.mainKeyBoard?.key0?.setOnClickListener {
             if (inputInSaleAmount) {
                 keyModelSaleAmount.onKeyClicked("0")
@@ -312,6 +327,12 @@ class NewInputAmountFragment : Fragment() {
                         )
                     }
                 }
+                EDashboardItem.BANK_EMI -> {
+                    iFrReq?.onFragmentRequest(
+                        UiAction.BANK_EMI,
+                        Pair(binding?.saleAmount?.text.toString().trim(), "0")
+                    )
+                }
                 EDashboardItem.CASH_ADVANCE -> {
                     iFrReq?.onFragmentRequest(
                         UiAction.CASH_ADVANCE,
@@ -343,7 +364,6 @@ class NewInputAmountFragment : Fragment() {
                     )
                 }
                 else -> {
-
                 }
             }
         }

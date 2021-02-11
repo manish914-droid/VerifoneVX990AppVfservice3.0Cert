@@ -5,7 +5,6 @@ import android.util.Log
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.main.PrefConstant
-import com.example.verifonevx990app.main.setAutoSettlement
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -423,7 +422,7 @@ class KeyExchanger(
             HitServer.hitInitServer({ result, success ->
                 if (success) {
                     GlobalScope.launch {
-                        setAutoSettlement()  // Setting auto settlement.
+                        //setAutoSettlement()  // Setting auto settlement.
                         downloadPromo()  // Setting
                     }
                     (context as MainActivity).hideProgress()

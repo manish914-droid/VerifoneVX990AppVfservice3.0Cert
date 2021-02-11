@@ -91,8 +91,7 @@ class InputAmountFragment : Fragment() {
                 } else if (title == SubHeaderTitle.BANK_EMI.title && tpt?.reservedValues?.substring(
                         1,
                         2
-                    ) == "1"
-                    && tpt.reservedValues.substring(2, 3) == "1"
+                    ) == "1" && tpt.reservedValues.substring(2, 3) == "1"
                 ) {
                     showMobileBillDialog(activity, TransactionType.EMI_SALE.type) { extraPairData ->
                         sendStartSale(inputAmountEditText?.text.toString(), extraPairData)

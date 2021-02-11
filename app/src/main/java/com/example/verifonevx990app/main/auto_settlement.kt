@@ -15,7 +15,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
 
-
+/*
+This AutoSettlement File is Not Used in Project , Please Ignore it!!
+ */
 suspend fun setAutoSettlement() {
     try {
         val tpt = TerminalParameterTable.selectFromSchemeTable()

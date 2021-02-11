@@ -46,6 +46,7 @@ import kotlin.experimental.and
 
 var isDashboardOpen = false
 var isExpanded = false
+var isFirstBankEMICardRead = true
 
 open class OnTextChange(private val cb: (String) -> Unit) : TextWatcher {
 
@@ -272,6 +273,7 @@ suspend fun saveToDB(spliter: List<String>) {
             IssuerParameterTable.performOperation(issuerParameterTable) {
                 logger("saveToDB", "ipt")
             }
+
         }
         spliter[2] == "106" -> {
             val terminalParameterTable = TerminalParameterTable()
@@ -391,7 +393,9 @@ suspend fun saveToDB(spliter: List<String>) {
             }
         }
         //endregion
+
     }
+
 }
 
 fun unzipZipedBytes(ba: ByteArray) {
@@ -1733,6 +1737,10 @@ fun getNII(): String {
     return tctData?.nii ?: Nii.DEFAULT.nii
 }
 //endregion
+//endregion
+
+//region=============================Get Time in Millis==================
+fun getTimeInMillis(): Long = System.currentTimeMillis()
 //endregion
 /*
 App Update Through FTP Steps:-
