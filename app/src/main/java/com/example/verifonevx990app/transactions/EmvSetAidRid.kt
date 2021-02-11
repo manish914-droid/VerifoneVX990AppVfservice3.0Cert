@@ -9,7 +9,11 @@ import com.vfi.smartpos.deviceservice.aidl.IEMV
 import com.vfi.smartpos.deviceservice.constdefine.ConstIPBOC
 
 
-class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String, private var ctlsUpdateTransLimit: String) {
+class EmvSetAidRid(
+    private var ipboc: IEMV?,
+    private var updateCVMValue: String,
+    private var ctlsUpdateTransLimit: String
+) {
     private val TAG = "EMV-SetAidRid"
     private var ctlsVal: String? = null
     private var cvmVal: String? = null
@@ -73,7 +77,7 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
                 // Visa credit or debit	10 10
                 // Visa credit or debit	10 10
 
-                        "9F3303E020C8" +     //Terminal capability
+                "9F3303E020C8" +     //Terminal capability
                         "DF1A06000000012000" +
                         "9F0607A0000000031010" + //Application Aid
                         "9F40056F00F0F001" +  //Additional terminal cpability
@@ -83,12 +87,12 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
                         "9F660432004000" + //Terminal transaction qualifier(TTQ)
                         "DF170101" +   // DDA public module length
                         "9F09020096" + //Application version number
-                        "5F2A020901" + // Transaction currency code
+                        "5F2A020356" + // Transaction currency code
                         "DF1B06000000000000" +
                         "9F350122" +   //Terminal type
                         "DF1205FC60ACF800" +
                         "9F1B0400000000" + //Terminal floor limit
-                        "9F1A020158" +     //Terminal country code
+                        "9F1A020356" +     //Terminal country code
                         "DF2106009999999999" +
                         "DF160199" +
                         "DF150400049444" +
@@ -99,7 +103,11 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
 
                 // Visa credit or debit	10 10
                 // Visa credit or debit	10 10
-                "9F0607A0000000031010" +
+                "9F3303E0F0C8" +
+                        "9F40056200002001" +
+                        "97099F02065F2A029A0390" +
+                        "9F40056F00F0F001" + //additional terminal capability
+                        "9F0607A0000000031010" +
                         "DF2006009999999999" +
                         "DF010100" +
                         "DF140111" +
@@ -108,6 +116,8 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
                         "DF180101" +
                         "DF12050000000000" +
                         "9F1B0400000000" + //Terminal floor limit
+                        "5F2A020356" + // Transaction currency code
+                        "9F1A020356" +     //Terminal country code
                         "DF160101" +
                         "DF150400000000" +
                         "DF1105C000000000" +
@@ -117,7 +127,11 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
 
                 // Visa credit or debit	10 10
                 // Visa credit or debit	10 10
-                "9F0608A000000003101001" +
+                "9F3303E0F0C8" +
+                        "9F40056200002001" +
+                        "97099F02065F2A029A0390" +
+                        "9F40056F00F0F001" + //additional terminal capability
+                        "9F0608A000000003101001" +
                         "DF2006009999999999" +
                         "DF010100" +
                         "DF140111" +
@@ -126,6 +140,8 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
                         "DF180101" +
                         "DF1205D84000F800" +
                         "9F1B0400000000" +
+                        "5F2A020356" + // Transaction currency code
+                        "9F1A020356" +     //Terminal country code
                         "DF160101" +
                         "DF150400000000" +
                         "DF1105D84004A800" +
@@ -135,7 +151,11 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
 
                 // Visa credit or debit	10 10
                 // Visa credit or debit	10 10
-                "9F0608A000000003101002" +
+                       "9F3303E0F0C8" +
+                        "9F40056200002001" +
+                        "97099F02065F2A029A0390" +
+                        "9F40056F00F0F001" + //additional terminal capability
+                        "9F0608A000000003101002" +
                         "DF2006009999999999" +
                         "DF010100" +
                         "DF140111" +
@@ -144,6 +164,8 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
                         "DF180101" +
                         "DF1205D84000F800" +
                         "9F1B0400000000" +
+                        "5F2A020356" + // Transaction currency code
+                        "9F1A020356" +     //Terminal country code
                         "DF160101" +
                         "DF150400000000" +
                         "DF1105D84004A800" +
@@ -153,7 +175,11 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
 
                 // Visa Electron	20 10
                 // Visa Electron	20 10
-                "9F0607A0000000032010" +
+                "9F3303E0F0C8" +
+                        "9F40056200002001" +
+                        "97099F02065F2A029A0390" +
+                        "9F40056F00F0F001" + //additional terminal capability
+                        "9F0607A0000000032010" +
                         "DF2006009999999999" +
                         "DF010100" +
                         "DF140111" +
@@ -162,6 +188,8 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
                         "DF180101" +
                         "DF1205D84000F800" +
                         "9F1B0400000000" +
+                        "5F2A020356" + // Transaction currency code
+                        "9F1A020356" +     //Terminal country code
                         "DF160101" +
                         "DF150400000000" +
                         "DF1105D84004A800" +
@@ -169,56 +197,229 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
                         "9F7B06000000000000" +
                         "DF13050010000000",
 // =============================================Visa Contact card Aids Ends============================================================================================
-                // =================================Masters card Aids starts========================================================
+// ===================================================Masters Contact card Aids starts=================================================================================
                 // MasterCard credit or debit	10 10
                 "9F0607A0000000041010" +
-                        "DF2006009999999999DF010100DF140111DF1701019F09020004DF180101DF1205F85080F8009F1B0400000000DF160101DF150400000000DF1105FC5080A000DF19060000000000009F7B06000000001000DF13050000400000",
+                        "DF2006009999999999" +
+                        "DF010100" +
+                        "DF140111" +
+                        "DF170101" +
+                        "9F09020096" + //Application version number
+                        "DF180101" +
+                        "DF1205F85080F800" +
+                        "9F1B0400000000" +
+                        "5F2A020356" + // Transaction currency code
+                        "9F1A020356" +     //Terminal country code
+                        "DF160101" +
+                        "DF150400000000" +
+                        "DF1105FC5080A000" +
+                        "DF1906000000000000" +
+                        "9F7B06000000001000" +
+                        "DF13050000400000",
+
                 // MasterCard(debit card)_	30 60
                 "9F0607A0000000043060" +
-                        "DF2006009999999999DF010100DF140111DF1701019F09020004DF180101DF1205F85080F8009F1B0400000000DF160101DF150400000000DF1105FC5080A000DF19060000000000009F7B06000000000000DF13050000400000",
+                        "DF2006009999999999" +
+                        "DF010100" +
+                        "DF140111" +
+                        "DF170101" +
+                        "9F09020096" + //Application version number
+                        "DF180101" +
+                        "DF1205F85080F800" +
+                        "9F1B0400000000" +
+                        "5F2A020356" + // Transaction currency code
+                        "9F1A020356" +     //Terminal country code
+                        "DF160101" +
+                        "DF150400000000" +
+                        "DF1105FC5080A000" +
+                        "DF1906000000000000" +
+                        "9F7B06000000000000" +
+                        "DF13050000400000",
+
                 // MasterCard
                 "9F0607A0000000044010" +
-                        "DF2006009999999999DF010100DF140111DF1701019F09020004DF180101DF1205F85080F8009F1B0400000000DF160101DF150400000000DF1105FC5080A000DF19060000000000009F7B06000000000000DF13050000400000",
+                        "DF2006009999999999" +
+                        "DF010100" +
+                        "DF140111" +
+                        "DF170101" +
+                        "9F09020096" + //Application version number
+                        "DF180101" +
+                        "DF1205F85080F800" +
+                        "9F1B0400000000" +
+                        "5F2A020356" + // Transaction currency code
+                        "9F1A020356" +     //Terminal country code
+                        "DF160101" +
+                        "DF150400000000" +
+                        "DF1105FC5080A000" +
+                        "DF1906000000000000" +
+                        "9F7B06000000000000" +
+                        "DF13050000400000",
 
-                // =================================Masters card Aids Ends========================================================
+// ====================================Masters Contact card Aids Ends=============================================================================================
 
-                // =================================PBOC card Aids starts========================================================
+// ===============================================PBOC card Aids starts=======================================================================================================
                 // PBOC
                 "9F0608A000000333010103" +
-                        "DF2006009999999999DF010100DF14039F3704DF1701209F09020020DF180101DF1205DC4004F8009F1B0400000064DF160150DF150400000028DF1105DC4000A800DF19060000000000009F7B06000000100000DF13050010000000",
+                        "DF2006009999999999" +
+                        "DF010100" +
+                        "DF14039F3704" +
+                        "DF170120" +
+                        "9F09020020" +
+                        "DF180101" +
+                        "DF1205DC4004F800" +
+                        "9F1B0400000000" +
+                        "5F2A020356" + // Transaction currency code
+                        "9F1A020356" + // Terminal country code
+                        "DF160150" +
+                        "DF150400000028" +
+                        "DF1105DC4000A800" +
+                        "DF1906000000000000" +
+                        "9F7B06000000100000" +
+                        "DF13050010000000",
+
                 "9F0608A000000333010101" +
-                        "DF2006009999999999DF010100DF14039F3704DF1701999F09020020DF180101DF1205DC4004F8009F1B0400000064DF160199DF150400000000DF1105DC4000A800DF19060000000000009F7B06000000100000DF13050010000000",
+                        "DF2006009999999999" +
+                        "DF010100" +
+                        "DF14039F3704" +
+                        "DF170199" +
+                        "9F09020020" +
+                        "DF180101" +
+                        "DF1205DC4004F800" +
+                        "9F1B0400000000" +
+                        "5F2A020356" + // Transaction currency code
+                        "9F1A020356" + // Terminal country code
+                        "DF160199" +
+                        "DF150400000000" +
+                        "DF1105DC4000A800" +
+                        "DF1906000000000000" +
+                        "9F7B06000000100000" +
+                        "DF13050010000000",
+
                 "9F0608A000000333010106" +
-                        "DF2006009999999999DF010100DF14039F3704DF1701999F09020020DF180101DF1205DC4004F8009F1B0400000064DF160199DF150400000000DF1105DC4000A800DF19060000000000009F7B06000000100000DF13050010000000",
+                        "DF2006009999999999" +
+                        "DF010100" +
+                        "DF14039F3704" +
+                        "DF170199" +
+                        "9F09020020" +
+                        "DF180101" +
+                        "DF1205DC4004F800" +
+                        "9F1B0400000000" +
+                        "5F2A020356" + // Transaction currency code
+                        "9F1A020356" + // Terminal country code
+                        "DF160199DF150400000000" +
+                        "DF1105DC4000A800" +
+                        "DF1906000000000000" +
+                        "9F7B06000000100000" +
+                        "DF13050010000000",
+
                 "9F0608A000000333010102" +
-                        "DF2006009999999999DF010100DF14039F3704DF1701209F09020020DF180101DF1205DC4004F8009F1B0400000064DF160150DF150400000000DF1105DC4000A800DF19060000000000009F7B06000000100000DF13050010000000",
+                        "DF2006009999999999" +
+                        "DF010100" +
+                        "DF14039F3704" +
+                        "DF170120" +
+                        "9F09020020" +
+                        "DF180101" +
+                        "DF1205DC4004F800" +
+                        "9F1B0400000000" +
+                        "5F2A020356" + // Transaction currency code
+                        "9F1A020356" + // Terminal country code
+                        "DF160150" +
+                        "DF150400000000" +
+                        "DF1105DC4000A800" +
+                        "DF1906000000000000" +
+                        "9F7B06000000100000" +
+                        "DF13050010000000",
 
-                // =================================PBOC card Aids starts========================================================
+//=================================================PBOC card Aids starts============================================================================================================
 
 
-                // =================================JCB card Aids starts========================================================
-                // jCB
+// ================================================JCB contatct card Aids starts=============================================================================================================
+                // JCB
+                        "9F3303E0F0C8" +      //Terminal capability
+                        "97099F02065F2A029A0390" +
+                        "9F40056F00F0F001" + //additional terminal capability
+                        "9F0607A0000000651010" +
+                        "DF2006009999999999" +
+                        "DF010100" +
+                        "DF14039F3704" +
+                        "DF170101" +
+                        "9F09020001" +
+                        "DF180101" +
+                        "DF1205FC60ACF800" +
+                        "9F1B0400000000" +
+                        "5F2A020356" + // Transaction currency code
+                        "9F1A020356" + // Terminal country code
+                        "DF160101" +
+                        "DF150400000000" +
+                        "DF1105FC60242800" +
+                        "DF1906000000000000" +
+                        "9F7B06000000000000" +
+                        "DF13050010000000",
+// ==================================================JCB contact card Aids ends============================================================================================================
+
+//=====================================================================Diners card Aids starts========================================================
+
                 "9F0607A0000001523010" +
-                        "DF2006009999999999DF010100DF140111DF1701019F09020001DF180101DF1205D84004F8009F1B0400000000DF160101DF150400000000DF1105D84004A800DF19060000000000009F7B06000000000000DF13050010000000",
+                        "DF2006009999999999" +
+                        "DF010100" +
+                        "DF140111" +
+                        "DF1701019" +
+                        "F09020001" +
+                        "DF180101" +
+                        "DF1205D84004F800" +
+                        "9F1B0400000000" +
+                        "5F2A020356" + // Transaction currency code
+                        "9F1A020356" + // Terminal country code
+                        "DF160101" +
+                        "DF150400000000" +
+                        "DF1105D84004A800" +
+                        "DF1906000000000000" +
+                        "9F7B06000000000000" +
+                        "DF13050010000000",
 
-                // =================================JCB card Aids starts========================================================
+//========================================================================Diners card Aids ends===========================================================
+// =======================================================================Rupay Contact card Aids starts============================================================================================
 
+                "9F3303E0F0C8" +     //Terminal capability
+                        "DF1A06000000012000" +
+                        "9F0607A0000005241010" + //Application Aid
+                        "9F40056F00F0F001" +  //Additional terminal cpability
+                        "DF010100" +
+                        "DF2006009999999999" +
+                        "DF14039F3704" +
+                        "9F660432004000" + //Terminal transaction qualifier(TTQ)
+                        "DF170101" +   // DDA public module length
+                        "9F09020096" + //Application version number
+                        "5F2A020356" + // Transaction currency code
+                        "DF1B06000000000000" +
+                        "9F350122" +   //Terminal type
+                        "DF1205FC60ACF800" +
+                        "9F1B0400000000" + //Terminal floor limit
+                        "9F1A020356" +     //Terminal country code
+                        "DF2106009999999999" +
+                        "DF160199" +
+                        "DF150400049444" +
+                        "DF1105FC6024A800" +
+                        "9F08020140" +      //Application version
+                        "DF1906000000000000" +
+                        "DF13050010000000",  //Public modulus
+// =======================================================================Rupay Contact card Aids ends============================================================================================
 
                 "9F0606F00000002501" +
                         "DF2006009999999999DF010100DF14039F3704DF1701009F09020001DF180100DF1205CC000000009F1B0400000000DF160101DF150400000000DF1105CC00000000DF19060000000000009F7B06000000100000DF130500000000009F1A020356",
                 "9F0606A00000002501" +
                         "DF2006009999999999DF010100DF14039F3704DF1701999F09020001DF180101DF1205CC000080009F1B0400000000DF160199DF150400000000DF1105CC00000000DF19060000000000009F7B06000010000000DF130500000000009F1A020356",
-                "9F0607A0000003241010" +
+/*                "9F0607A0000003241010" +
                         "DF2006009999999999DF010100DF14039F3704DF1701999F09020001DF180101DF1205FCE09CF8009F1B0400000000DF160199DF150400000000DF1105DC00002000DF19060000000000009F7B06000000000000DF130500100000009F1A020356",
                 "9F0605A000000000" +
-                        "DF2006009999999999DF010100DF140111DF1701019F09020001DF180100DF120500000000009F1B0400000064DF160101DF150400000001DF11050000000000DF19060000000000009F7B06000000000100DF130500000000009F1A020356"
+                        "DF2006009999999999DF010100DF140111DF1701019F09020001DF180100DF120500000000009F1B0400000064DF160101DF150400000001DF11050000000000DF19060000000000009F7B06000000000100DF130500000000009F1A020356"*/
             )
         val AID_CTLS_Card = arrayOf(
 
             //American express Aid's
             "9F0606F00000002501" +
                     "DF0306009999999999DF2006009999999999DF010100DF14039F37049F6601225F2A020356DF1701009F09020001DF180100DF1205CC000000009F1B04000000009F1A020356DF2106000000100000DF160101DF150400000000DF1105CC00000000DF0406000000000501DF1906000000000000DF13050000000000",
-            "9F0606A00000002501" +     // AID
+            /*  "9F0606A00000002501" +     // AID
                     "DF0306009999999999" +
                     "DF2006${ctlsVal}" + //Contact less Maximum Transaction Limit
                     "DF010100" +     //Application id
@@ -237,31 +438,31 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
                     "DF11050000000000" +     //TAC Default
                     "DF0406000000000000" +   //
                     "DF1906000000000000" +   //Contact less offline minimum
-                    "DF13050000000000",    //TAC Refuse
+                    "DF13050000000000",    //TAC Refuse*/
 
             /*  "9f0607A0000001523010"+*/
-            "9F0607A0000003241010" +
+/*            "9F0607A0000003241010" +
                     "DF0306009999999999" +
                     "DF2006009999999999" +
-                    "DF010100DF14039F37049F6601265F2A020356DF1701999F09020001DF180101DF1205FCE09CF8009F1B04000000009F1A020356DF2106000000000000DF160199DF150400000000DF1105DC00002000DF0406000000000000DF1906000000000000DF13050010000000",
+                    "DF010100DF14039F37049F6601265F2A020356DF1701999F09020001DF180101DF1205FCE09CF8009F1B04000000009F1A020356DF2106000000000000DF160199DF150400000000DF1105DC00002000DF0406000000000000DF1906000000000000DF13050010000000"*/
 
 //=============================================Visa Contactless card Aids starts============================================================================================
-                    // Visa, Plus	80 10
-                   // Visa, Plus	80 10
+            // Visa, Plus	80 10
+            // Visa, Plus	80 10
 
-                    "9F3303E0F0C8"+
-                    "9F40056200002001"+
-                    "97099F02065F2A029A0390"+
+            "9F3303E0F0C8" +
+                    "9F40056200002001" +
+                    "97099F02065F2A029A0390" +
                     "9F40056F00F0F001" + //additional terminal capability
                     "9F0607A0000000038010" +
                     "DF0306009999999999" +
                     "DF2006009999999999" +
                     "DF010100" +
                     "DF14039F3704" +
-                    "9F660100" +
+                    "9F6604F6004000" +
                     "5F2A020356" +
                     "DF170101" +
-                            "9F09020096" + //Application version number
+                    "9F09020096" + //Application version number
                     "DF180101" +
                     "DF1205D84004F800" + //Tac online
                     "9F1B0400000000" +
@@ -275,9 +476,9 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
                     "DF13050010000000",
 
 
-                    "9F3303E0F0C8"+
-                    "9F40056200002001"+
-                    "97099F02065F2A029A0390"+
+            "9F3303E0F0C8" +
+                    "9F40056200002001" +
+                    "97099F02065F2A029A0390" +
                     "9F0607A0000000031010" +
                     "DF0306009999999999" +
                     "DF2006009999999999" + //Contact less Maximum Transaction Limit
@@ -286,7 +487,7 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
                     "9F6604F6004000" +           //Teminal transaction qualifier
                     "5F2A020356" +         //  Transaction currency code
                     "DF170101" +           //The target percentage randomly choosen
-                            "9F09020096" + //Application version number
+                    "9F09020096" + //Application version number
                     "DF180101" +           //Online pin
                     "DF1205A0109C9800" +   //TAC online
                     "9F1B0400000000" +      //Minimum Limit //floor limit
@@ -299,17 +500,17 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
                     "DF1906000000000000" +    //Contact less offline minimum
                     "DF13055C40000000",       //TAC Refuse
 
-                    "9F3303E0F0C8"+
-                    "9F40056200002001"+
-                     "97099F02065F2A029A0390"+
+            "9F3303E0F0C8" +
+                    "9F40056200002001" +
+                    "97099F02065F2A029A0390" +
                     "9F0608A000000003101001" +
                     "DF2006009999999999" +
                     "DF010100" +
                     "DF14039F3704" +
-                    "9F660100" +
+                    "9F6604F6004000" +
                     "5F2A020156" +
                     "DF170101" +
-                            "9F09020096" + //Application version number
+                    "9F09020096" + //Application version number
                     "DF180101" +
                     "DF1205A0109C9800" +
                     "9F1B0400000000" +
@@ -322,17 +523,17 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
                     "DF1906000000000000" +
                     "DF13055C40000000",
 
-                    "9F3303E0F0C8"+
-                    "9F40056200002001"+
-                    "97099F02065F2A029A0390"+
+            "9F3303E0F0C8" +
+                    "9F40056200002001" +
+                    "97099F02065F2A029A0390" +
                     "9F0608A000000003101002" +
                     "DF2006009999999999" +
                     "DF010100" +
                     "DF14039F3704" +
-                    "9F660100" +
+                    "9F6604F6004000" +
                     "5F2A020156" +
                     "DF170101" +
-                            "9F09020096" + //Application version number
+                    "9F09020096" + //Application version number
                     "DF180101" +
                     "DF1205A0109C9800" +
                     "9F1B0400000000" +
@@ -343,42 +544,119 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
                     "DF1105A4109C0000" +
                     "DF0406000000000000" +
                     "DF1906000000000000" +
-                    "DF13055C40000000"
-// =============================================Visa Conatcless card Aids Ends============================================================================================
+                    "DF13055C40000000",
+// =============================================Visa Contactless card Aids Ends============================================================================================
+
+// =================================Masters Contactless card Aids starts===================================================================================================
+
+            // MasterCard credit or debit	10 10
+            "9F3303E0F0C8" + //terminal capability
+                    "9F40056200002001" + // additional terminal capability
+                    "97099F02065F2A029A0390" +
+                    "9F0607A0000000041010" +
+                    "DF0306009999999999" +
+                    "DF2006009999999999" + // Max^m txn limit
+                    "DF010100" +          //  Application Id
+                    "DF14039F3704" +
+                    "9F6604F6004000" +          //TTQ
+                    "5F2A020356" + // Transaction currency code
+                    "DF170101" +
+                    "9F09020096" + //Application version number
+                    "DF180101" +
+                    "DF1205A0109C9800" +
+                    "9F1B043B9ACA00" +
+                    "9F1A020356" +   //Terminal country code
+                    "DF2106000000001000" + //Internet authentication flag
+                    "DF160101" +
+                    "DF150400000000" +
+                    "DF1105A4109C0000" +
+                    "DF0406000000000000" +
+                    "DF1906000000000000" +
+                    "DF13055C40000000", //
+
+//==================================================================Masters Contactless card Aids Ends==========================================================================================
+
+//==================================================================Diners Contactless card Aids Start==========================================================================================
+            "9F3303E0F0C8" + // terminal capability
+                    "97099F02065F2A029A0390" +
+                    "9F40056F00F0F001" + //additional terminal capability
+                    "9F0607A0000001523010" +
+                    "DF0306009999999999" +
+                    "DF2006009999999999" +
+                    "DF010100" +
+                    "DF14039F3704" +
+                    "9F6604F6004000" + //TTQ
+                    "5F2A020356" +
+                    "DF170101" +
+                    "9F09020001" +
+                    "DF180101" +
+                    "DF1205D84004F800" +
+                    "9F1B0400000000" +
+                    "9F1A020356" +
+                    "DF2106000000000100" +
+                    "DF160101" +
+                    "DF150400000000" +
+                    "DF1105D84004A800" +
+                    "DF0406000000000000" +
+                    "DF1906000000000000" +
+                    "DF13050010000000",
+
+//==================================================================Diners Contactless card Aids Ends==========================================================================================
+
+//==================================================================Rupay Contactless card Aids Start==========================================================================================
+
+            "9F3303E0F0C8" + // terminal capability
+                    "97099F02065F2A029A0390" +
+                    "9F40056F00F0F001" + //additional terminal capability
+                    "9f0607A0000005241010" +
+                    "DF0306009999999999" +
+                    "DF2006009999999999" +
+                    "DF010100" +
+                    "DF14039F3704" +
+                    "9F6604F6004000" + //TTQ
+                    "5F2A020356" +
+                    "DF170101" +
+                    "9F09020001" +
+                    "DF180101" +
+                    "DF1205D84004F800" +
+                    "9F1B0400000000" +
+                    "9F1A020356" +
+                    "DF2106000000000100" +
+                    "DF160101" +
+                    "DF150400000000" +
+                    "DF1105D84004A800" +
+                    "DF0406000000000000" +
+                    "DF1906000000000000" +
+                    "DF13050010000000"
+
+
+//==================================================================Rupay Contactless card Aids Ends==========================================================================================
+
 
         )
-
         try {
             if (ipboc != null) {
                 isSuccess = ipboc!!.updateAID(3, 1, null)
                 Log.d("TAG", "Clear AID (smart AID):$isSuccess")
                 isSuccess = ipboc!!.updateAID(3, 2, null)
                 Log.d("TAG", "Clear AID (CTLS):$isSuccess")
-          //      VFService.showToast("AID & RID Configured Successfully!!!")
+//      VFService.showToast("AID & RID Configured Successfully!!!")
             }
         } catch (e: RemoteException) {
             e.printStackTrace()
         }
 
 
-        // =================================Masters card Aids starts========================================================
+// =================================PBOC card Aids Ends========================================================
 
-                // MasterCard credit or debit	10 10
-            "9F0607A0000000041010" +
-                    "DF0306009999999999DF2006009999999999DF010100DF14039F37049F6601005F2A020156DF1701019F09020004DF180101DF1205A0109C98009F1B043B9ACA009F1A020156DF2106000000001000DF160101DF150400000000DF1105A4109C0000DF0406000000000000DF1906000000000000DF13055C40000000"
-
-            // =================================Masters card Aids Ends========================================================
-
-
-            // =================================PBOC card Aids Ends========================================================
-            // PBOC
-            "9F0608A000000333010102" +
-                    "DF0306009999999999DF2006009999999999DF010100DF14039F37049F6601265F2A020156DF1701999F09020020DF180101DF1205DC4004F8009F1B04000000649F1A020156DF2106000000100000DF160199DF150400000000DF1105DC4000A800DF0406000000000000DF1906000000000000DF13050010000000"
-            "9F0608A000000333010101" +
-                    "DF0306009999999999DF2006009999999999DF010100DF14039F37049F6601265F2A020156DF1701999F09020020DF180101DF1205DC4004F8009F1B04000000649F1A020156DF2106000000100000DF160199DF150400000000DF1105DC4000A800DF0406000000000000DF1906000000000000DF13050010000000"
-            "9F0608A000000333010106" +
-                    "DF0306009999999999DF2006009999999999DF010100DF14039F37049F6601265F2A020156DF1701999F09020020DF180101DF1205DC4004F8009F1B04000000649F1A020156DF2106000000100000DF160199DF150400000000DF1105DC4000A800DF0406000000000000DF1906000000000000DF13050010000000"
-            // =================================PBOC card Aids Ends========================================================
+// PBOC
+        "9F0608A000000333010102" +
+                "DF0306009999999999DF2006009999999999DF010100DF14039F37049F6601265F2A020156DF1701999F09020020DF180101DF1205DC4004F8009F1B04000000649F1A020156DF2106000000100000DF160199DF150400000000DF1105DC4000A800DF0406000000000000DF1906000000000000DF13050010000000"
+        "9F0608A000000333010101" +
+                "DF0306009999999999DF2006009999999999DF010100DF14039F37049F6601265F2A020156DF1701999F09020020DF180101DF1205DC4004F8009F1B04000000649F1A020156DF2106000000100000DF160199DF150400000000DF1105DC4000A800DF0406000000000000DF1906000000000000DF13050010000000"
+        "9F0608A000000333010106" +
+                "DF0306009999999999DF2006009999999999DF010100DF14039F37049F6601265F2A020156DF1701999F09020020DF180101DF1205DC4004F8009F1B04000000649F1A020156DF2106000000100000DF160199DF150400000000DF1105DC4000A800DF0406000000000000DF1906000000000000DF13050010000000"
+// =================================PBOC card Aids Ends========================================================
 
         val smartCardAidType = ConstIPBOC.updateAID.aidType.smart_card
         val ctlsAidType = ConstIPBOC.updateAID.aidType.contactless
@@ -390,7 +668,7 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
         dataList.addAll(ctlsCardDataList)
         isSuccess = false
 
-        //Below For Loop is to set All AID of AID_SmartCard && CTLS_SmartCard by changing aidType:-
+    //Below For Loop is to set All AID of AID_SmartCard && CTLS_SmartCard by changing aidType:-
         for (i in 0 until dataList.size) {
             if (dataList[i].isEmpty()) {
                 continue
@@ -437,7 +715,7 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
     fun setRID(type: Int) {
         var isSuccess: Boolean
         if (type == 3) {
-            // clear RID
+         // clear RID
             isSuccess = false
             try {
                 isSuccess = ipboc!!.updateRID(3, null)
@@ -448,13 +726,13 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
             return
         }
 
-        // way 2#, set one tlv string
-        // hardcoding some rid
+// way 2#, set one tlv string
+// hardcoding some rid
         val ridList = arrayOf(
-            //Amex Test Cap keys
-            /*   "9F0605A0000000259F2201C8DF0503201231DF060101DF070101DF028190BF0CFCED708FB6B048E3014336EA24AA007D7967B8AA4E613D26D015C4FE7805D9DB131CED0D2A8ED504C3B5CCD48C33199E5A5BF644DA043B54DBF60276F05B1750FAB39098C7511D04BABC649482DDCF7CC42C8C435BAB8DD0EB1A620C31111D1AAAF9AF6571EEBD4CF5A08496D57E7ABDBB5180E0A42DA869AB95FB620EFF2641C3702AF3BE0B0C138EAEF202E21DDF040103DF031433BD7A059FAB094939B90A8F35845C9DC779BD50", //c8
-            "9F0605A0000000259F2201C9DF0503201231DF060101DF070101DF0281B0B362DB5733C15B8797B8ECEE55CB1A371F760E0BEDD3715BB270424FD4EA26062C38C3F4AAA3732A83D36EA8E9602F6683EECC6BAFF63DD2D49014BDE4D6D603CD744206B05B4BAD0C64C63AB3976B5C8CAAF8539549F5921C0B700D5B0F83C4E7E946068BAAAB5463544DB18C63801118F2182EFCC8A1E85E53C2A7AE839A5C6A3CABE73762B70D170AB64AFC6CA482944902611FB0061E09A67ACB77E493D998A0CCF93D81A4F6C0DC6B7DF22E62DBDF040103DF03148E8DFF443D78CD91DE88821D70C98F0638E51E49", //c9
-            "9F0605A0000000259F2201CADF0503201231DF060101DF070101DF0281F8C23ECBD7119F479C2EE546C123A585D697A7D10B55C2D28BEF0D299C01DC65420A03FE5227ECDECB8025FBC86EEBC1935298C1753AB849936749719591758C315FA150400789BB14FADD6EAE2AD617DA38163199D1BAD5D3F8F6A7A20AEF420ADFE2404D30B219359C6A4952565CCCA6F11EC5BE564B49B0EA5BF5B3DC8C5C6401208D0029C3957A8C5922CBDE39D3A564C6DEBB6BD2AEF91FC27BB3D3892BEB9646DCE2E1EF8581EFFA712158AAEC541C0BBB4B3E279D7DA54E45A0ACC3570E712C9F7CDF985CFAFD382AE13A3B214A9E8E1E71AB1EA707895112ABC3A97D0FCB0AE2EE5C85492B6CFD54885CDD6337E895CC70FB3255E3DF040103DF03146BDA32B1AA171444C7E8F88075A74FBFE845765F", //CA,*/
+//Amex Test Cap keys
+/*   "9F0605A0000000259F2201C8DF0503201231DF060101DF070101DF028190BF0CFCED708FB6B048E3014336EA24AA007D7967B8AA4E613D26D015C4FE7805D9DB131CED0D2A8ED504C3B5CCD48C33199E5A5BF644DA043B54DBF60276F05B1750FAB39098C7511D04BABC649482DDCF7CC42C8C435BAB8DD0EB1A620C31111D1AAAF9AF6571EEBD4CF5A08496D57E7ABDBB5180E0A42DA869AB95FB620EFF2641C3702AF3BE0B0C138EAEF202E21DDF040103DF031433BD7A059FAB094939B90A8F35845C9DC779BD50", //c8
+"9F0605A0000000259F2201C9DF0503201231DF060101DF070101DF0281B0B362DB5733C15B8797B8ECEE55CB1A371F760E0BEDD3715BB270424FD4EA26062C38C3F4AAA3732A83D36EA8E9602F6683EECC6BAFF63DD2D49014BDE4D6D603CD744206B05B4BAD0C64C63AB3976B5C8CAAF8539549F5921C0B700D5B0F83C4E7E946068BAAAB5463544DB18C63801118F2182EFCC8A1E85E53C2A7AE839A5C6A3CABE73762B70D170AB64AFC6CA482944902611FB0061E09A67ACB77E493D998A0CCF93D81A4F6C0DC6B7DF22E62DBDF040103DF03148E8DFF443D78CD91DE88821D70C98F0638E51E49", //c9
+"9F0605A0000000259F2201CADF0503201231DF060101DF070101DF0281F8C23ECBD7119F479C2EE546C123A585D697A7D10B55C2D28BEF0D299C01DC65420A03FE5227ECDECB8025FBC86EEBC1935298C1753AB849936749719591758C315FA150400789BB14FADD6EAE2AD617DA38163199D1BAD5D3F8F6A7A20AEF420ADFE2404D30B219359C6A4952565CCCA6F11EC5BE564B49B0EA5BF5B3DC8C5C6401208D0029C3957A8C5922CBDE39D3A564C6DEBB6BD2AEF91FC27BB3D3892BEB9646DCE2E1EF8581EFFA712158AAEC541C0BBB4B3E279D7DA54E45A0ACC3570E712C9F7CDF985CFAFD382AE13A3B214A9E8E1E71AB1EA707895112ABC3A97D0FCB0AE2EE5C85492B6CFD54885CDD6337E895CC70FB3255E3DF040103DF03146BDA32B1AA171444C7E8F88075A74FBFE845765F", //CA,*/
 
             //Amex Live cap Keys
             "9F0605A000000025" + //Aid
@@ -595,4 +873,5 @@ class EmvSetAidRid(private var ipboc: IEMV?, private var updateCVMValue: String,
             }
         }
     }
+
 }
