@@ -39,7 +39,7 @@ class CardProcessedDataModal : Serializable {
     private var encryptedPan: String? = null
 
     private var amountInResponse: String? = null
-    private var tipAmount: Double = 0.0
+    private var tipAmount: Long? = 0L
 
     // used in case of sale with cash type
     private var saleAmount: Long? = 0
@@ -269,11 +269,11 @@ class CardProcessedDataModal : Serializable {
         return amountInResponse
     }
 
-    fun getTipAmount(): Double {
+    fun getTipAmount(): Long? {
         return tipAmount
     }
 
-    fun setTipAmount(tipAmount: Double) {
+    fun setTipAmount(tipAmount: Long?) {
         this.tipAmount = tipAmount
     }
 

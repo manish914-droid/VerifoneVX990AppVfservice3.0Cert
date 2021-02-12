@@ -596,7 +596,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                 if (checkInternetConnection()) {
                     //  val amt = data as String
                     val amt = (data as Pair<*, *>).first.toString()
-                    val otherAmount = data.second.toString()
+                    val saleWithTipAmt = data.second.toString()
                     startActivityForResult(Intent(this, VFTransactionActivity::class.java).apply {
                         val formattedTransAmount = "%.2f".format(amt.toDouble())
                         putExtra("amt", formattedTransAmount)
@@ -604,6 +604,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                         putExtra("proc_code", ProcessingCode.SALE.code)
                         putExtra("mobileNumber", extraPairData?.first)
                         putExtra("billNumber", extraPairData?.second)
+                        putExtra("saleWithTipAmt", saleWithTipAmt)
                     }, EIntentRequest.TRANSACTION.code)
                 } else {
                     VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
@@ -667,7 +668,8 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
             UiAction.PRE_AUTH -> {
                 if (checkInternetConnection()) {
-                    val amt = data as String
+                    val amt = (data as Pair<*, *>).first.toString()
+                    // val otherAmount = data.second.toString()
                     startActivityForResult(Intent(this, VFTransactionActivity::class.java).apply {
                         putExtra("amt", amt)
                         putExtra("type", TransactionType.PRE_AUTH.type)
@@ -680,7 +682,8 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
             UiAction.REFUND -> {
                 if (checkInternetConnection()) {
-                    val amt = data as String
+                    val amt = (data as Pair<*, *>).first.toString()
+                    // val otherAmount = data.second.toString()
                     startActivityForResult(Intent(this, VFTransactionActivity::class.java).apply {
                         putExtra("amt", amt)
                         putExtra("type", TransactionType.REFUND.type)
@@ -1040,7 +1043,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                 if (checkInternetConnection()) {
                     verifyAdminPasswordDialog(this) {
                         if (it) {
-                            transactFragment(InputAmountFragment().apply {
+                            transactFragment(NewInputAmountFragment().apply {
                                 arguments = Bundle().apply {
                                     putSerializable("type", action)
                                     putString(

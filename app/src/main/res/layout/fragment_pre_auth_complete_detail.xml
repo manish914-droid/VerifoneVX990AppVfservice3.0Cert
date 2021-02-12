@@ -156,7 +156,7 @@
                     android:layout_gravity="center"
                     android:layout_marginTop="@dimen/pad_16"
                     android:background="@drawable/basic_button_bg"
-                    android:text="Complete Pre-Auth"
+                    android:text="@string/complete_pre_auth"
                     app:fname="bold" />
 
             </LinearLayout>

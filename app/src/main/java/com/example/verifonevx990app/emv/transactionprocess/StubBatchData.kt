@@ -145,6 +145,7 @@ class StubBatchData(
         var baseAmount = 0L
         var cashAmount = 0L
         var totalAmount = 0L
+        var saleWithTipAmount = 0L
         when (cardProcessedDataModal.getTransType()) {
             TransactionType.SALE_WITH_CASH.type -> {
                 baseAmount = cardProcessedDataModal.getSaleAmount() ?: 0L
@@ -157,7 +158,9 @@ class StubBatchData(
             else -> {
                 baseAmount = cardProcessedDataModal.getTransactionAmount() ?: 0L
                 totalAmount = cardProcessedDataModal.getTransactionAmount() ?: 0L
+                saleWithTipAmount = cardProcessedDataModal.getTipAmount() ?: 0L
                 batchFileData.baseAmmount = MoneyUtil.fen2yuan(baseAmount).toString()
+                batchFileData.tipAmmount = MoneyUtil.fen2yuan(saleWithTipAmount).toString()
                 batchFileData.cashBackAmount = MoneyUtil.fen2yuan(cashAmount).toString()
                 batchFileData.totalAmmount = MoneyUtil.fen2yuan(totalAmount).toString()
             }

@@ -495,15 +495,26 @@ class PrintUtil(context: Context?) {
              // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
              printer?.addTextInLine(fmtAddTextInLine, "TOTAL AMOUNT :    Rs  ${"%.2f".format(tipAndTransAmount)}", "", "", PrinterConfig.addTextInLine.mode.Devide_flexible)
              //    centerText(format, "TOTAL AMOUNT :    Rs  $baseAmount")*/
-            val saleAmount = "%.2f".format(printerReceiptData.baseAmmount.toDouble())
+            var saleAmount = "%.2f".format(printerReceiptData.baseAmmount.toDouble())
+
+
             val totalAmount = "%.2f".format(printerReceiptData.totalAmmount.toDouble())
-            val cashAmount = "%.2f".format(printerReceiptData.cashBackAmount.toDouble())
+            val cashAmount = if (printerReceiptData.cashBackAmount.isEmpty()) {
+                "%.2f".format("0".toDouble())
+            } else {
+                "%.2f".format(printerReceiptData.cashBackAmount.toDouble())
+            }
             val tipAmount =
                 if (printerReceiptData.tipAmmount.isEmpty()) {
                     "%.2f".format("0".toDouble())
                 } else {
                     "%.2f".format(printerReceiptData.tipAmmount.toDouble())
                 }
+
+            if (isTipAllowed && tipAmount.toDouble() > 0) {
+                saleAmount = "%.2f".format((saleAmount.toDouble() - tipAmount.toDouble()))
+            }
+
 
             when (printerReceiptData.transactionType) {
                 TransactionType.SALE_WITH_CASH.type -> {
@@ -530,14 +541,15 @@ class PrintUtil(context: Context?) {
                     )
                 }
                 TransactionType.SALE.type -> {
-                    if (isTipAllowed) {
-                        printer?.addTextInLine(
-                            fmtAddTextInLine,
-                            "BASE AMOUNT  :    Rs  $saleAmount",
-                            "",
-                            "",
-                            PrinterConfig.addTextInLine.mode.Devide_flexible
-                        )
+                    printer?.addTextInLine(
+                        fmtAddTextInLine,
+                        "SALE AMOUNT  :    Rs  $saleAmount",
+                        "",
+                        "",
+                        PrinterConfig.addTextInLine.mode.Devide_flexible
+                    )
+
+                    if (isTipAllowed && printerReceiptData.tipAmmount.toDouble() <= 0) {
                         printer?.addTextInLine(
                             fmtAddTextInLine,
                             "TIP AMOUNT   :    ...............................",
@@ -545,37 +557,27 @@ class PrintUtil(context: Context?) {
                             "",
                             PrinterConfig.addTextInLine.mode.Devide_flexible
                         )
+                    } else if (isTipAllowed && tipAmount.toDouble() > 0) {
                         printer?.addTextInLine(
                             fmtAddTextInLine,
-                            "TOTAL AMOUNT  :    Rs  $totalAmount",
+                            "TIP AMOUNT  :    Rs  $tipAmount",
                             "",
                             "",
                             PrinterConfig.addTextInLine.mode.Devide_flexible
                         )
-
-                    } else {
-                        printer?.addTextInLine(
-                            fmtAddTextInLine,
-                            "BASE AMOUNT  :    Rs  $saleAmount",
-                            "",
-                            "",
-                            PrinterConfig.addTextInLine.mode.Devide_flexible
-                        )
-                        printer?.addTextInLine(
-                            fmtAddTextInLine,
-                            "TOTAL AMOUNT  :    Rs  $totalAmount",
-                            "",
-                            "",
-                            PrinterConfig.addTextInLine.mode.Devide_flexible
-                        )
-
                     }
-
+                    printer?.addTextInLine(
+                        fmtAddTextInLine,
+                        "TOTAL AMOUNT  :    Rs  $totalAmount",
+                        "",
+                        "",
+                        PrinterConfig.addTextInLine.mode.Devide_flexible
+                    )
                 }
                 TransactionType.TIP_SALE.type -> {
                     printer?.addTextInLine(
                         fmtAddTextInLine,
-                        "BASE AMOUNT  :    Rs  $saleAmount",
+                        "SALE AMOUNT  :    Rs  $saleAmount",
                         "",
                         "",
                         PrinterConfig.addTextInLine.mode.Devide_flexible

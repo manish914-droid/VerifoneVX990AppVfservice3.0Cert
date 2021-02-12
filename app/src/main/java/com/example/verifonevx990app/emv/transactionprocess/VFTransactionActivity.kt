@@ -62,6 +62,7 @@ class VFTransactionActivity : BaseActivity() {
     private val saleAmt by lazy { intent.getStringExtra("saleAmt") ?: "0" }
     private val mobileNumber by lazy { intent.getStringExtra("mobileNumber") ?: "" }
     private val billNumber by lazy { intent.getStringExtra("billNumber") ?: "0" }
+    private val saleWithTipAmt by lazy { intent.getStringExtra("saleWithTipAmt") ?: "0" }
 
 
     private val transactionProcessingCode by lazy {
@@ -347,6 +348,7 @@ class VFTransactionActivity : BaseActivity() {
         globalCardProcessedModel.setOtherAmount(otherTransAmount)
         globalCardProcessedModel.setTransactionAmount(transactionalAmount)
         globalCardProcessedModel.setSaleAmount(((saleAmt.toDouble()) * 100).toLong())
+        globalCardProcessedModel.setTipAmount(((saleWithTipAmt.toDouble()) * 100).toLong())
 
         if (isManualEntryAllowed) binding?.manualEntryButton?.visibility =
             View.VISIBLE else binding?.manualEntryButton?.visibility = View.GONE
