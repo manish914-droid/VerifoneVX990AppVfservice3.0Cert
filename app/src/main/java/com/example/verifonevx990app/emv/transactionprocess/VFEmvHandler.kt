@@ -290,10 +290,6 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                     }
                 }
 
-                //Here we make a callback for first time card read in case of bank emi:-
-                if (isFirstBankEMICardRead)
-                    vfEmvHandlerCallback(cardProcessedDataModal)
-
                 if (!cardProcessedDataModal.getPanNumberData()?.let { cardLuhnCheck(it) }!!) {
                     val bun = Bundle()
                     bun.putString("ERROR", "Invalid Card Number")

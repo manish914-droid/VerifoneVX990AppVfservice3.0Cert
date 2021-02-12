@@ -37,7 +37,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-const val HDFC_LOGO = ""
+const val HDFC_LOGO = "hdfc_print_logo.bmp"
 const val AMEX_LOGO = "amex_print.bmp"
 private const val disclaimerEmiOpen = "~emi~"
 private const val disclaimerEmiClose = "~!emi~"
@@ -171,7 +171,7 @@ class PrintUtil(context: Context?) {
             // bundle formate for AddTextInLine
             val fmtAddTextInLine = Bundle()
 
-            printLogo("amex_print.bmp")
+            printLogo("hdfc_print_logo.bmp")
 
             format.putInt(
                 PrinterConfig.addText.FontSize.BundleName,
@@ -300,17 +300,6 @@ class PrintUtil(context: Context?) {
                 PrinterConfig.addTextInLine.mode.Devide_flexible
             )
 
-            /*  format.putInt(
-                   PrinterConfig.addText.FontSize.BundleName,
-                   PrinterConfig.addText.FontSize.LARGE_DH_32_64_IN_BOLD
-               )
-               format.putInt(
-                   PrinterConfig.addText.Alignment.BundleName,
-                   PrinterConfig.addText.Alignment.CENTER
-               )
-               logger("PS_transtype", (printer?.status).toString(), "e")
-               printer?.addText(format, printerReceiptData.getTransactionType())*/
-
             printTransType(format, printerReceiptData.transactionType)
 
             fmtAddTextInLine.putInt(
@@ -321,8 +310,7 @@ class PrintUtil(context: Context?) {
                 PrinterConfig.addTextInLine.GlobalFont.BundleName,
                 PrinterFonts.path + PrinterFonts.FONT_AGENCYR
             )
-            //   printer.addTextInLine( fmtAddTextInLine, "L & R", "", "Divide Equally", 0);
-            //   printer.addTextInLine( fmtAddTextInLine, "L & R", "", "Divide Equally", 0);
+
             logger("PS_ct_exp", (printer?.status).toString(), "e")
 
             printer?.addTextInLine(
@@ -475,10 +463,10 @@ class PrintUtil(context: Context?) {
             val baseAmount = "%.2f".format(printerReceiptData.transactionalAmmount.toDouble() / 100)
 
             logger("PS_baseamt", (printer?.status).toString(), "e")
-            printer?.feedLine(2)
+            // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
             //  alignLeftRightText(fmtAddTextInLine, "", "")
             if (printerReceiptData.transactionType == TransactionType.VOID.type && printerReceiptData.tipAmmount != "") {
-                //  printer?.feedLine(2)
+                //  // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
                 printer?.addTextInLine(
                     fmtAddTextInLine,
                     "BASE AMOUNT  :    Rs  ${"%.2f".format((printerReceiptData.totalAmmount.toFloat()) / 100)}",
@@ -488,7 +476,7 @@ class PrintUtil(context: Context?) {
                 )
 
             } else {
-                //   printer?.feedLine(2)
+                //   // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
                 printer?.addTextInLine(
                     fmtAddTextInLine,
                     "BASE AMOUNT  :    Rs  ${printerReceiptData.baseAmmount}",
@@ -496,14 +484,11 @@ class PrintUtil(context: Context?) {
                     "",
                     PrinterConfig.addTextInLine.mode.Devide_flexible
                 )
-
             }
 
-            // alignLeftRightText(fmtAddTextInLine, "", "")
-            //   val ttamount=(baseAmount.toFloat())+((printerReceiptData.tipAmmount.toFloat())/100)
             if (isTipAllowed && printerReceiptData.transactionType == TransactionType.TIP_SALE.type) {
                 val tipamt = "%.2f".format((printerReceiptData.tipAmmount.toFloat()) / 100)
-                printer?.feedLine(2)
+                // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
                 printer?.addTextInLine(
                     fmtAddTextInLine,
                     "TIP AMOUNT   :    Rs  $tipamt",
@@ -513,7 +498,7 @@ class PrintUtil(context: Context?) {
                 )
 
             } else if (isTipAllowed && printerReceiptData.transactionType == TransactionType.SALE.type) {
-                printer?.feedLine(2)
+                // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
                 printer?.addTextInLine(
                     fmtAddTextInLine,
                     "TIP AMOUNT   :    ...............................",
@@ -523,25 +508,16 @@ class PrintUtil(context: Context?) {
                 )
             }
 
-
-            //  val totalAmount = "%.2f".format(printerReceiptData.totalAmmount.toFloat() / 100)
             var tipAndTransAmount = 0.0
-            /*   if(!printerReceiptData.tipAmmount.isBlank()){
-                  val tipamt=(printerReceiptData.tipAmmount.toFloat())/100
-                  tipAndTransAmount= tipamt+baseAmount.toFloat()
-              }else{
-                  tipAndTransAmount=baseAmount.toFloat()
 
-              }*/
 
             if (printerReceiptData.transactionType == TransactionType.TIP_SALE.type) {
                 tipAndTransAmount = printerReceiptData.totalAmmount.toDouble() / 100
-
             } else {
                 tipAndTransAmount += baseAmount.toDouble()
             }
 
-            printer?.feedLine(2)
+            // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
             printer?.addTextInLine(
                 fmtAddTextInLine,
                 "TOTAL AMOUNT :    Rs  ${"%.2f".format(tipAndTransAmount)}",
@@ -565,10 +541,10 @@ class PrintUtil(context: Context?) {
                 centerText(format, pinVerifyMsg)
                 centerText(format, signatureMsg)
             } else {
-                printer?.feedLine(2)
+                // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
                 alignLeftRightText(format, pinVerifyMsg, "", "")
                 alignLeftRightText(format, signatureMsg, "", "")
-                printer?.feedLine(2)
+                // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
                 // printer?.addText(format, pinVerifyMsg)
                 //  printer?.addText(format, signatureMsg)
             }
@@ -668,7 +644,7 @@ class PrintUtil(context: Context?) {
             // bundle formate for AddTextInLine
             val fmtAddTextInLine = Bundle()
 
-            printLogo("amex_print.bmp")
+            printLogo("hdfc_print_logo.bmp")
 
             format.putInt(
                 PrinterConfig.addText.FontSize.BundleName,
@@ -1577,7 +1553,7 @@ class PrintUtil(context: Context?) {
                 tpt?.receiptHeaderTwo?.let { headers.add(it) }
                 tpt?.receiptHeaderThree?.let { headers.add(it) }
 
-                setHeaderWithLogo(textFormatBundle, "amex_print.bmp", headers)
+                setHeaderWithLogo(textFormatBundle, "hdfc_print_logo.bmp", headers)
 
                 val td = System.currentTimeMillis()
                 val formatdate = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
@@ -1762,7 +1738,7 @@ class PrintUtil(context: Context?) {
             // bundle formate for AddTextInLine
             val fmtAddTextInLine = Bundle()
 
-            printLogo("amex_print.bmp")
+            printLogo("hdfc_print_logo.bmp")
 
             format.putInt(
                 PrinterConfig.addText.FontSize.BundleName,
@@ -2013,9 +1989,9 @@ class PrintUtil(context: Context?) {
                 PrinterConfig.addText.Alignment.BundleName,
                 PrinterConfig.addText.Alignment.CENTER
             )
-            printer?.feedLine(2)
+            // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
             alignLeftRightText(format, signatureMsg, "", "")
-            printer?.feedLine(2)
+            // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
             val ipt =
                 IssuerParameterTable.selectFromIssuerParameterTable(AppPreference.WALLET_ISSUER_ID)
 
@@ -2501,16 +2477,16 @@ class PrintUtil(context: Context?) {
             printSeperator(textFormatBundle)
 
             centerText(textFormatBundle, "BASE AMOUNT  :     Rs  $txnAmount", true)
-            printer?.feedLine(2)
+            // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
             if (printerReceiptData.isPinverified) {
                 //  printer?.addText(format, pinVerifyMsg)
                 pinVerifyMsg?.let { centerText(textInLineFormatBundle, it) }
                 signatureMsg?.let { centerText(textInLineFormatBundle, it) }
             } else {
-                printer?.feedLine(2)
+                // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
                 pinVerifyMsg?.let { alignLeftRightText(textInLineFormatBundle, it, "", "") }
                 signatureMsg?.let { alignLeftRightText(textInLineFormatBundle, it, "", "") }
-                printer?.feedLine(2)
+                // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
                 // printer?.addText(format, pinVerifyMsg)
                 //  printer?.addText(format, signatureMsg)
             }
@@ -2530,7 +2506,7 @@ class PrintUtil(context: Context?) {
                 }
             }
             //    printer?.addText(textInLineFormatBundle, ipt?.volletIssuerDisclammer)
-            printer?.feedLine(2)
+            // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
             centerText(textInLineFormatBundle, copyType.pName)
             printer?.addText(textInLineFormatBundle, footerText[0])
             printer?.addText(textInLineFormatBundle, footerText[1])
@@ -2655,7 +2631,7 @@ class PrintUtil(context: Context?) {
             tpt?.receiptHeaderOne?.let { headers.add(it) }
             tpt?.receiptHeaderTwo?.let { headers.add(it) }
             tpt?.receiptHeaderThree?.let { headers.add(it) }
-            setHeaderWithLogo(format, "amex_print.bmp", headers, context)
+            setHeaderWithLogo(format, "hdfc_print_logo.bmp", headers, context)
 
             val time = cardProcessedDataModal.getTime()
             val timeFormat = SimpleDateFormat("HHmmss", Locale.getDefault())
@@ -2980,7 +2956,7 @@ class PrintUtil(context: Context?) {
             tpt?.receiptHeaderTwo?.let { headers.add(it) }
             tpt?.receiptHeaderThree?.let { headers.add(it) }
 
-            setHeaderWithLogo(textFormatBundle, AMEX_LOGO, headers)
+            setHeaderWithLogo(textFormatBundle, HDFC_LOGO, headers)
         } catch (ex: DeadObjectException) {
             throw ex
         } catch (ex: RemoteException) {

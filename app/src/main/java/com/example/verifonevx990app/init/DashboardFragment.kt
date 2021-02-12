@@ -98,6 +98,13 @@ class DashboardFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        if (isExpanded) {
+            binding?.pagerViewLL?.visibility = View.GONE
+        } else {
+            binding?.pagerViewLL?.visibility = View.VISIBLE
+        }
+
         update = Runnable {
             if (currentPage == imageArr.size) {
                 currentPage = 0

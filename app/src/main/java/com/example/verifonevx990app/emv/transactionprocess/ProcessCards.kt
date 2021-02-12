@@ -103,7 +103,7 @@ class ProcessCard(
                                         //    VFEmv.savedPinblock = data
                                         /*    if(VFService.isOnlinePin!!) {
                                                                                                         VFService.mIsoWriter?.genratedPinBlock = Utility.byte2HexStr(data)
-                                                                                                    }*/
+                                                                                              }*/
                                         cardProcessedDataModal.setGeneratePinBlock(
                                             Utility.byte2HexStr(data)
                                         )
@@ -403,10 +403,12 @@ class ProcessCard(
                         iemv?.abortEMV()
                         cardProcessedDataModal.setReadCardType(DetectCardType.EMV_CARD_TYPE)
                         VFService.vfBeeper?.startBeep(200)
-                        println("Transactionamount is calling" + transactionalAmt.toString() + "Handler is" + handler)
+                        println("Transaction Amount ---->  $transactionalAmt  Handler is$handler")
+                        println("Transaction Other Amount ---->  $otherAmt  Handler is$handler")
                         when (cardProcessedDataModal.getTransType()) {
                             TransactionType.EMI_SALE.type -> {
-                                VFService.vfIEMV?.startEMV(ConstIPBOC.startEMV.processType.full_process,
+                                VFService.vfIEMV?.startEMV(
+                                    ConstIPBOC.startEMV.processType.full_process,
                                     Bundle(),
                                     VFEmvHandler(
                                         activity,

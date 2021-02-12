@@ -68,7 +68,7 @@ enum class UiAction(val tvalue: Int = 0, val title: String = "") {
         title = "Pre-Auth"
     ),
     REFUND(title = "Refund"),
-    BANK_EMI(title = "Bank EMI"), OFFLINE_SALE(title = "Offline Sale"), CASH_ADVANCE(title = "Cash Advance"), SALE_WITH_CASH(
+    BANK_EMI(title = "Bank EMI"), OFFLINE_SALE(title = "Offline Sale"), CASH_AT_POS(title = "Cash Advance"), SALE_WITH_CASH(
         title = "Sale With Cash"
     ),
     PRE_AUTH_COMPLETE(title = "Pre Auth Complete")

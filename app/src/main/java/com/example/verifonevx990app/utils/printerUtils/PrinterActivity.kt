@@ -518,7 +518,7 @@ class PrinterActivity : BaseActivity() {
             tpt?.receiptHeaderTwo?.let { headers.add(it) }
             tpt?.receiptHeaderThree?.let { headers.add(it) }
 
-            setHeaderWithLogo(textFormatBundle, AMEX_LOGO, headers)
+            setHeaderWithLogo(textFormatBundle, HDFC_LOGO, headers)
         } catch (ex: DeadObjectException) {
             throw ex
         } catch (ex: RemoteException) {

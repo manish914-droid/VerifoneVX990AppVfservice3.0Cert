@@ -66,7 +66,7 @@ enum class TransactionType(val type: Int,val processingCode: ProcessingCode=Proc
     BALANCE_ENQUIRY(8),
     REFUND(9, ProcessingCode.REFUND, "REFUND"),
     VOID_REFUND(10, ProcessingCode.VOID_REFUND, "VOID OF REFUND"),
-    SALE_WITH_CASH(11, ProcessingCode.SALE_WITH_CASH, "Sale With Cash"),
+    SALE_WITH_CASH(11, ProcessingCode.SALE_WITH_CASH, "SALE-CASH"),
     CASH(12),
     BATCH_UPLOAD(13),
     PRE_AUTH(14, ProcessingCode.PRE_AUTH, "PRE-AUTH"),
@@ -80,7 +80,7 @@ enum class TransactionType(val type: Int,val processingCode: ProcessingCode=Proc
     TIP_ADJUSTMENT(21),
 
     OFF_SALE(22),
-    CASH_AT_POS(23),
+    CASH_AT_POS(23, ProcessingCode.CASH_AT_POS, "CASH ONLY"),
     BATCH_SETTLEMENT(24),
 
     PRE_AUTH_COMPLETE(25, ProcessingCode.PRE_SALE_COMPLETE, "AUTH-COMP"),

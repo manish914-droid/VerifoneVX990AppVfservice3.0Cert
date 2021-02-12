@@ -51,8 +51,8 @@ class VFTransactionActivity : BaseActivity() {
 
     private var userInactivity: Boolean = false
     private val pinHandler = Handler(Looper.getMainLooper())
-    private var transactionalAmount: Long = 0L
-    private var otherTransAmount: Long = 0L
+    private var transactionalAmount: Long = 0
+    private var otherTransAmount: Long = 0
     private val transactionAmountValue by lazy { intent.getStringExtra("amt") ?: "0" }
 
     //used for other cash amount
@@ -240,7 +240,7 @@ class VFTransactionActivity : BaseActivity() {
             DetectCardType.MAG_CARD_TYPE -> {
                 //region============Below When Condition is used to check Transaction Types Based Process Execution:-
                 when (cardProcessedData.getTransType()) {
-                    TransactionType.SALE.type, TransactionType.PRE_AUTH.type, TransactionType.REFUND.type -> emvProcessNext(
+                    TransactionType.SALE.type, TransactionType.PRE_AUTH.type, TransactionType.REFUND.type, TransactionType.CASH_AT_POS.type, TransactionType.SALE_WITH_CASH.type -> emvProcessNext(
                         cardProcessedData
                     )
                     TransactionType.EMI_SALE.type -> {
@@ -254,10 +254,12 @@ class VFTransactionActivity : BaseActivity() {
             DetectCardType.EMV_CARD_TYPE -> {
                 //  when(cardProcessedData.getTransType()==)
 
-                if (cardProcessedData.getTransType() == TransactionType.SALE.type || cardProcessedData.getTransType() == TransactionType.PRE_AUTH.type || cardProcessedData.getTransType() == TransactionType.REFUND.type) {
+                if (cardProcessedData.getTransType() == TransactionType.SALE.type || cardProcessedData.getTransType() == TransactionType.PRE_AUTH.type || cardProcessedData.getTransType() == TransactionType.REFUND.type || cardProcessedData.getTransType() == TransactionType.CASH_AT_POS.type
+                    || cardProcessedData.getTransType() == TransactionType.SALE_WITH_CASH.type
+                ) {
                     emvProcessNext(cardProcessedData)
                 } else {
-                    val transactionEMIISO = CreateEMITransactionPacket(
+                    /*val transactionEMIISO = CreateEMITransactionPacket(
                         cardProcessedData,
                         emiCustomerDetails
                     ).createTransactionPacket()
@@ -265,7 +267,7 @@ class VFTransactionActivity : BaseActivity() {
                     //  runOnUiThread { showProgress(getString(R.string.sale_data_sync)) }
                     GlobalScope.launch(Dispatchers.IO) {
                         checkReversal(transactionEMIISO, cardProcessedData)
-                    }
+                    }*/
 
                 }
 
@@ -277,15 +279,15 @@ class VFTransactionActivity : BaseActivity() {
                 if (cardProcessedData.getTransType() == TransactionType.SALE.type || cardProcessedData.getTransType() == TransactionType.PRE_AUTH.type || cardProcessedData.getTransType() == TransactionType.REFUND.type) {
                     emvProcessNext(cardProcessedData)
                 } else {
-                    val transactionEMIISO = CreateEMITransactionPacket(
-                        cardProcessedData,
-                        emiCustomerDetails
-                    ).createTransactionPacket()
-                    logger("Transaction REQUEST PACKET --->>", transactionEMIISO.isoMap, "e")
-                    // runOnUiThread { showProgress(getString(R.string.sale_data_sync)) }
-                    GlobalScope.launch(Dispatchers.IO) {
-                        checkReversal(transactionEMIISO, cardProcessedData)
-                    }
+                    /*  val transactionEMIISO = CreateEMITransactionPacket(
+                          cardProcessedData,
+                          emiCustomerDetails
+                      ).createTransactionPacket()
+                      logger("Transaction REQUEST PACKET --->>", transactionEMIISO.isoMap, "e")
+                      // runOnUiThread { showProgress(getString(R.string.sale_data_sync)) }
+                      GlobalScope.launch(Dispatchers.IO) {
+                          checkReversal(transactionEMIISO, cardProcessedData)
+                      }*/
 
                 }
 
@@ -306,15 +308,15 @@ class VFTransactionActivity : BaseActivity() {
                 if (cardProcessedData.getTransType() == TransactionType.SALE.type || cardProcessedData.getTransType() == TransactionType.PRE_AUTH.type || cardProcessedData.getTransType() == TransactionType.REFUND.type) {
                     emvProcessNext(cardProcessedData)
                 } else {
-                    val transactionEMIISO = CreateEMITransactionPacket(
-                        cardProcessedData,
-                        emiCustomerDetails
-                    ).createTransactionPacket()
-                    logger("Transaction REQUEST PACKET --->>", transactionEMIISO.isoMap, "e")
-                 //   runOnUiThread { showProgress(getString(R.string.sale_data_sync)) }
-                    GlobalScope.launch(Dispatchers.IO) {
-                        checkReversal(transactionEMIISO, cardProcessedData)
-                    }
+                    /*  val transactionEMIISO = CreateEMITransactionPacket(
+                          cardProcessedData,
+                          emiCustomerDetails
+                      ).createTransactionPacket()
+                      logger("Transaction REQUEST PACKET --->>", transactionEMIISO.isoMap, "e")
+                   //   runOnUiThread { showProgress(getString(R.string.sale_data_sync)) }
+                      GlobalScope.launch(Dispatchers.IO) {
+                          checkReversal(transactionEMIISO, cardProcessedData)
+                      }*/
                 }
             }
 
@@ -339,10 +341,11 @@ class VFTransactionActivity : BaseActivity() {
         binding?.paymentGif?.setOnTouchListener { _, event -> event.action == MotionEvent.ACTION_MOVE }
         val amountValue = "${getString(R.string.rupees_symbol)} $transactionAmountValue"
         findViewById<BHTextView>(R.id.base_amt_tv).text = amountValue
-        transactionalAmount = transactionAmountValue.replace(".", "").toLong()
-        otherTransAmount = transactionOtherAmountValue.replace(".", "").toLong()
+        transactionalAmount = ((transactionAmountValue.toDouble()) * 100).toLong()
+        otherTransAmount = ((transactionOtherAmountValue.toDouble()) * 100).toLong()
         globalCardProcessedModel.setOtherAmount(otherTransAmount)
         globalCardProcessedModel.setTransactionAmount(transactionalAmount)
+        globalCardProcessedModel.setSaleAmount(((saleAmt.toDouble()) * 100).toLong())
 
         if (isManualEntryAllowed) binding?.manualEntryButton?.visibility =
             View.VISIBLE else binding?.manualEntryButton?.visibility = View.GONE
@@ -431,39 +434,43 @@ class VFTransactionActivity : BaseActivity() {
         // If case Sale data sync to server
         if (TextUtils.isEmpty(AppPreference.getString(AppPreference.GENERIC_REVERSAL_KEY))) {
             val msg: String = getString(R.string.sale_data_sync)
-           /* when (cardProcessedDataModal.getTransType()) {
-                TransactionType.PRE_AUTH.type -> getString(R.string.pre_auth_data_syn)
-                TransactionType.SALE.type -> getString(R.string.sale_data_sync)
-                TransactionType.REFUND.type -> getString(R.string.refund_data_sync)
-                else -> getString(R.string.data_sync)
-            }*/
+            /* when (cardProcessedDataModal.getTransType()) {
+                 TransactionType.PRE_AUTH.type -> getString(R.string.pre_auth_data_syn)
+                 TransactionType.SALE.type -> getString(R.string.sale_data_sync)
+                 TransactionType.REFUND.type -> getString(R.string.refund_data_sync)
+                 else -> getString(R.string.data_sync)
+             }*/
             runOnUiThread { showProgress(msg) }
-            SyncTransactionToHost(
-                transactionISOByteArray,
-                cardProcessedDataModal
-            ) { syncStatus, responseCode, transactionMsg, printExtraData ->
+            SyncTransactionToHost(transactionISOByteArray, cardProcessedDataModal)
+            { syncStatus, responseCode, transactionMsg, printExtraData ->
                 hideProgress()
-                if(cardProcessedDataModal.getReadCardType()== DetectCardType.EMV_CARD_TYPE)
-                logger("CHECKCALL","CALLED","e")
+                if (cardProcessedDataModal.getReadCardType() == DetectCardType.EMV_CARD_TYPE)
+                    logger("CHECKCALL", "CALLED", "e")
                 if (syncStatus) {
-
                     val responseIsoData: IsoDataReader = readIso(transactionMsg.toString(), false)
-                    val autoSettlementCheck = responseIsoData.isoMap[60]?.parseRaw2String().toString()
+                    val autoSettlementCheck =
+                        responseIsoData.isoMap[60]?.parseRaw2String().toString()
                     if (syncStatus && responseCode == "00" && !AppPreference.getBoolean(
-                            AppPreference.ONLINE_EMV_DECLINED)) {
+                            AppPreference.ONLINE_EMV_DECLINED
+                        )
+                    ) {
                         //Below we are saving batch data and print the receipt of transaction:-
-                        GlobalScope.launch (Dispatchers.Main){
-                            if(cardProcessedDataModal.getReadCardType()== DetectCardType.EMV_CARD_TYPE)
-                            txnSuccessToast(this@VFTransactionActivity,getString(R.string.transaction_approved_successfully))
+                        GlobalScope.launch(Dispatchers.Main) {
+                            if (cardProcessedDataModal.getReadCardType() == DetectCardType.EMV_CARD_TYPE)
+                                txnSuccessToast(
+                                    this@VFTransactionActivity,
+                                    getString(R.string.transaction_approved_successfully)
+                                )
                             else
                                 txnSuccessToast(this@VFTransactionActivity)
-                           // delay(4000)
+                            // delay(4000)
                         }
                         StubBatchData(
                             cardProcessedDataModal.getTransType(),
                             cardProcessedDataModal,
                             printExtraData
-                        ) { stubbedData ->
+                        )
+                        { stubbedData ->
                             if (cardProcessedDataModal.getTransType() == TransactionType.EMI_SALE.type) {
                                 stubEMI(stubbedData, emiCustomerDetails) { data ->
                                     printSaveSaleEmiDataInBatch(data) { printCB ->
@@ -472,7 +479,9 @@ class VFTransactionActivity : BaseActivity() {
                                             //If Auto Settlement Enabled Show Pop Up and User has choice whether he/she wants to settle or not:-
                                             if (!TextUtils.isEmpty(autoSettlementCheck))
                                                 GlobalScope.launch(Dispatchers.Main) {
-                                                    syncOfflineSaleAndAskAutoSettlement(autoSettlementCheck.substring(0, 1))
+                                                    syncOfflineSaleAndAskAutoSettlement(
+                                                        autoSettlementCheck.substring(0, 1)
+                                                    )
                                                 }
                                         }
                                     }

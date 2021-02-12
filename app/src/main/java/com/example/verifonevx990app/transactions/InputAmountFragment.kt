@@ -163,7 +163,10 @@ class InputAmountFragment : Fragment() {
                     EDashboardItem.EMI_ENQUIRY-> {
                        // val formatAmt = "%.2f".format(amt)
                         iDailog?.onEvents(VxEvent.Emi(amt.toDouble(),transactionType))  }//(activity as MainActivity).showToast("TO BE IMPLEMENTED")
-                    EDashboardItem.CASH_ADVANCE->iFrReq?.onFragmentRequest(UiAction.CASH_ADVANCE, amt)
+                    EDashboardItem.CASH_ADVANCE -> iFrReq?.onFragmentRequest(
+                        UiAction.CASH_AT_POS,
+                        amt
+                    )
                     EDashboardItem.SALE_WITH_CASH -> {
                         val cashAmt = binding?.iafCashAmountEt?.text.toString()
                         if (!cashAmt.isBlank()) {

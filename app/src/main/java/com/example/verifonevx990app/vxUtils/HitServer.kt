@@ -122,15 +122,21 @@ object HitServer {
                     logger(TAG, "len=$len, data = $responseStr")
                     socket.close()
                     irh?.clearReversal()
-                    } catch (ex: SocketTimeoutException) {
+                } catch (ex: SocketTimeoutException) {
                     println("Read Time out error1" + ex.message)
                     //println("Read Time out error"+ex.message)
+                    socket.close()
                     ex.printStackTrace()
-                    callbackSale(responseStr ?: "", true, ConnectionError.ReadTimeout.errorCode.toString())
+                    callbackSale(
+                        responseStr ?: "",
+                        true,
+                        ConnectionError.ReadTimeout.errorCode.toString()
+                    )
                     this@HitServer.callback = null
                     return@openSocketSale
                 } catch (ex: ConnectException) {
                     ex.printStackTrace()
+                    socket.close()
                     println("Read Time out error2" + ex.message)
                     callbackSale(
                         ex.message ?: "Connection Error",
@@ -143,6 +149,7 @@ object HitServer {
                 } catch (ex: SocketException) {
                     ex.printStackTrace()
                     println("Read Time out error3" + ex.message)
+                    socket.close()
                     callbackSale(
                         ex.message ?: "Connection Error",
                         true,
@@ -155,6 +162,7 @@ object HitServer {
                 catch (ex : Exception) {
                     ex.printStackTrace()
                     println("Read Time out error4" + ex.message)
+                    socket.close()
                     callbackSale(
                         ex.message ?: "Connection Error",
                         true,

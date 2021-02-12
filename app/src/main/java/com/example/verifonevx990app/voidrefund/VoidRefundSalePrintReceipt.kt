@@ -60,7 +60,7 @@ class VoidRefundSalePrintReceipt {
             // bundle formate for AddTextInLine
             val fmtAddTextInLine = Bundle()
 
-            printLogo("amex_print.bmp")
+            printLogo("hdfc_print_logo.bmp")
 
             format.putInt(
                 PrinterConfig.addText.FontSize.BundleName,
@@ -394,10 +394,10 @@ class VoidRefundSalePrintReceipt {
                 centerText(format, pinVerifyMsg)
                 centerText(format, signatureMsg)
             } else {
-                printer?.feedLine(2)
+                // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
                 alignLeftRightText(format, pinVerifyMsg, "", "")
                 alignLeftRightText(format, signatureMsg, "", "")
-                printer?.feedLine(2)
+                // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
                 // printer?.addText(format, pinVerifyMsg)
                 //  printer?.addText(format, signatureMsg)
             }

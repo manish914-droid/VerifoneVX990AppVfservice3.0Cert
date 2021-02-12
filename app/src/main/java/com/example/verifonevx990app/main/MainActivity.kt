@@ -625,15 +625,20 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                 }
             }
 
-            UiAction.CASH_ADVANCE -> {
+            UiAction.CASH_AT_POS -> {
                 if (checkInternetConnection()) {
                     val amt = (data as Pair<*, *>).first.toString()
                     val otherAmount = data.second.toString()
-                    // val amt = data as String
+                    //    val amts = data as ArrayList<String>
                     startActivityForResult(Intent(this, VFTransactionActivity::class.java).apply {
+
                         putExtra("amt", amt)
-                        putExtra("type", action)
-                        putExtra("otherAmount", otherAmount)
+                        putExtra("type", TransactionType.CASH_AT_POS.type)
+                        putExtra("proc_code", ProcessingCode.CASH_AT_POS.code)
+                        putExtra("title", TransactionType.CASH_AT_POS.txnTitle)
+                        putExtra("saleAmt", amt)
+                        //same as main amount in case of cash at pos
+                        putExtra("otherAmount", amt)
                     }, EIntentRequest.TRANSACTION.code)
                 } else {
                     VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))

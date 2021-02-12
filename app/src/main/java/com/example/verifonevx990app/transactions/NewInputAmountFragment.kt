@@ -335,7 +335,7 @@ class NewInputAmountFragment : Fragment() {
                 }
                 EDashboardItem.CASH_ADVANCE -> {
                     iFrReq?.onFragmentRequest(
-                        UiAction.CASH_ADVANCE,
+                        UiAction.CASH_AT_POS,
                         Pair(
                             binding?.saleAmount?.text.toString().trim(),
                             binding?.saleAmount?.text.toString().trim()

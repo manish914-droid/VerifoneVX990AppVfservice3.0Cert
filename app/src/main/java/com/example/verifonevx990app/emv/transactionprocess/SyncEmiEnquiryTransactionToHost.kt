@@ -1,12 +1,7 @@
 package com.example.verifonevx990app.emv.transactionprocess
 
-import android.text.TextUtils
 import android.util.Log
-import com.example.verifonevx990app.main.ConnectionError
-import com.example.verifonevx990app.main.PrefConstant
-import com.example.verifonevx990app.preAuth.CreateReversal
 import com.example.verifonevx990app.vxUtils.*
-import com.google.gson.Gson
 import com.vfi.smartpos.deviceservice.aidl.IEMV
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -34,9 +29,7 @@ class SyncEmiEnquiryTransactionToHost(var transactionISOByteArray: IsoDataWriter
         if (transactionISOByteArray != null) {
             HitServer.hitServersale(transactionISOByteArray, { result, success,readtimeout ->
                 try {
-
                     if (success) {
-
                         //Below we are incrementing previous ROC (Because ROC will always be incremented whenever Server Hit is performed:-
                         ROCProviderV2.incrementFromResponse(ROCProviderV2.getRoc(AppPreference.getBankCode()).toString(), AppPreference.getBankCode())
 

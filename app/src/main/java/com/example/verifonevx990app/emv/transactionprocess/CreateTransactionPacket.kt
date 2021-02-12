@@ -73,6 +73,27 @@ class CreateTransactionPacket(private var cardProcessedData: CardProcessedDataMo
             if (!(TextUtils.isEmpty(cardProcessedData.getGeneratePinBlock())))
                 addField(52, cardProcessedData.getGeneratePinBlock().toString())
 
+            //Field 54 in case od sale with cash AND Cash at POS.
+            when (cardProcessedData.getTransType()) {
+                TransactionType.CASH_AT_POS.type, TransactionType.SALE_WITH_CASH.type ->
+                    addFieldByHex(
+                        54,
+                        addPad(cardProcessedData.getOtherAmount().toString(), "0", 12, true)
+                    )
+
+                /* TransactionType.SALE.type->{
+                     if(cardProcessedData?.getSaleTipAmount()?:0L >0L){
+                         addFieldByHex(
+                             54,
+                             addPad(cardProcessedData?.getSaleTipAmount().toString(), "0", 12, true)
+                         )
+                     }
+                 }*/
+                else -> {
+                }
+            }
+
+
             //Field 55
             when (cardProcessedData.getReadCardType()) {
                 DetectCardType.EMV_CARD_TYPE, DetectCardType.CONTACT_LESS_CARD_TYPE -> addField(

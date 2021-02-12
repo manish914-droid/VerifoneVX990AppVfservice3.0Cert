@@ -39,11 +39,13 @@ class CardProcessedDataModal : Serializable {
     private var encryptedPan: String? = null
 
     private var amountInResponse: String? = null
-    private var tipAmount: Float = 0.0f
-    private var saleAmount: Float = 0.0f
+    private var tipAmount: Double = 0.0
+
+    // used in case of sale with cash type
+    private var saleAmount: Long? = 0
     private var enteredInvoice: String? = null
-    private var acqReferalNumber:String?=null
-    private var mobileBillExtraData: Pair<String , String>? = null
+    private var acqReferalNumber: String? = null
+    private var mobileBillExtraData: Pair<String, String>? = null
 
     fun getTrack1Data(): String? {
         return track1Data
@@ -267,19 +269,20 @@ class CardProcessedDataModal : Serializable {
         return amountInResponse
     }
 
-    fun getTipAmount(): Float {
+    fun getTipAmount(): Double {
         return tipAmount
     }
 
-    fun setTipAmount(tipAmount: Float) {
+    fun setTipAmount(tipAmount: Double) {
         this.tipAmount = tipAmount
     }
 
-    fun getSaleAmount(): Float {
+    // used in case of sale with cash type
+    fun getSaleAmount(): Long? {
         return saleAmount
     }
 
-    fun setSaleAmount(saleAmount: Float) {
+    fun setSaleAmount(saleAmount: Long) {
         this.saleAmount = saleAmount
     }
 

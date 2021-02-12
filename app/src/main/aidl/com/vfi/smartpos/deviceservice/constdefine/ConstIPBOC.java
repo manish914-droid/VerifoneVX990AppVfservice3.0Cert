@@ -63,6 +63,13 @@ public class ConstIPBOC {
             public static final String KEY_merchantId_String = "merchantId";
 
             public static final String KEY_terminalId_String = "terminalId";
+
+            /**
+             * added by lucky singh(11/02/2021)
+             */
+            public static final String KEY_isSupportPBOCFirst_String = "isSupportPBOCFirst";
+            public static final String KEY_transCurrCode_String = "transCurrCode";
+            public static final String KEY_otherAmount_String = "otherAmount";
         }
 
     }

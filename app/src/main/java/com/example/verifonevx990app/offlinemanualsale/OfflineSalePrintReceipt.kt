@@ -102,7 +102,7 @@ class OfflineSalePrintReceipt {
         tpt?.receiptHeaderTwo?.let { headers.add(it) }
         tpt?.receiptHeaderThree?.let { headers.add(it) }
 
-        setHeaderWithLogo(format, "amex_print.bmp", headers)
+        setHeaderWithLogo(format, "hdfc_print_logo.bmp", headers)
         val formattime = SimpleDateFormat("HH:mm:ss", Locale.ENGLISH)
 
 
@@ -167,9 +167,9 @@ class OfflineSalePrintReceipt {
 
         //Sign Body Code:-
         val signatureMsg = "SIGN ..............................................."
-        printer?.feedLine(2)
+        // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
         alignLeftRightText(format, signatureMsg, "", "")
-        printer?.feedLine(2)
+        // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
         //Agreement Body Code:-
         val ipt =
             IssuerParameterTable.selectFromIssuerParameterTable(AppPreference.WALLET_ISSUER_ID)

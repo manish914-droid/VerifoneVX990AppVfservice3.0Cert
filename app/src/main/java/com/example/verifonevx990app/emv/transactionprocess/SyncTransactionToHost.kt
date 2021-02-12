@@ -42,7 +42,7 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
         if (cardProcessedDataModal?.getReadCardType() != DetectCardType.EMV_CARD_TYPE) {
             val reversalPacket = Gson().toJson(transactionISOData)
             AppPreference.saveString(GENERIC_REVERSAL_KEY, reversalPacket)
-            transactionISOByteArray?.byteArr2HexStr()?.let { logger("PACKET-->", it) }
+          //  transactionISOByteArray?.byteArr2HexStr()?.let { logger("PACKET-->", it) }
        }
 
         if (transactionISOByteArray != null) {
@@ -53,7 +53,10 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
                     //println("Result is$success")
                     if (success) {
                         //Below we are incrementing previous ROC (Because ROC will always be incremented whenever Server Hit is performed:-
-                        ROCProviderV2.incrementFromResponse(ROCProviderV2.getRoc(AppPreference.getBankCode()).toString(), AppPreference.getBankCode())
+                        ROCProviderV2.incrementFromResponse(
+                            ROCProviderV2.getRoc(AppPreference.getBankCode()).toString(),
+                            AppPreference.getBankCode()
+                        )
                         Log.d("Success Data:- ", result)
 //if(!result.isNullOrBlank())
                         if (!TextUtils.isEmpty(result)) {
@@ -95,19 +98,32 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
                                     readIso(result.toString(), false)
                                 logger("Transaction RESPONSE ", "---", "e")
                                 logger("Transaction RESPONSE --->>", responseIsoData.isoMap, "e")
-                                Log.e("Success 39-->  ", responseIsoData.isoMap[39]?.parseRaw2String().toString() + "---->" + responseIsoData.isoMap[58]?.parseRaw2String().toString())
-                                successResponseCode = (responseIsoData.isoMap[39]?.parseRaw2String().toString())
-                                val authCode = (responseIsoData.isoMap[38]?.parseRaw2String().toString())
+                                Log.e(
+                                    "Success 39-->  ",
+                                    responseIsoData.isoMap[39]?.parseRaw2String()
+                                        .toString() + "---->" + responseIsoData.isoMap[58]?.parseRaw2String()
+                                        .toString()
+                                )
+                                successResponseCode =
+                                    (responseIsoData.isoMap[39]?.parseRaw2String().toString())
+                                val authCode =
+                                    (responseIsoData.isoMap[38]?.parseRaw2String().toString())
                                 cardProcessedDataModal?.setAuthCode(authCode.trim())
                                 //Here we are getting RRN Number :-
                                 val rrnNumber = responseIsoData.isoMap[37]?.rawData ?: ""
                                 cardProcessedDataModal?.setRetrievalReferenceNumber(rrnNumber)
 
-                                val acqRefereal = responseIsoData.isoMap[31]?.parseRaw2String().toString()
+                                val acqRefereal =
+                                    responseIsoData.isoMap[31]?.parseRaw2String().toString()
                                 cardProcessedDataModal?.setAcqReferalNumber(acqRefereal)
-                                logger("ACQREFERAL", cardProcessedDataModal?.getAcqReferalNumber().toString(), "e")
+                                logger(
+                                    "ACQREFERAL",
+                                    cardProcessedDataModal?.getAcqReferalNumber().toString(),
+                                    "e"
+                                )
 
-                                val encrptedPan = responseIsoData.isoMap[57]?.parseRaw2String().toString()
+                                val encrptedPan =
+                                    responseIsoData.isoMap[57]?.parseRaw2String().toString()
                                 cardProcessedDataModal?.setEncryptedPan(encrptedPan)
 
                                 val f55 = responseIsoData.isoMap[55]?.rawData
@@ -126,22 +142,46 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
                                         DetectCardType.CONTACT_LESS_CARD_WITH_MAG_TYPE,
                                         DetectCardType.MANUAL_ENTRY_TYPE -> {
                                             clearReversal()
-                                            syncTransactionCallback(true, successResponseCode.toString(), result, null)
+                                            syncTransactionCallback(
+                                                true,
+                                                successResponseCode.toString(),
+                                                result,
+                                                null
+                                            )
                                         }
                                         DetectCardType.EMV_CARD_TYPE -> {
                                             if (TextUtils.isEmpty(
-                                                    AppPreference.getString(GENERIC_REVERSAL_KEY))) {
-                                                CompleteSecondGenAc(responseIsoData, transactionISOData) { printExtraData ->
-                                                    syncTransactionCallback(true, successResponseCode.toString(), result, printExtraData)
+                                                    AppPreference.getString(GENERIC_REVERSAL_KEY)
+                                                )
+                                            ) {
+                                                CompleteSecondGenAc(
+                                                    responseIsoData,
+                                                    transactionISOData
+                                                ) { printExtraData ->
+                                                    syncTransactionCallback(
+                                                        true,
+                                                        successResponseCode.toString(),
+                                                        result,
+                                                        printExtraData
+                                                    )
                                                 }
                                             } else {
                                                 clearReversal()
-                                                syncTransactionCallback(true, successResponseCode.toString(), result, null)
+                                                syncTransactionCallback(
+                                                    true,
+                                                    successResponseCode.toString(),
+                                                    result,
+                                                    null
+                                                )
                                             }
 
                                         }
 
-                                        else -> logger("CARD_ERROR:- ", cardProcessedDataModal?.getReadCardType().toString(), "e")
+                                        else -> logger(
+                                            "CARD_ERROR:- ",
+                                            cardProcessedDataModal?.getReadCardType().toString(),
+                                            "e"
+                                        )
                                     }
                                     //remove emi case
 
@@ -153,15 +193,29 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
                                         DetectCardType.CONTACT_LESS_CARD_WITH_MAG_TYPE,
                                         DetectCardType.MANUAL_ENTRY_TYPE -> {
                                             clearReversal()
-                                            syncTransactionCallback(true, successResponseCode.toString(), result, null)
+                                            syncTransactionCallback(
+                                                true,
+                                                successResponseCode.toString(),
+                                                result,
+                                                null
+                                            )
                                         }
                                         DetectCardType.EMV_CARD_TYPE -> {
                                             clearReversal()
                                             CompleteSecondGenAc(responseIsoData) { printExtraData ->
-                                                syncTransactionCallback(true, successResponseCode.toString(), result, printExtraData)
+                                                syncTransactionCallback(
+                                                    true,
+                                                    successResponseCode.toString(),
+                                                    result,
+                                                    printExtraData
+                                                )
                                             }
                                         }
-                                        else -> logger("CARD_ERROR:- ", cardProcessedDataModal?.getReadCardType().toString(), "e")
+                                        else -> logger(
+                                            "CARD_ERROR:- ",
+                                            cardProcessedDataModal?.getReadCardType().toString(),
+                                            "e"
+                                        )
                                     }
 
                                 }
@@ -184,13 +238,27 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
                                     clearReversal()
                                     //Below we are incrementing previous ROC (Because ROC will always be incremented whenever Server Hit is performed:-
                                     ROCProviderV2.incrementFromResponse(
-                                        ROCProviderV2.getRoc(AppPreference.getBankCode()).toString(), AppPreference.getBankCode()
+                                        ROCProviderV2.getRoc(AppPreference.getBankCode())
+                                            .toString(), AppPreference.getBankCode()
                                     )
-                                    SecondGenAcOnNetworkError(result.toString(), cardProcessedDataModal) { secondGenAcErrorStatus ->
+                                    SecondGenAcOnNetworkError(
+                                        result.toString(),
+                                        cardProcessedDataModal
+                                    ) { secondGenAcErrorStatus ->
                                         if (secondGenAcErrorStatus) {
-                                            syncTransactionCallback(false, successResponseCode.toString(), result, null)
+                                            syncTransactionCallback(
+                                                false,
+                                                successResponseCode.toString(),
+                                                result,
+                                                null
+                                            )
                                         } else {
-                                            syncTransactionCallback(false, ConnectionError.NetworkError.errorCode.toString(), result, null)
+                                            syncTransactionCallback(
+                                                false,
+                                                ConnectionError.NetworkError.errorCode.toString(),
+                                                result,
+                                                null
+                                            )
                                         }
                                     }
                                 }
@@ -200,8 +268,17 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
                                     //Clear reversal
                                     clearReversal()
                                     //Below we are incrementing previous ROC (Because ROC will always be incremented whenever Server Hit is performed:-
-                                    ROCProviderV2.incrementFromResponse(ROCProviderV2.getRoc(AppPreference.getBankCode()).toString(), AppPreference.getBankCode())
-                                    syncTransactionCallback(false, ConnectionError.ConnectionTimeout.errorCode.toString(), result, null)
+                                    ROCProviderV2.incrementFromResponse(
+                                        ROCProviderV2.getRoc(
+                                            AppPreference.getBankCode()
+                                        ).toString(), AppPreference.getBankCode()
+                                    )
+                                    syncTransactionCallback(
+                                        false,
+                                        ConnectionError.ConnectionTimeout.errorCode.toString(),
+                                        result,
+                                        null
+                                    )
                                     Log.d("Failure Data:- ", result)
                                 }
                             }
@@ -209,8 +286,16 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
                             //Clear reversal
                             clearReversal()
                             //Below we are incrementing previous ROC (Because ROC will always be incremented whenever Server Hit is performed:-
-                            ROCProviderV2.incrementFromResponse(ROCProviderV2.getRoc(AppPreference.getBankCode()).toString(), AppPreference.getBankCode())
-                            syncTransactionCallback(false, ConnectionError.ConnectionTimeout.errorCode.toString(), result, null)
+                            ROCProviderV2.incrementFromResponse(
+                                ROCProviderV2.getRoc(AppPreference.getBankCode()).toString(),
+                                AppPreference.getBankCode()
+                            )
+                            syncTransactionCallback(
+                                false,
+                                ConnectionError.ConnectionTimeout.errorCode.toString(),
+                                result,
+                                null
+                            )
                             Log.d("Failure Data:- ", result)
                         }
                     }

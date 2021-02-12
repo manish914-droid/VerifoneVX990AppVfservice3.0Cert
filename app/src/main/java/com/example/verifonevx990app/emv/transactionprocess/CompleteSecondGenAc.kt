@@ -60,7 +60,8 @@ class CompleteSecondGenAc(var data: IsoDataReader, var isoData: IsoDataWriter? =
             if (tagDatatag91.isNotEmpty()) {
                 val ba = tagDatatag91.hexStr2ByteArr()
                 mba.addAll(ba.asList())
-                mba.addAll(tagData8a.str2ByteArr().asList())
+                //when checking jcb or union pay comment below(mba.addAll(tagData8a.str2ByteArr().asList())) line Only,If VISA uncomment this
+                //  mba.addAll(tagData8a.str2ByteArr().asList())
 
                 //  rtn = EMVCallback.EMVSetTLVData(ta.toShort(), mba.toByteArray(), mba.size)
                 logger("Data:- ", "On setting ${Integer.toHexString(ta91)} tag status = $", "e")

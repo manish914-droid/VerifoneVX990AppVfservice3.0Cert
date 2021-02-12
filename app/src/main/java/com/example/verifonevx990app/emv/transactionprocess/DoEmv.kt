@@ -5,13 +5,11 @@ import android.app.AlertDialog
 import android.os.*
 import android.util.Log
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
-import com.example.verifonevx990app.vxUtils.ProcessingCode
-import com.example.verifonevx990app.vxUtils.VFService
-import com.example.verifonevx990app.vxUtils.VerifoneApp
-import com.example.verifonevx990app.vxUtils.forceStart
+import com.example.verifonevx990app.vxUtils.*
 import com.vfi.smartpos.deviceservice.aidl.IEMV
 
 import com.vfi.smartpos.deviceservice.constdefine.ConstIPBOC
+
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -27,18 +25,52 @@ class DoEmv(
 
     //    private var iemv: IEMV? = VFService.vfIEMV
     var transactionalAmount = cardProcessedDataModal.getTransactionAmount() ?: 0
+    var otherAmount = cardProcessedDataModal.getOtherAmount() ?: 0
 
     init {
         startEMVProcess(valueCardTypeSmartCard, transactionalAmount)
     }
 
     // region ========================== First GEN AC
-    private fun startEMVProcess(type: Int, transactionalAmount: Long) {
+    private fun startEMVProcess(valueCardTypeSmartCard: Int, transactionalAmount: Long) {
         try {
             val terminalParameterTable = TerminalParameterTable.selectFromSchemeTable()
             val emvIntent = Bundle()
-            emvIntent.putInt(ConstIPBOC.startEMV.intent.KEY_cardType_int, type)
-            emvIntent.putLong(ConstIPBOC.startEMV.intent.KEY_authAmount_long, transactionalAmount)
+            var amountFor9F02 = 0
+            var amountFor9F03 = 0
+            when (cardProcessedDataModal.getTransType()) {
+                TransactionType.CASH_AT_POS.type -> {
+                    emvIntent.putLong(
+                        ConstIPBOC.startEMV.intent.KEY_authAmount_long,
+                        transactionalAmount
+                    )
+                    emvIntent.putString(
+                        ConstIPBOC.startEMV.intent.KEY_otherAmount_String,
+                        transactionalAmount.toString()
+                    )
+                }
+                TransactionType.SALE_WITH_CASH.type -> {
+                    emvIntent.putLong(
+                        ConstIPBOC.startEMV.intent.KEY_authAmount_long,
+                        transactionalAmount
+                    )
+                    emvIntent.putString(
+                        ConstIPBOC.startEMV.intent.KEY_otherAmount_String,
+                        otherAmount.toString()
+                    )
+                }
+                else -> {
+                    emvIntent.putLong(
+                        ConstIPBOC.startEMV.intent.KEY_authAmount_long,
+                        transactionalAmount
+                    )
+                    emvIntent.putString(ConstIPBOC.startEMV.intent.KEY_otherAmount_String, "0")
+                }
+            }
+
+            emvIntent.putInt(ConstIPBOC.startEMV.intent.KEY_cardType_int, valueCardTypeSmartCard)
+            emvIntent.putBoolean(ConstIPBOC.startEMV.intent.KEY_isSupportPBOCFirst_String, false)
+            emvIntent.putString(ConstIPBOC.startEMV.intent.KEY_transCurrCode_String, "0356")
             emvIntent.putString(
                 ConstIPBOC.startEMV.intent.KEY_merchantName_String,
                 terminalParameterTable?.receiptHeaderTwo
@@ -64,13 +96,13 @@ class DoEmv(
                 ConstIPBOC.startEMV.intent.VALUE_unforced
             )
             emvIntent.putBoolean("isForceOffline", false)
-            if (type == ConstIPBOC.startEMV.intent.VALUE_cardType_contactless) {
+            if (valueCardTypeSmartCard == ConstIPBOC.startEMV.intent.VALUE_cardType_contactless) {
                 emvIntent.putByte(
                     ConstIPBOC.startEMV.intent.KEY_transProcessCode_byte,
                     0x00.toByte()
                 )
             }
-            //Below we are setting 9C for all Type of Transaction CTLS & EMV:-
+            //Below we are setting 9C (Transaction Type) in CTLS & EMV for all transaction:-
             when (cardProcessedDataModal.getProcessingCode()) {
                 ProcessingCode.REFUND.code -> emvIntent.putByte(
                     ConstIPBOC.startEMV.intent.KEY_transProcessCode_byte,
@@ -82,10 +114,13 @@ class DoEmv(
                     0x09.toByte()
                 ) //------> For Sale with Cash Transaction
 
-                ProcessingCode.CASH_AT_POS.code -> emvIntent.putByte(
-                    ConstIPBOC.startEMV.intent.KEY_transProcessCode_byte,
-                    0x01.toByte()
-                ) //------> For Cash Transaction
+                ProcessingCode.CASH_AT_POS.code -> {
+                    emvIntent.putByte(
+                        ConstIPBOC.startEMV.intent.KEY_transProcessCode_byte,
+                        0x01.toByte()
+                    ) //------> For Cash Transaction
+                }
+
 
                 else -> emvIntent.putByte(
                     ConstIPBOC.startEMV.intent.KEY_transProcessCode_byte,
@@ -93,12 +128,10 @@ class DoEmv(
                 ) //------> For Sale Transaction
             }
 
-            emvIntent.putBoolean("isSupportPBOCFirst", false)
-            val TRASNSCURRENTCODE = "transCurrCode"
-            val OTHERAMOUNT = "otherAmount"
-            emvIntent.putString(TRASNSCURRENTCODE, "0356")
-            emvIntent.putString(OTHERAMOUNT, "0")
+
+            // Starting EMV Process Here---------->>
             iemv?.startEMV(ConstIPBOC.startEMV.processType.full_process, emvIntent, emvHandler())
+
         } catch (ex: DeadObjectException) {
             ex.printStackTrace()
             println("DoEmv card error1" + ex.message)
