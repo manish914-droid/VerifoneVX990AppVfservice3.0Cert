@@ -1,5 +1,10 @@
 package com.example.verifonevx990app.utils.printerUtils
 
+/**
+ * Created by Lucky Singh.
+ * Modifications needed...
+ */
+
 import android.app.Activity
 import android.content.Context
 import android.content.res.AssetManager
@@ -146,6 +151,8 @@ class PrintUtil(context: Context?) {
         }
     }
 
+
+    // Printing Sale Charge slip....
     fun startPrinting(
         printerReceiptData: BatchFileDataTable,
         copyType: EPrintCopyType,
@@ -447,9 +454,8 @@ class PrintUtil(context: Context?) {
 
             }
 
-
+            // region =======Setting amount on Sale charge slip ==============
             printSeperator(format)
-
             fmtAddTextInLine.putInt(
                 PrinterConfig.addTextInLine.FontSize.BundleName,
                 PrinterConfig.addTextInLine.FontSize.NORMAL_24_24
@@ -458,75 +464,161 @@ class PrintUtil(context: Context?) {
                 PrinterConfig.addTextInLine.GlobalFont.BundleName,
                 PrinterFonts.path + PrinterFonts.FONT_AGENCYR
             )
-            //   printer.addTextInLine( fmtAddTextInLine, "L & R", "", "Divide Equally", 0);
-            //   printer.addTextInLine( fmtAddTextInLine, "L & R", "", "Divide Equally", 0);
-            val baseAmount = "%.2f".format(printerReceiptData.transactionalAmmount.toDouble() / 100)
+            /* val baseAmount = "%.2f".format(printerReceiptData.transactionalAmmount.toDouble() / 100)
+             // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
 
-            logger("PS_baseamt", (printer?.status).toString(), "e")
-            // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
-            //  alignLeftRightText(fmtAddTextInLine, "", "")
-            if (printerReceiptData.transactionType == TransactionType.VOID.type && printerReceiptData.tipAmmount != "") {
-                //  // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
-                printer?.addTextInLine(
-                    fmtAddTextInLine,
-                    "BASE AMOUNT  :    Rs  ${"%.2f".format((printerReceiptData.totalAmmount.toFloat()) / 100)}",
-                    "",
-                    "",
-                    PrinterConfig.addTextInLine.mode.Devide_flexible
-                )
+             //printing base amount for  void Case of tip adjust
+             if (printerReceiptData.transactionType == TransactionType.VOID.type && printerReceiptData.tipAmmount != "") {
+                 //  // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
+                 printer?.addTextInLine(fmtAddTextInLine, "BASE AMOUNT  :    Rs  ${"%.2f".format((printerReceiptData.totalAmmount.toFloat()) / 100)}", "", "", PrinterConfig.addTextInLine.mode.Devide_flexible)
+             } else {
+                 //   // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
+                 printer?.addTextInLine(fmtAddTextInLine, "BASE AMOUNT  :    Rs  ${printerReceiptData.baseAmmount}", "", "", PrinterConfig.addTextInLine.mode.Devide_flexible)
+             }
+             if (isTipAllowed && printerReceiptData.transactionType == TransactionType.TIP_SALE.type) {
+                 val tipamt = "%.2f".format((printerReceiptData.tipAmmount.toFloat()) / 100)
+                 // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
+                 printer?.addTextInLine(fmtAddTextInLine, "TIP AMOUNT   :    Rs  $tipamt", "", "", PrinterConfig.addTextInLine.mode.Devide_flexible)
 
-            } else {
-                //   // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
-                printer?.addTextInLine(
-                    fmtAddTextInLine,
-                    "BASE AMOUNT  :    Rs  ${printerReceiptData.baseAmmount}",
-                    "",
-                    "",
-                    PrinterConfig.addTextInLine.mode.Devide_flexible
-                )
+             } else if (isTipAllowed && printerReceiptData.transactionType == TransactionType.SALE.type) {
+                 // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
+                 printer?.addTextInLine(fmtAddTextInLine, "TIP AMOUNT   :    ...............................", "", "", PrinterConfig.addTextInLine.mode.Devide_flexible)
+             }
+
+             var tipAndTransAmount = 0.0
+
+             if (printerReceiptData.transactionType == TransactionType.TIP_SALE.type) {
+                 tipAndTransAmount = printerReceiptData.totalAmmount.toDouble() / 100
+             } else {
+                 tipAndTransAmount += baseAmount.toDouble()
+             }
+             // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
+             printer?.addTextInLine(fmtAddTextInLine, "TOTAL AMOUNT :    Rs  ${"%.2f".format(tipAndTransAmount)}", "", "", PrinterConfig.addTextInLine.mode.Devide_flexible)
+             //    centerText(format, "TOTAL AMOUNT :    Rs  $baseAmount")*/
+            val saleAmount = "%.2f".format(printerReceiptData.baseAmmount.toDouble())
+            val totalAmount = "%.2f".format(printerReceiptData.totalAmmount.toDouble())
+            val cashAmount = "%.2f".format(printerReceiptData.cashBackAmount.toDouble())
+            val tipAmount =
+                if (printerReceiptData.tipAmmount.isEmpty()) {
+                    "%.2f".format("0".toDouble())
+                } else {
+                    "%.2f".format(printerReceiptData.tipAmmount.toDouble())
+                }
+
+            when (printerReceiptData.transactionType) {
+                TransactionType.SALE_WITH_CASH.type -> {
+                    printer?.addTextInLine(
+                        fmtAddTextInLine,
+                        "SALE AMOUNT  :    Rs  $saleAmount",
+                        "",
+                        "",
+                        PrinterConfig.addTextInLine.mode.Devide_flexible
+                    )
+                    printer?.addTextInLine(
+                        fmtAddTextInLine,
+                        "CASH AMOUNT  :    Rs  $cashAmount",
+                        "",
+                        "",
+                        PrinterConfig.addTextInLine.mode.Devide_flexible
+                    )
+                    printer?.addTextInLine(
+                        fmtAddTextInLine,
+                        "TOTAL AMOUNT  :    Rs  $totalAmount",
+                        "",
+                        "",
+                        PrinterConfig.addTextInLine.mode.Devide_flexible
+                    )
+                }
+                TransactionType.SALE.type -> {
+                    if (isTipAllowed) {
+                        printer?.addTextInLine(
+                            fmtAddTextInLine,
+                            "BASE AMOUNT  :    Rs  $saleAmount",
+                            "",
+                            "",
+                            PrinterConfig.addTextInLine.mode.Devide_flexible
+                        )
+                        printer?.addTextInLine(
+                            fmtAddTextInLine,
+                            "TIP AMOUNT   :    ...............................",
+                            "",
+                            "",
+                            PrinterConfig.addTextInLine.mode.Devide_flexible
+                        )
+                        printer?.addTextInLine(
+                            fmtAddTextInLine,
+                            "TOTAL AMOUNT  :    Rs  $totalAmount",
+                            "",
+                            "",
+                            PrinterConfig.addTextInLine.mode.Devide_flexible
+                        )
+
+                    } else {
+                        printer?.addTextInLine(
+                            fmtAddTextInLine,
+                            "BASE AMOUNT  :    Rs  $saleAmount",
+                            "",
+                            "",
+                            PrinterConfig.addTextInLine.mode.Devide_flexible
+                        )
+                        printer?.addTextInLine(
+                            fmtAddTextInLine,
+                            "TOTAL AMOUNT  :    Rs  $totalAmount",
+                            "",
+                            "",
+                            PrinterConfig.addTextInLine.mode.Devide_flexible
+                        )
+
+                    }
+
+                }
+                TransactionType.TIP_SALE.type -> {
+                    printer?.addTextInLine(
+                        fmtAddTextInLine,
+                        "BASE AMOUNT  :    Rs  $saleAmount",
+                        "",
+                        "",
+                        PrinterConfig.addTextInLine.mode.Devide_flexible
+                    )
+                    printer?.addTextInLine(
+                        fmtAddTextInLine,
+                        "TIP AMOUNT  :    Rs  $tipAmount",
+                        "",
+                        "",
+                        PrinterConfig.addTextInLine.mode.Devide_flexible
+                    )
+                    printer?.addTextInLine(
+                        fmtAddTextInLine,
+                        "TOTAL AMOUNT  :    Rs  $totalAmount",
+                        "",
+                        "",
+                        PrinterConfig.addTextInLine.mode.Devide_flexible
+                    )
+                }
+                else -> {
+                    printer?.addTextInLine(
+                        fmtAddTextInLine,
+                        "BASE AMOUNT  :    Rs  $saleAmount",
+                        "",
+                        "",
+                        PrinterConfig.addTextInLine.mode.Devide_flexible
+                    )
+                    printer?.addTextInLine(
+                        fmtAddTextInLine,
+                        "TOTAL AMOUNT  :    Rs  $totalAmount",
+                        "",
+                        "",
+                        PrinterConfig.addTextInLine.mode.Devide_flexible
+                    )
+                }
+
+
             }
 
-            if (isTipAllowed && printerReceiptData.transactionType == TransactionType.TIP_SALE.type) {
-                val tipamt = "%.2f".format((printerReceiptData.tipAmmount.toFloat()) / 100)
-                // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
-                printer?.addTextInLine(
-                    fmtAddTextInLine,
-                    "TIP AMOUNT   :    Rs  $tipamt",
-                    "",
-                    "",
-                    PrinterConfig.addTextInLine.mode.Devide_flexible
-                )
-
-            } else if (isTipAllowed && printerReceiptData.transactionType == TransactionType.SALE.type) {
-                // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
-                printer?.addTextInLine(
-                    fmtAddTextInLine,
-                    "TIP AMOUNT   :    ...............................",
-                    "",
-                    "",
-                    PrinterConfig.addTextInLine.mode.Devide_flexible
-                )
-            }
-
-            var tipAndTransAmount = 0.0
-
-
-            if (printerReceiptData.transactionType == TransactionType.TIP_SALE.type) {
-                tipAndTransAmount = printerReceiptData.totalAmmount.toDouble() / 100
-            } else {
-                tipAndTransAmount += baseAmount.toDouble()
-            }
-
-            // -------(Remove in New VFservice 3.0)  printer?.feedLine(2)
-            printer?.addTextInLine(
-                fmtAddTextInLine,
-                "TOTAL AMOUNT :    Rs  ${"%.2f".format(tipAndTransAmount)}",
-                "",
-                "",
-                PrinterConfig.addTextInLine.mode.Devide_flexible
-            )
-            //    centerText(format, "TOTAL AMOUNT :    Rs  $baseAmount")
             printSeperator(format)
+
+            // endregion=======Setting amount on Sale charge slip ==============
+
 
             format.putInt(
                 PrinterConfig.addText.FontSize.BundleName,

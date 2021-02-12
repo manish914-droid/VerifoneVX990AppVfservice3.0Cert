@@ -139,31 +139,45 @@ class StubBatchData(
         //batchFileData.indicator = isoPackageWriter.indicator (Need to Discuss by Ajay)
         batchFileData.field55Data = cardProcessedDataModal.getFiled55() ?: ""
 
-        batchFileData.baseAmmount =
-            MoneyUtil.fen2yuan(cardProcessedDataModal.getTransactionAmount()?.toLong() ?: 0L)
-                .toString()
-        val cashBackAmount = 0L
-        if (cashBackAmount.toString().isNotEmpty() && cashBackAmount.toString() != "0") {
-            batchFileData.cashBackAmount =
-                MoneyUtil.fen2yuan(cashBackAmount).toString()
-            if (transactionType != TransactionTypeValues.CASH_AT_POS)
-                batchFileData.totalAmmount = MoneyUtil.fen2yuan(
-                    cardProcessedDataModal.getTransactionAmount()?.toLong()
-                        ?: 0L + cashBackAmount
-                ).toString()
-            else
-                batchFileData.totalAmmount =
-                    MoneyUtil.fen2yuan(
-                        cardProcessedDataModal.getTransactionAmount()?.toLong() ?: 0L
-                    )
-                        .toString()
-        } else
-            batchFileData.totalAmmount =
-                MoneyUtil.fen2yuan(cardProcessedDataModal.getTransactionAmount()?.toLong() ?: 0L)
-                    .toString()
+        // setting base amount
+        // ( getOtherAmount is not zero in CAsh at pos And sale with Cash type other then this it will be zero)
 
-        /*batchFileData.referenceNumber = isoPackageReader.retrievalReferenceNumber
-        //batchFileData.responseCode = isoPackageReader.reasionCode ?: "" (Need to Discuss by Ajay)  */
+        var baseAmount = 0L
+        var cashAmount = 0L
+        var totalAmount = 0L
+        when (cardProcessedDataModal.getTransType()) {
+            TransactionType.SALE_WITH_CASH.type -> {
+                baseAmount = cardProcessedDataModal.getSaleAmount() ?: 0L
+                cashAmount = cardProcessedDataModal.getOtherAmount() ?: 0L
+                totalAmount = cardProcessedDataModal.getTransactionAmount() ?: 0L
+                batchFileData.baseAmmount = MoneyUtil.fen2yuan(baseAmount).toString()
+                batchFileData.cashBackAmount = MoneyUtil.fen2yuan(cashAmount).toString()
+                batchFileData.totalAmmount = MoneyUtil.fen2yuan(totalAmount).toString()
+            }
+            else -> {
+                baseAmount = cardProcessedDataModal.getTransactionAmount() ?: 0L
+                totalAmount = cardProcessedDataModal.getTransactionAmount() ?: 0L
+                batchFileData.baseAmmount = MoneyUtil.fen2yuan(baseAmount).toString()
+                batchFileData.cashBackAmount = MoneyUtil.fen2yuan(cashAmount).toString()
+                batchFileData.totalAmmount = MoneyUtil.fen2yuan(totalAmount).toString()
+            }
+        }
+
+        /*  batchFileData.baseAmmount = MoneyUtil.fen2yuan(baseAmount).toString()
+
+          batchFileData.baseAmmount = MoneyUtil.fen2yuan(cardProcessedDataModal.getTransactionAmount()?.toLong() ?: 0L).toString()
+          val cashBackAmount = 0L
+        val otherAmount=  cardProcessedDataModal.getOtherAmount()
+
+          if (cashBackAmount.toString().isNotEmpty() && cashBackAmount.toString() != "0") {
+              batchFileData.cashBackAmount = MoneyUtil.fen2yuan(cashBackAmount).toString()
+              if (transactionType != TransactionTypeValues.CASH_AT_POS)
+                  batchFileData.totalAmmount = MoneyUtil.fen2yuan(cardProcessedDataModal.getTransactionAmount()?.toLong() ?: 0L + cashBackAmount).toString()
+              else
+                  batchFileData.totalAmmount = MoneyUtil.fen2yuan(cardProcessedDataModal.getTransactionAmount()?.toLong() ?: 0L).toString()
+          } else
+              batchFileData.totalAmmount = MoneyUtil.fen2yuan(cardProcessedDataModal.getTransactionAmount()?.toLong() ?: 0L).toString()
+          */
 
         batchFileData.authCode = cardProcessedDataModal.getAuthCode() ?: ""
         batchFileData.invoiceNumber = invoiceIncrementValue.toString()

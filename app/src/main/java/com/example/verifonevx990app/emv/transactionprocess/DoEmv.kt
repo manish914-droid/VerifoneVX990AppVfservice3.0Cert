@@ -36,17 +36,17 @@ class DoEmv(
         try {
             val terminalParameterTable = TerminalParameterTable.selectFromSchemeTable()
             val emvIntent = Bundle()
-            var amountFor9F02 = 0
-            var amountFor9F03 = 0
             when (cardProcessedDataModal.getTransType()) {
                 TransactionType.CASH_AT_POS.type -> {
                     emvIntent.putLong(
                         ConstIPBOC.startEMV.intent.KEY_authAmount_long,
                         transactionalAmount
                     )
+
+                    // Set it to zero as suggest by Sachin sir
                     emvIntent.putString(
                         ConstIPBOC.startEMV.intent.KEY_otherAmount_String,
-                        transactionalAmount.toString()
+                        "0"
                     )
                 }
                 TransactionType.SALE_WITH_CASH.type -> {
@@ -67,7 +67,6 @@ class DoEmv(
                     emvIntent.putString(ConstIPBOC.startEMV.intent.KEY_otherAmount_String, "0")
                 }
             }
-
             emvIntent.putInt(ConstIPBOC.startEMV.intent.KEY_cardType_int, valueCardTypeSmartCard)
             emvIntent.putBoolean(ConstIPBOC.startEMV.intent.KEY_isSupportPBOCFirst_String, false)
             emvIntent.putString(ConstIPBOC.startEMV.intent.KEY_transCurrCode_String, "0356")

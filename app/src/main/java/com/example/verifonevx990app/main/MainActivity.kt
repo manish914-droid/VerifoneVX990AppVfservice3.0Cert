@@ -598,7 +598,8 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                     val amt = (data as Pair<*, *>).first.toString()
                     val otherAmount = data.second.toString()
                     startActivityForResult(Intent(this, VFTransactionActivity::class.java).apply {
-                        putExtra("amt", amt)
+                        val formattedTransAmount = "%.2f".format(amt.toDouble())
+                        putExtra("amt", formattedTransAmount)
                         putExtra("type", TransactionType.SALE.type)
                         putExtra("proc_code", ProcessingCode.SALE.code)
                         putExtra("mobileNumber", extraPairData?.first)
@@ -628,10 +629,9 @@ class MainActivity : BaseActivity(), IFragmentRequest,
             UiAction.CASH_AT_POS -> {
                 if (checkInternetConnection()) {
                     val amt = (data as Pair<*, *>).first.toString()
-                    val otherAmount = data.second.toString()
+                    // val otherAmount = data.second.toString()
                     //    val amts = data as ArrayList<String>
                     startActivityForResult(Intent(this, VFTransactionActivity::class.java).apply {
-
                         putExtra("amt", amt)
                         putExtra("type", TransactionType.CASH_AT_POS.type)
                         putExtra("proc_code", ProcessingCode.CASH_AT_POS.code)

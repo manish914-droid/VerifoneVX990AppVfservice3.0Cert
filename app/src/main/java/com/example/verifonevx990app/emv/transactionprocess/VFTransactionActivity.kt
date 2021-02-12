@@ -100,7 +100,7 @@ class VFTransactionActivity : BaseActivity() {
         isManualEntryAllowed = tpt?.fManEntry == "1"
         globalCardProcessedModel.setTransType(transactionType)
 
-        initUI()
+
 
         if (!TextUtils.isEmpty(AppPreference.getString(AppPreference.GENERIC_REVERSAL_KEY))) {
             Log.d("Reversal:-", " Reversal Consist Data")
@@ -109,6 +109,7 @@ class VFTransactionActivity : BaseActivity() {
         }
         //    doProcessCard()
         Handler(Looper.getMainLooper()).postDelayed(Runnable {
+            initUI()
             doProcessCard()
         }, 100)
 

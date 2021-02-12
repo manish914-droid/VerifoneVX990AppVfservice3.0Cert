@@ -17,6 +17,7 @@ import com.example.verifonevx990app.realmtables.BatchFileDataTable
 import com.example.verifonevx990app.realmtables.IssuerParameterTable
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
 import com.example.verifonevx990app.utils.HexStringConverter
+import com.example.verifonevx990app.utils.MoneyUtil
 import com.example.verifonevx990app.utils.printerUtils.EPrintCopyType
 import com.example.verifonevx990app.utils.printerUtils.PrintUtil
 import com.example.verifonevx990app.utils.printerUtils.checkForPrintReversalReceipt
@@ -146,23 +147,32 @@ class TipAdjustFragment : Fragment() {
 
                 if (syncStatus && responseCode == "00") {
                     AppPreference.clearReversal()
-                    GlobalScope.launch(Dispatchers.Main) {   txnSuccessToast(context) }
+                    GlobalScope.launch(Dispatchers.Main) { txnSuccessToast(context) }
 
                     val responseIsoData: IsoDataReader = readIso(transactionMsg, false)
-                    val autoSettlementCheck = responseIsoData.isoMap[60]?.parseRaw2String().toString()
+                    val autoSettlementCheck =
+                        responseIsoData.isoMap[60]?.parseRaw2String().toString()
                     //Below we are saving batch data and print the receipt of transaction:-
                     val resp = readIso(transactionMsg, false)
                     val tip = (tipAmt * 100).toLong()
-                    batch.tipAmmount = tip.toString()
-                    batch.totalAmmount = (batch.transactionalAmmount.toLong() + tip).toString()
-                    batch.transactionalAmmount = batch.totalAmmount
+                    /* batch.tipAmmount = tip.toString()
+                     batch.totalAmmount = (batch.transactionalAmmount.toLong() + tip).toString()
+                     batch.transactionalAmmount = batch.totalAmmount
+ */
+                    batch.baseAmmount = MoneyUtil.fen2yuan(batch.transactionalAmmount.toLong())
+                    batch.tipAmmount = MoneyUtil.fen2yuan(tip).toString()
+                    batch.totalAmmount =
+                        MoneyUtil.fen2yuan((batch.transactionalAmmount.toLong() + tip)).toString()
+
+
                     //     batch.aqrRefNo = resp.isoMap[31]?.parseRaw2String() ?: ""
 
                     /*RRN -->37
                     Auth code--> 38
                     */
                     //Here we are only saving new referencenumber and other details are as well
-                    batch.referenceNumber = (resp.isoMap[37]?.parseRaw2String() ?: "").replace(" ", "")
+                    batch.referenceNumber =
+                        (resp.isoMap[37]?.parseRaw2String() ?: "").replace(" ", "")
 
                     batch.authCode = (responseIsoData.isoMap[38]?.parseRaw2String().toString())
 
