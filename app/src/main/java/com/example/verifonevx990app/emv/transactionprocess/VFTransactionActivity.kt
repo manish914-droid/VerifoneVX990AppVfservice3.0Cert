@@ -353,19 +353,14 @@ class VFTransactionActivity : BaseActivity() {
         if (isManualEntryAllowed) binding?.manualEntryButton?.visibility =
             View.VISIBLE else binding?.manualEntryButton?.visibility = View.GONE
 
+
+        // Manual transaction initiated here with stop card checking.
         binding?.manualEntryButton?.setOnClickListener {
-            //have to check
             try {
                 vfIEMV?.stopCheckCard()
-            } catch (ex: DeadObjectException) {
-                ex.printStackTrace()
-            } catch (ex: RemoteException) {
+            } catch (ex: Exception) {
                 ex.printStackTrace()
             }
-            catch (ex: Exception){
-                ex.printStackTrace()
-            }
-         //   vfIEMV?.stopCheckCard()
             showEnterManualDetailDialog()
         }
     }

@@ -31,7 +31,7 @@ class DoEmv(
         startEMVProcess(valueCardTypeSmartCard, transactionalAmount)
     }
 
-    // region ========================== First GEN AC
+    // region ========================== First GEN AC   (Setting parameters for first gen then start EMV process)
     private fun startEMVProcess(valueCardTypeSmartCard: Int, transactionalAmount: Long) {
         try {
             val terminalParameterTable = TerminalParameterTable.selectFromSchemeTable()

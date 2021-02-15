@@ -1076,7 +1076,7 @@ fun transactionType2Name(code: Int): String {
 }
 
 
-//Create the bundle with the types of Card Supported by the hardware
+//Create the bundle with the types of Card Supported by the hardware (Terminal)
 fun getCardOptionBundle(): Bundle {
     val cardOption = Bundle()
     cardOption.putBoolean(
