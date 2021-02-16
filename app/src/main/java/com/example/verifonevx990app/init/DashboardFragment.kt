@@ -125,10 +125,12 @@ class DashboardFragment : Fragment() {
         runBlocking(Dispatchers.IO) {
             val hdfcTptData = HdfcTpt.selectAllHDFCTPTData()
             val hdfcCdt = HdfcCdt.selectAllHDFCCDTData()
+            val issuerTC = IssuerTAndCTable.getAllIssuerTAndCData()
             tptData = TerminalParameterTable.selectFromSchemeTable()
             batchData = BatchFileDataTable.selectBatchData()
             Log.d("HDFCTPT Data:- ", hdfcTptData.toString())
             Log.d("HDFCCDT Data:- ", hdfcCdt.toString())
+            Log.d("IssuerTAndC Data:- ", issuerTC.toString())
         }
         (activity as MainActivity).showHelpDeskNumber()
         Log.d("Current Time:- ", getTimeInMillis().toString())

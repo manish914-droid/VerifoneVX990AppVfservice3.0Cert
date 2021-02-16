@@ -145,6 +145,7 @@ open class BatchFileDataTable() : RealmObject(), Parcelable {
     var customerName = ""
     var phoneNo = ""
     var email = ""
+    var emiTransactionAmount = ""
 
     //EMITRANSDETAIL
     var emiBin = ""
@@ -160,6 +161,9 @@ open class BatchFileDataTable() : RealmObject(), Parcelable {
     var netPay = ""
     var processingFee = ""
     var totalInterest = ""
+    var issuerName = ""
+    var bankEmiTAndC = ""
+    var tenureTAndC = ""
 
     //EMI BrandDetail
     var brandId = "01"
@@ -3721,10 +3725,78 @@ open class ProductCategoryTable() : RealmObject(), Parcelable {
 
     }
 }
+//endregion
 
+//region===============Issuer Terms and Condition Table for EMI:-
+@RealmClass
+open class IssuerTAndCTable() : RealmObject(), Parcelable {
+    @PrimaryKey
+    var issuerId: String = ""
+    var headerTAndC: String = ""
+    var footerTAndC: String = ""
 
+    private constructor(parcel: Parcel) : this() {
+        issuerId = parcel.readString().toString()
+        headerTAndC = parcel.readString().toString()
+        footerTAndC = parcel.readString().toString()
+    }
 
+    override fun writeToParcel(p0: Parcel?, p1: Int) {
+        p0?.writeString(issuerId)
+        p0?.writeString(headerTAndC)
+        p0?.writeString(footerTAndC)
+    }
 
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object {
+        private val TAG = IssuerTAndCTable::class.java.simpleName
+
+        @JvmField
+        val CREATOR = object : Parcelable.Creator<IssuerTAndCTable> {
+            override fun createFromParcel(parcel: Parcel): IssuerTAndCTable {
+                return IssuerTAndCTable(parcel)
+            }
+
+            override fun newArray(size: Int): Array<IssuerTAndCTable> {
+                return Array(size) { IssuerTAndCTable() }
+            }
+        }
+
+        fun performOperation(param: IssuerTAndCTable) =
+            withRealm { it.executeTransaction { i -> i.insertOrUpdate(param) } }
+
+        //region====================Method to Get All IssuerTAndC Data================
+        fun getAllIssuerTAndCData(): MutableList<IssuerTAndCTable> = runBlocking {
+            var result = mutableListOf<IssuerTAndCTable>()
+            getRealm {
+                val re = it.copyFromRealm(it.where(IssuerTAndCTable::class.java).findAll())
+                if (re != null) result = re
+
+            }.await()
+            result
+        }
+        //endregion
+
+        //region===================Method to Get All IssuerTAndC Data by Issuer ID================
+        fun selectIssuerTAndCDataByID(issuerId: String): IssuerTAndCTable = runBlocking {
+            var result = IssuerTAndCTable()
+            getRealm {
+                val re = it.copyFromRealm(
+                    it.where(IssuerTAndCTable::class.java)
+                        .equalTo("issuerId", issuerId)
+                        .findFirst()
+                )
+                if (re != null) result = re
+
+            }.await()
+            result
+        }
+        //endregion
+    }
+}
 //endregion
 
 

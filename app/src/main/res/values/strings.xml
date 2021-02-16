@@ -355,6 +355,17 @@
     <string name="default_amount">0.00</string>
     <string name="transaction_amount">Transaction Amount</string>
     <string name="cash_amount">Enter Cash Amount (\u20B9)</string>
+    <string name="tenure_interest_rate">Tenure Interest Rate</string>
+    <string name="emi_amount">EMI Amount</string>
+    <string name="total_emi">Total EMI</string>
+    <string name="discount_amount">Discount Amount</string>
+    <string name="emi_scheme_and_offer">Please Select EMI Scheme Offer</string>
+    <string name="select_scheme">"Select "</string>
+    <string name="schemes">Scheme</string>
+    <string name="cashback">CashBack Amount</string>
+    <string name="total_interest_pay">Total Interest Pay</string>
+    <string name="total_emi_pay">Total EMI Pay</string>
+    <string name="please_select_scheme">Please Select Scheme</string>
     <string name="complete_pre_auth">Complete Pre-Auth</string>
 
 

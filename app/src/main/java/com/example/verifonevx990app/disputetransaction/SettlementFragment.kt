@@ -356,7 +356,6 @@ class SettlementFragment : Fragment(R.layout.activity_settlement_view) {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
         })
     }
-
 }
 
 internal class SettlementAdapter(private val list: List<BatchFileDataTable>) : RecyclerView.Adapter<SettlementAdapter.SettlementHolder>() {

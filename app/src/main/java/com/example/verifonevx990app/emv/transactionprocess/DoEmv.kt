@@ -134,7 +134,7 @@ class DoEmv(
         } catch (ex: DeadObjectException) {
             ex.printStackTrace()
             println("DoEmv card error1" + ex.message)
-            Handler(Looper.getMainLooper()).postDelayed(Runnable {
+            Handler(Looper.getMainLooper()).postDelayed({
                 GlobalScope.launch {
                     VFService.connectToVFService(VerifoneApp.appContext)
                     delay(200)

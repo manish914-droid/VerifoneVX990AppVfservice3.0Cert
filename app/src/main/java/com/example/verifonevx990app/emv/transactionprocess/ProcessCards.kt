@@ -2,13 +2,18 @@ package com.example.verifonevx990app.emv.transactionprocess
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.*
+import android.text.TextUtils
 import android.util.Log
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.bankemi.EMISchemeAndOfferActivity
+import com.example.verifonevx990app.bankemi.GenericEMISchemeAndOffer
 import com.example.verifonevx990app.main.DetectCardType
 import com.example.verifonevx990app.main.DetectError
 import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.main.PosEntryModeType
+import com.example.verifonevx990app.utils.GenericReadCardData
 import com.example.verifonevx990app.utils.Utility
 import com.example.verifonevx990app.vxUtils.*
 import com.example.verifonevx990app.vxUtils.ROCProviderV2.getEncryptedTrackData
@@ -40,7 +45,7 @@ class ProcessCard(
     // Detecting the card type ie(emv,cls,mag...)
     private fun detectCard(fallbackType: Int = 0) {
         //Toast to show for the use card case:-
-        //  VFService.showToast("start check card\nUse you card please")
+        //VFService.showToast("start check card\nUse you card please")
         var iemv: IEMV? = VFService.vfIEMV
 
         try {
@@ -100,10 +105,7 @@ class ProcessCard(
                                                 data
                                             )
                                         )
-                                        //    VFEmv.savedPinblock = data
-                                        /*    if(VFService.isOnlinePin!!) {
-                                                                                                        VFService.mIsoWriter?.genratedPinBlock = Utility.byte2HexStr(data)
-                                                                                              }*/
+
                                         cardProcessedDataModal.setGeneratePinBlock(
                                             Utility.byte2HexStr(data)
                                         )
@@ -282,7 +284,7 @@ class ProcessCard(
 
                                                     }
                                                 } else if (cardProcessedDataModal.getTransType() == TransactionType.EMI_SALE.type) {
-                                                    (activity as VFTransactionActivity).checkEmiBankEmi(
+                                                    (activity as VFTransactionActivity).checkEmiInstaEmi(
                                                         cardProcessedDataModal
                                                     ) {
                                                     }
@@ -314,7 +316,7 @@ class ProcessCard(
                                                     }
                                                 }
                                             } else if (cardProcessedDataModal.getTransType() == TransactionType.EMI_SALE.type) {
-                                                (activity as VFTransactionActivity).checkEmiBankEmi(
+                                                (activity as VFTransactionActivity).checkEmiInstaEmi(
                                                     cardProcessedDataModal
                                                 ) {
                                                     //   iemv?.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed)
@@ -359,7 +361,7 @@ class ProcessCard(
                     } catch (ex: DeadObjectException) {
                         ex.printStackTrace()
                         println("Process card error22" + ex.message)
-                        Handler(Looper.getMainLooper()).postDelayed(Runnable {
+                        Handler(Looper.getMainLooper()).postDelayed({
                             GlobalScope.launch {
                                 VFService.connectToVFService(VerifoneApp.appContext)
                                 delay(100)
@@ -371,7 +373,7 @@ class ProcessCard(
                     } catch (ex: RemoteException) {
                         ex.printStackTrace()
                         println("Process card error23" + ex.message)
-                        Handler(Looper.getMainLooper()).postDelayed(Runnable {
+                        Handler(Looper.getMainLooper()).postDelayed({
                             GlobalScope.launch {
                                 VFService.connectToVFService(VerifoneApp.appContext)
                                 delay(100)
@@ -383,7 +385,7 @@ class ProcessCard(
                     } catch (ex: Exception) {
                         ex.printStackTrace()
                         println("Process card error24" + ex.message)
-                        Handler(Looper.getMainLooper()).postDelayed(Runnable {
+                        Handler(Looper.getMainLooper()).postDelayed({
                             GlobalScope.launch {
                                 VFService.connectToVFService(VerifoneApp.appContext)
                                 delay(100)
@@ -402,36 +404,56 @@ class ProcessCard(
                         iemv?.stopCheckCard()
                         iemv?.abortEMV()
                         cardProcessedDataModal.setReadCardType(DetectCardType.EMV_CARD_TYPE)
+
                         VFService.vfBeeper?.startBeep(200)
-                        println("Transaction Amount ---->  $transactionalAmt  Handler is$handler")
-                        println("Transaction Other Amount ---->  $otherAmt  Handler is$handler")
+                        println("TransactionAmount is calling" + transactionalAmt.toString() + "Handler is" + handler)
                         when (cardProcessedDataModal.getTransType()) {
                             TransactionType.EMI_SALE.type -> {
-                                VFService.vfIEMV?.startEMV(
-                                    ConstIPBOC.startEMV.processType.full_process,
+                                //region=========This Field is use only in case of BankEMI Field58 Transaction Amount:-
+                                cardProcessedDataModal.setEmiTransactionAmount(transactionalAmt)
+                                //endregion
+                                iemv?.startEMV(ConstIPBOC.startEMV.processType.full_process,
                                     Bundle(),
-                                    VFEmvHandler(
-                                        activity,
-                                        handler,
-                                        VFService.vfIEMV,
-                                        cardProcessedDataModal
-                                    ) { cardProcessedData ->
-                                        isFirstBankEMICardRead = false
-                                        Log.d(
-                                            "Track2Data:- ",
-                                            cardProcessedData.getTrack2Data() ?: ""
-                                        )
-                                        Log.d(
-                                            "PanNumber:- ",
-                                            cardProcessedData.getPanNumberData() ?: ""
-                                        )
+                                    GenericReadCardData(activity, iemv) { cardBinValue ->
+                                        if (!TextUtils.isEmpty(cardBinValue)) {
+                                            GlobalScope.launch(Dispatchers.Main) {
+                                                (activity as VFTransactionActivity).showProgress()
+                                                iemv?.stopCheckCard()
+                                            }
+                                            GenericEMISchemeAndOffer(
+                                                activity,
+                                                cardProcessedDataModal,
+                                                cardBinValue,
+                                                transactionalAmt
+                                            ) { bankEMISchemeAndTAndCData, hostResponseCodeAndMessage ->
+                                                GlobalScope.launch(Dispatchers.Main) {
+                                                    (activity as VFTransactionActivity).startActivityForResult(
+                                                        Intent(
+                                                            activity,
+                                                            EMISchemeAndOfferActivity::class.java
+                                                        ).apply {
+                                                            putParcelableArrayListExtra(
+                                                                "emiSchemeDataList",
+                                                                bankEMISchemeAndTAndCData.first as ArrayList<out Parcelable>
+                                                            )
+                                                            putParcelableArrayListExtra(
+                                                                "emiTAndCDataList",
+                                                                bankEMISchemeAndTAndCData.second as ArrayList<out Parcelable>
+                                                            )
+                                                            putExtra(
+                                                                "cardProcessedData",
+                                                                cardProcessedDataModal
+                                                            )
+
+                                                        }, EIntentRequest.BankEMISchemeOffer.code
+                                                    )
+                                                    (activity as VFTransactionActivity).hideProgress()
+                                                }
+                                            }
+                                        }
                                     })
-                                /* BankEMIThinClientApproach(activity , cardProcessedDataModal) {
-                                     GlobalScope.launch(Dispatchers.Main) {
-                                         VFService.showToast("SuccessFully Fetched Tenure of BankEMI........")
-                                     }
-                                 }*/
                             }
+
                             else -> {
                                 DoEmv(
                                     activity, handler, cardProcessedDataModal,
@@ -444,7 +466,7 @@ class ProcessCard(
                     } catch (ex: DeadObjectException) {
                         ex.printStackTrace()
                         println("Process card error11" + ex.message)
-                        Handler(Looper.getMainLooper()).postDelayed(Runnable {
+                        Handler(Looper.getMainLooper()).postDelayed({
                             GlobalScope.launch {
                                 VFService.connectToVFService(VerifoneApp.appContext)
                                 delay(100)

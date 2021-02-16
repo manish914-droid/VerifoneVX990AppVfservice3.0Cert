@@ -283,10 +283,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                     cardProcessedDataModal.setPanNumberData(track22)
                     //  cardProcessedDataModal.setPanNumberData("8909878")
                     cardProcessedDataModal.getPanNumberData()?.let {
-                        logger(
-                            "CTLS_EMV",
-                            it, "e"
-                        )
+                        logger("CTLS_EMV", it, "e")
                     }
                 }
 
@@ -328,7 +325,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                             }
                         }
                     } else if (cardProcessedDataModal.getTransType() == TransactionType.EMI_SALE.type) {
-                        (activity as VFTransactionActivity).checkEmiBankEmi(cardProcessedDataModal) {
+                        (activity as VFTransactionActivity).checkEmiInstaEmi(cardProcessedDataModal) {
                             iemv?.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed)
                         }
                     } else {
@@ -853,7 +850,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
     }
 }
 
-class MultiSelectionAppAdapter(
+open class MultiSelectionAppAdapter(
     var appList: MutableList<Bundle>,
     var dialog: Dialog,
     var updatePosition: (Int) -> Unit

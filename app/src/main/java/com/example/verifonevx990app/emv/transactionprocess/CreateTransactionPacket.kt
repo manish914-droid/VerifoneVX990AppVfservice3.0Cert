@@ -1,7 +1,10 @@
 package com.example.verifonevx990app.emv.transactionprocess
 
 import android.text.TextUtils
+import android.util.Log
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.bankemi.BankEMIDataModal
+import com.example.verifonevx990app.bankemi.BankEMIIssuerTAndCDataModal
 import com.example.verifonevx990app.main.DetectCardType
 import com.example.verifonevx990app.realmtables.CardDataTable
 import com.example.verifonevx990app.realmtables.IssuerParameterTable
@@ -10,8 +13,14 @@ import com.example.verifonevx990app.vxUtils.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class CreateTransactionPacket(private var cardProcessedData: CardProcessedDataModal) :
+class CreateTransactionPacket(
+    private var cardProcessedData: CardProcessedDataModal,
+    private var bankEmiSchemeData: BankEMIDataModal? = null,
+    private var bankEmiTandCData: BankEMIIssuerTAndCDataModal? = null
+) :
     ITransactionPacketExchange {
+
+    private var indicator: String? = null
 
     //Below method is used to create Transaction Packet in all cases:-
     init {
@@ -121,17 +130,31 @@ class CreateTransactionPacket(private var cardProcessedData: CardProcessedDataMo
                     2
                 ) //cardDataTable.getA//"00"
 
-            val indicator =
+            //region===============Check If Transaction Type is EMI_SALE then Field would be appended with Bank EMI Scheme Offer Values:-
+            indicator = if (cardProcessedData.getTransType() == TransactionType.EMI_SALE.type) {
+                "$cardIndFirst|$firstTwoDigitFoCard|$cdtIndex|$accSellection," +
+                        "${cardProcessedData.getPanNumberData()?.substring(0, 8)}," +
+                        "${bankEmiTandCData?.issuerID},${bankEmiTandCData?.emiSchemeID},1,0,${cardProcessedData.getEmiTransactionAmount()}," +
+                        "${bankEmiSchemeData?.discountAmount},${bankEmiSchemeData?.loanAmount},${bankEmiSchemeData?.tenure}," +
+                        "${bankEmiSchemeData?.tenureInterestRate},${bankEmiSchemeData?.emiAmount},${bankEmiSchemeData?.cashBackAmount}," +
+                        "${bankEmiSchemeData?.netPay},,,,,,0,${bankEmiSchemeData?.processingFee},${bankEmiSchemeData?.processingRate}," +
+                        "${bankEmiSchemeData?.totalProcessingFee},,"
+            } else {
                 "$cardIndFirst|$firstTwoDigitFoCard|$cdtIndex|$accSellection"//used for visa// used for ruppay//"0|54|2|00"
-            addFieldByHex(58, indicator)
+            }
+
+            Log.d("SALE Indicator:- ", indicator.toString())
+
+            //Adding Field 58
+            addFieldByHex(58, indicator ?: "")
 
             //Adding Field 60 value on basis of Condition Whether it consist Mobile Number Data , Bill Number Data or not:-
             val gcc = "0"
-            var field60 : String? = null
-            var batchNumber : String? = null
-            when{
+            var field60: String? = null
+            var batchNumber: String? = null
+            when {
                 !TextUtils.isEmpty(cardProcessedData.getMobileBillExtraData()?.first) -> {
-                    batchNumber = addPad(terminalData.batchNumber , "0" , 6,true)
+                    batchNumber = addPad(terminalData.batchNumber, "0", 6, true)
                     val mobileNumber = cardProcessedData.getMobileBillExtraData()?.first
                     field60 = "$batchNumber|$mobileNumber|$gcc"
                     addFieldByHex(60 , field60)

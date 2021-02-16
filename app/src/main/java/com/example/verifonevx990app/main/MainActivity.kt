@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.appupdate.*
+import com.example.verifonevx990app.bankemi.GenericEMIIssuerTAndC
 import com.example.verifonevx990app.crosssell.HDFCCrossSellFragment
 import com.example.verifonevx990app.databinding.ActivityMainBinding
 import com.example.verifonevx990app.databinding.AuthCatogoryDialogBinding
@@ -184,6 +185,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
             //EmiActivity
 
             is VxEvent.Emi -> {
+                Log.d("Bank EMI Clicked:- ", "Clicked")
                 if (event.type == EDashboardItem.EMI_ENQUIRY) {
                     var cardProcessedData = CardProcessedDataModal()
                     cardProcessedData.setEmiType(EIntentRequest.EMI_ENQUIRY.code)
@@ -612,16 +614,62 @@ class MainActivity : BaseActivity(), IFragmentRequest,
             }
 
             UiAction.BANK_EMI -> {
+                val amt = (data as Pair<*, *>).first.toString()
                 if (checkInternetConnection()) {
-                    isFirstBankEMICardRead = true
-                    val amt = (data as Pair<*, *>).first.toString()
-                    startActivityForResult(Intent(this, VFTransactionActivity::class.java).apply {
-                        putExtra("amt", amt)
-                        putExtra("type", TransactionType.EMI_SALE.type) //EMI //UiAction.BANK_EMI
-                        putExtra("proc_code", ProcessingCode.SALE.code)
-                        putExtra("mobileNumber", extraPairData?.first)
-                        putExtra("billNumber", extraPairData?.second)
-                    }, EIntentRequest.TRANSACTION.code)
+                    Log.d("Bank EMI Clicked:- ", "Clicked")
+                    GenericEMIIssuerTAndC { issuerTermsAndConditionData ->
+                        val issuerTAndCData = issuerTermsAndConditionData.first
+                        val responseBool = issuerTermsAndConditionData.second
+                        if (issuerTAndCData.isNotEmpty() && responseBool) {
+                            //region================Insert IssuerTAndC and Brand TAndC in DB:-
+                            //Issuer TAndC Inserting:-
+                            for (i in 0 until issuerTAndCData.size) {
+                                val issuerModel = IssuerTAndCTable()
+                                if (!TextUtils.isEmpty(issuerTAndCData[i])) {
+                                    val splitData = parseDataListWithSplitter(
+                                        SplitterTypes.CARET.splitter,
+                                        issuerTAndCData[i]
+                                    )
+                                    issuerModel.issuerId = splitData[0]
+                                    issuerModel.headerTAndC = splitData[1]
+                                    runBlocking(Dispatchers.IO) {
+                                        IssuerTAndCTable.performOperation(issuerModel)
+                                    }
+                                }
+                            }
+                            startActivityForResult(
+                                Intent(
+                                    this,
+                                    VFTransactionActivity::class.java
+                                ).apply {
+                                    putExtra("amt", amt)
+                                    putExtra(
+                                        "type",
+                                        TransactionType.EMI_SALE.type
+                                    ) //EMI //UiAction.BANK_EMI
+                                    putExtra("proc_code", ProcessingCode.SALE.code)
+                                    putExtra("mobileNumber", extraPairData?.first)
+                                    putExtra("billNumber", extraPairData?.second)
+                                }, EIntentRequest.TRANSACTION.code
+                            )
+                        } else {
+                            startActivityForResult(
+                                Intent(
+                                    this,
+                                    VFTransactionActivity::class.java
+                                ).apply {
+                                    putExtra("amt", amt)
+                                    putExtra(
+                                        "type",
+                                        TransactionType.EMI_SALE.type
+                                    ) //EMI //UiAction.BANK_EMI
+                                    putExtra("proc_code", ProcessingCode.SALE.code)
+                                    putExtra("mobileNumber", extraPairData?.first)
+                                    putExtra("billNumber", extraPairData?.second)
+                                }, EIntentRequest.TRANSACTION.code
+                            )
+                        }
+                    }
                 } else {
                     VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
                 }
@@ -1997,6 +2045,29 @@ enum class ConnectionError(val errorCode: Int) {
     NetworkError(504),
     Success(200)
 }
+
+//region==============================Enum Class for Splitter Types:-
+enum class SplitterTypes(var splitter: String) {
+    VERTICAL_LINE("|"),
+    OPEN_CURLY_BRACE("{"),
+    CLOSED_CURLY_BRACE("}"),
+    COMMA(","),
+    DOT("."),
+    CARET("^"),
+    STAR("*"),
+    POUND("#")
+}
+//endregion
+
+//region===============================Enum Class for BrandEMI Data RequestType:-
+enum class EMIRequestType(var requestType: String) {
+    BRAND_DATA("1"),
+    ISSUER_T_AND_C("5"),
+    BRAND_T_AND_C("6"),
+    BRAND_SUB_CATEGORY("2"),
+    BRAND_EMI_Product("3"),
+}
+//endregion
 
 interface IFragmentRequest {
     fun onFragmentRequest(action: UiAction, data: Any, extraPairData: Pair<String, String>? = null)

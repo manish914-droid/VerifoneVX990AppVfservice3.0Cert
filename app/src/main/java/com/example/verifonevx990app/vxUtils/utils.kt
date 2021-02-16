@@ -23,6 +23,7 @@ import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.init.getEditorActionListener
 import com.example.verifonevx990app.main.MainActivity
+import com.example.verifonevx990app.main.SplitterTypes
 import com.example.verifonevx990app.realmtables.*
 import com.example.verifonevx990app.utils.PaxUtils
 import com.example.verifonevx990app.utils.Utility
@@ -46,7 +47,6 @@ import kotlin.experimental.and
 
 var isDashboardOpen = false
 var isExpanded = false
-var isFirstBankEMICardRead = true
 
 open class OnTextChange(private val cb: (String) -> Unit) : TextWatcher {
 
@@ -1574,7 +1574,7 @@ fun getRevisionIDFromFile(context: Context, cb: (Boolean) -> Unit) {
     }
 }
 
-//Below method is used to chunk the TNC's text(words's are not slitted in between) which was printed on EMI sale :-
+//Below method is used to chunk the TNC's text(words's are not splitted in between) which was printed on EMI sale :-
 fun chunkTnC(s: String, limit: Int = 48): List<String> {
     var str = s
     val parts: MutableList<String> = ArrayList()
@@ -1742,6 +1742,59 @@ fun getNII(): String {
 //region=============================Get Time in Millis==================
 fun getTimeInMillis(): Long = System.currentTimeMillis()
 //endregion
+
+//region==========================Generate Field 61 ====================================
+fun getField61(ipt: IssuerParameterTable, bankCode: String, mti: String): String {
+    val terminalSerialNumber = addPad(VerifoneApp.getDeviceSerialNo(), " ", 15, false)
+    println("Terminal Serial no is$terminalSerialNumber")
+
+    val bankCode = addPad(bankCode, "0", 2)
+    val walletId = addPad(ipt.issuerId, "0", 2)
+    val customerId = addPad(ipt.customerIdentifierFiledType, "0", 2)
+    val appName = addPad(VerifoneApp.appContext.getString(R.string.title_app), " ", 10, false)
+
+    val deviceModel = addPad(AppPreference.getString("deviceModel"), " ", 6, false)
+
+    val version = "${BuildConfig.VERSION_NAME}.${BuildConfig.REVISION_ID}"
+    val connectionType = ConnectionType.GPRS.code
+    val pccNo = addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY), "0", 9)
+    val pcNo2 = addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY_2), "0", 9)
+    return if (mti == Mti.EIGHT_HUNDRED_MTI.mti)
+        "$connectionType$deviceModel$appName$version$pccNo$pcNo2"
+    else
+        "$terminalSerialNumber$bankCode$customerId$walletId$connectionType$deviceModel$appName$version$pccNo$pcNo2"
+}
+//endregion
+
+//region=======================DataParser According to Splitter Provided in Method and Return MutableList:-
+fun parseDataListWithSplitter(splitterType: String, data: String): MutableList<String> {
+    var dataList = mutableListOf<String>()
+    when (splitterType) {
+        SplitterTypes.CLOSED_CURLY_BRACE.splitter -> {
+            dataList = data.split(splitterType) as MutableList<String>
+        }
+        SplitterTypes.VERTICAL_LINE.splitter -> {
+            dataList = data.split(splitterType) as MutableList<String>
+        }
+        SplitterTypes.CARET.splitter -> {
+            dataList = data.split(splitterType) as MutableList<String>
+        }
+    }
+
+    return dataList
+}
+//endregion
+
+//region=========================Divide Amount by 100 and Return Back:-
+fun divideAmountBy100(amount: Int = 0): Double {
+    return if (amount != 0) {
+        val divideAmount = amount.toDouble()
+        divideAmount.div(100)
+    } else
+        0.0
+}
+//endregion
+
 /*
 App Update Through FTP Steps:-
 1.Make Signing apk Build by using Verifone Signing USB and Signing Tool in Windows System.

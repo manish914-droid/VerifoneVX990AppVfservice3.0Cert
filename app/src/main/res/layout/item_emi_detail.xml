@@ -1,28 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:paddingBottom="@dimen/pad_16"
-        android:layout_height="wrap_content"
-        android:elevation="@dimen/pad_5"
-        app:cardElevation="@dimen/pad_5"
-        app:cardCornerRadius="@dimen/pad_5"
-        android:layout_marginEnd="@dimen/pad_5"
-        android:layout_marginStart="@dimen/pad_5"
-        android:layout_marginTop="@dimen/pad_5"
-        android:layout_marginBottom="@dimen/pad_16">
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/pad_5"
+    android:layout_marginTop="@dimen/pad_5"
+    android:layout_marginEnd="@dimen/pad_5"
+    android:layout_marginBottom="@dimen/pad_16"
+    android:elevation="@dimen/pad_5"
+    android:paddingBottom="@dimen/pad_16"
+    app:cardCornerRadius="@dimen/pad_5"
+    app:cardElevation="@dimen/pad_5">
 
 
-
-<androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:paddingBottom="@dimen/pad_16"
         android:layout_height="wrap_content"
         android:id="@+id/ied_parent_cl">
 
-    <com.example.verifonevx990app.vxUtils.BHTextView
+        <com.example.verifonevx990app.vxUtils.BHTextView
         android:id="@+id/ied_tenure_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -90,8 +90,7 @@ enum class TransactionType(val type: Int,val processingCode: ProcessingCode=Proc
     PENDING_PREAUTH(28, ProcessingCode.PENDING_PREAUTH, "PRE AUTH TXN"),
     OFFLINE_SALE(29, ProcessingCode.OFFLINE_SALE, "OFFLINE SALE"),
     VOID_OFFLINE_SALE(30, ProcessingCode.VOID_OFFLINE_SALE, "VOID OFFLINE SALE"),
-
-
+    EMI_MASTER_DATA(31, ProcessingCode.BANK_EMI, "BRAND EMI")
 }
 
 
@@ -106,7 +105,8 @@ enum class Mti(val mti: String) {
     REVERSAL("0400"),
     APP_UPDATE_MTI("0800"),
     CROSS_SELL_MTI("0800"),
-    BANKI_EMI("0800"),
+    BANK_EMI("0800"),
+    EIGHT_HUNDRED_MTI("0800")
 }
 
 enum class ProcessingCode(val code: String) {
@@ -151,7 +151,8 @@ enum class Nii(val nii: String) {
     DEFAULT("0091"),
     SOURCE("0001"),
     SMS_PAY("0411"),
-    HDFC_DEFAULT("0002")
+    HDFC_DEFAULT("0002"),
+    BANK_EMI("0028")
 }
 
 enum class ConnectionType(val code: String) {

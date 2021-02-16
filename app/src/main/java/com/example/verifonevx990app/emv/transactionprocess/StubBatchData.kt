@@ -2,13 +2,14 @@ package com.example.verifonevx990app.emv.transactionprocess
 
 import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.bankemi.BankEMIDataModal
+import com.example.verifonevx990app.bankemi.BankEMIIssuerTAndCDataModal
 import com.example.verifonevx990app.main.DetectCardType
 import com.example.verifonevx990app.main.PrefConstant
 import com.example.verifonevx990app.realmtables.BatchFileDataTable
 import com.example.verifonevx990app.realmtables.CardDataTable
 import com.example.verifonevx990app.realmtables.IssuerParameterTable
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
-import com.example.verifonevx990app.transactions.EmiCustomerDetails
 import com.example.verifonevx990app.utils.MoneyUtil
 import com.example.verifonevx990app.utils.TransactionTypeValues
 import com.example.verifonevx990app.vxUtils.*
@@ -68,6 +69,8 @@ class StubBatchData(
         batchFileData.transactionType = transactionType
         batchFileData.transactionalAmmount =
             cardProcessedDataModal.getTransactionAmount().toString()
+        batchFileData.emiTransactionAmount =
+            cardProcessedDataModal.getEmiTransactionAmount().toString()
         batchFileData.nii = Nii.DEFAULT.nii
         batchFileData.applicationPanSequenceNumber =
             cardProcessedDataModal.getApplicationPanSequenceValue() ?: ""
@@ -284,38 +287,41 @@ class StubBatchData(
 // Here We are stubbing emi data into batch record and save it in BatchFile.
 fun stubEMI(
     batchData: BatchFileDataTable,
-    emiCustomerDetails: EmiCustomerDetails?,
+    emiCustomerDetails: BankEMIDataModal?,
+    emiIssuerTAndCData: BankEMIIssuerTAndCDataModal?,
     batchStubCallback: (BatchFileDataTable) -> Unit
 ) {
     //For emi find the details from EMI
 
-    batchData.accountType = emiCustomerDetails?.accountType.toString()
-    batchData.customerName = emiCustomerDetails?.customerName.toString()
-    batchData.email = emiCustomerDetails?.email.toString()
-    batchData.merchantBillNo = emiCustomerDetails?.merchantBillNo.toString()
-    batchData.phoneNo = emiCustomerDetails?.phoneNo.toString()
-    batchData.serialNo = emiCustomerDetails?.serialNo.toString()
+    //batchData.accountType = emiCustomerDetails?.accountType.toString()
+    //batchData.customerName = emiCustomerDetails?.customerName.toString()
+    //batchData.email = emiCustomerDetails?.email.toString()
+    //batchData.merchantBillNo = emiCustomerDetails?.merchantBillNo.toString()
+    // batchData.phoneNo = emiCustomerDetails?.phoneNo.toString()
+    // batchData.serialNo = emiCustomerDetails?.serialNo.toString()
     batchData.tenure = emiCustomerDetails?.tenure.toString()
-    batchData.emiBin = emiCustomerDetails?.emiBin.toString()
-    batchData.issuerId = emiCustomerDetails?.issuerId.toString()
-    batchData.emiSchemeId = emiCustomerDetails?.emiSchemeId.toString()
-    batchData.transactionAmt = emiCustomerDetails?.transactionAmt.toString()
-    batchData.cashDiscountAmt = emiCustomerDetails?.cashDiscountAmt.toString()
-    batchData.loanAmt = emiCustomerDetails?.loanAmt.toString()
-    batchData.tenure = emiCustomerDetails?.tenure.toString()
-    batchData.roi = emiCustomerDetails?.roi.toString()
-    batchData.monthlyEmi = emiCustomerDetails?.monthlyEmi.toString()
-    batchData.cashback = emiCustomerDetails?.cashback.toString()
+    //batchData.emiBin = emiCustomerDetails?.emiBin.toString()
+    batchData.issuerId = emiIssuerTAndCData?.issuerID.toString()
+    batchData.emiSchemeId = emiIssuerTAndCData?.emiSchemeID.toString()
+    batchData.issuerName = emiIssuerTAndCData?.issuerName.toString()
+    batchData.bankEmiTAndC = emiIssuerTAndCData?.schemeTAndC.toString()
+    batchData.tenureTAndC = emiCustomerDetails?.tenureTAndC.toString()
+    batchData.transactionAmt = emiCustomerDetails?.transactionAmount.toString()
+    batchData.cashDiscountAmt = emiCustomerDetails?.discountAmount.toString()
+    batchData.loanAmt = emiCustomerDetails?.loanAmount.toString()
+    batchData.roi = emiCustomerDetails?.tenureInterestRate.toString()
+    batchData.monthlyEmi = emiCustomerDetails?.emiAmount.toString()
+    batchData.cashback = emiCustomerDetails?.cashBackAmount.toString()
     batchData.netPay = emiCustomerDetails?.netPay.toString()
     batchData.processingFee = emiCustomerDetails?.processingFee.toString()
-    batchData.totalInterest = emiCustomerDetails?.totalInterest.toString()
-    batchData.cashBackPercent= emiCustomerDetails?.cashBackPercent.toString()
-    if (emiCustomerDetails != null) {
-        batchData.isCashBackInPercent=emiCustomerDetails.isCashBackInPercent
-    }
-    //MI BrandDetail
-    batchData.brandId = emiCustomerDetails?.brandId.toString()//"01"
-    batchData.productId = emiCustomerDetails?.productId.toString()//"0"
+    batchData.totalInterest = emiCustomerDetails?.totalInterestPay.toString()
+    //batchData.cashBackPercent= emiCustomerDetails?.cashBackPercent.toString()
+    /* if (emiCustomerDetails != null) {
+         batchData.isCashBackInPercent=emiCustomerDetails.isCashBackInPercent
+     }*/
+    /* //MI BrandDetail
+     batchData.brandId = emiCustomerDetails?.brandId.toString()//"01"
+     batchData.productId = emiCustomerDetails?.productId.toString()//"0"*/
 
     //println("EMI tenure " + emiCustomerDetails?.tenure)
     val lastSuccessReceiptData = Gson().toJson(batchData)

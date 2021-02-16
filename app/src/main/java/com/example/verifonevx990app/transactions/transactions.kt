@@ -542,7 +542,11 @@ class PayBySms(
 
         //region=========adding field 61=============
         val f61 =
-            getField61(ipt as IssuerParameterTable, (tpt as TerminalParameterTable).tidBankCode)
+            getField61(
+                ipt as IssuerParameterTable,
+                (tpt as TerminalParameterTable).tidBankCode,
+                Mti.DEFAULT_MTI.mti
+            )
         addFieldByHex(61, f61)
         //endregion
 
@@ -552,44 +556,6 @@ class PayBySms(
 
 
 //region========== Field 61, Pan Mask, Field 57=================
-
-@Deprecated("Use getField61 with parameters IssuerParameterTable and Bank Code.")
-@Synchronized
-fun getField61(ipt: IssuerParameterTable): String {
-    val terminalSerialNumber = addPad(VerifoneApp.getDeviceSerialNo(), " ", 15, false)
-
-    val bankCode = addPad("1", "0", 2)
-    val walletId = addPad(ipt.issuerId, "0", 2)
-    val customerId = addPad(ipt.customerIdentifierFiledType, "0", 2)
-    val appName = addPad(VerifoneApp.appContext.getString(R.string.app_name), " ", 10, false)
-
-    val deviceModel = VerifoneApp.getDeviceModel()
-
-    val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)
-    val connectionType = ConnectionType.GPRS.code
-    val pccNo = addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY), "0", 9)
-    val pcNo2 = addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY_2), "0", 9)
-    return "$terminalSerialNumber$bankCode$customerId$walletId$connectionType$deviceModel$appName$version$pccNo$pcNo2"
-}
-
-@Synchronized
-fun getField61(ipt: IssuerParameterTable, bankcode: String): String {
-
-    val terminalSerialNumber = addPad(VerifoneApp.getDeviceSerialNo(), " ", 15, false)
-    val bankCode = addPad(bankcode, "0", 2)
-    val walletId = addPad(ipt.issuerId, "0", 2)
-    val customerId = addPad(ipt.customerIdentifierFiledType, "0", 2)
-    val appName = addPad(VerifoneApp.appContext.getString(R.string.title_app), " ", 10, false)
-
-    val deviceModel = VerifoneApp.getDeviceModel()
-
-    val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)
-    val connectionType = ConnectionType.GPRS.code
-    val pccNo = addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY), "0", 9)
-    val pcNo2 = addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY_2), "0", 9)
-    return "$terminalSerialNumber$bankCode$customerId$walletId$connectionType$deviceModel$appName$version$pccNo$pcNo2"
-}
-
 @Synchronized
 fun addField61ToBatch(ipt: IssuerParameterTable, bfdt: BatchFileDataTable) {
     bfdt.run {

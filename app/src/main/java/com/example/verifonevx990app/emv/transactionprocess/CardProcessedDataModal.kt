@@ -5,7 +5,6 @@ import java.io.Serializable
 
 //Below Modal class is for holding Card Returning Data Fields:-
 class CardProcessedDataModal : Serializable {
-
     private var track1Data: String? = null
     private var track2Data: String? = null
     private var track3Data: String? = null
@@ -16,6 +15,7 @@ class CardProcessedDataModal : Serializable {
     private var posEntryMode: String? = null
     private var processingCode: String? = null
     private var transactionAmount: Long? = null
+    private var emiTransactionAmount: Long? = null
     private var field55: String? = null
     private var isOnline: Int = 0
     private var genratedPinBlock: String? = null
@@ -127,11 +127,19 @@ class CardProcessedDataModal : Serializable {
         this.transactionAmount = transactionAmount
     }
 
+    fun getEmiTransactionAmount(): Long? {
+        return emiTransactionAmount
+    }
+
+    fun setEmiTransactionAmount(emiTransAmount: Long) {
+        this.emiTransactionAmount = emiTransAmount
+    }
+
     fun setField55(field55: String) {
         this.field55 = field55
     }
 
-    fun getFiled55(): String?{
+    fun getFiled55(): String? {
         return field55
     }
 
