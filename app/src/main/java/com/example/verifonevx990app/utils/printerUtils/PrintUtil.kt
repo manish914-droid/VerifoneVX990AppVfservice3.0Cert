@@ -2765,21 +2765,21 @@ class PrintUtil(context: Context?) {
             failureImpl(
                 context as Activity,
                 "Printer Service stopped.",
-                "Please take chargeslip from the Report menu."
+                "Please take ChargeSlip from the Report menu."
             )
         } catch (e: RemoteException) {
             e.printStackTrace()
             failureImpl(
                 context as Activity,
                 "Printer Service stopped.",
-                "Please take chargeslip from the Report menu."
+                "Please take ChargeSlip from the Report menu."
             )
         } catch (ex: Exception) {
             ex.printStackTrace()
             failureImpl(
                 context as Activity,
                 "Printer Service stopped.",
-                "Please take chargeslip from the Report menu."
+                "Please take ChargeSlip from the Report menu."
             )
         }
     }
