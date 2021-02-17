@@ -359,7 +359,7 @@
     <string name="emi_amount">EMI Amount</string>
     <string name="total_emi">Total EMI</string>
     <string name="discount_amount">Discount Amount</string>
-    <string name="emi_scheme_and_offer">Please Select EMI Scheme Offer</string>
+    <string name="emi_scheme_and_offer">Please Select EMI Scheme</string>
     <string name="select_scheme">"Select "</string>
     <string name="schemes">Scheme</string>
     <string name="cashback">CashBack Amount</string>
@@ -367,6 +367,8 @@
     <string name="total_emi_pay">Total EMI Pay</string>
     <string name="please_select_scheme">Please Select Scheme</string>
     <string name="complete_pre_auth">Complete Pre-Auth</string>
+    <string name="download_tmk">Download TMK</string>
+    <string name="do_you_want_to_download_tmk">Do You Want To Download TMK?</string>
 
 
 </resources>

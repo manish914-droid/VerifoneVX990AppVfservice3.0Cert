@@ -290,6 +290,19 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                     VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
                 }
             }
+
+            is VxEvent.DownloadTMKForHDFC -> {
+                Log.d("Download TMK:-", "Clicked")
+                val tptData =
+                    runBlocking(Dispatchers.IO) { TerminalParameterTable.selectFromSchemeTable() }
+                showProgress()
+                if (!TextUtils.isEmpty(tptData?.terminalId)) {
+                    KeyExchanger(this, tptData?.terminalId ?: "", ::onInitResponse).apply {
+                        isHdfc = true
+                    }.downloadTMKForHDFC()
+                }
+            }
+
         }
     }
 
@@ -630,8 +643,16 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                                         SplitterTypes.CARET.splitter,
                                         issuerTAndCData[i]
                                     )
-                                    issuerModel.issuerId = splitData[0]
-                                    issuerModel.headerTAndC = splitData[1]
+
+                                    if (splitData.size > 2) {
+                                        issuerModel.issuerId = splitData[0]
+                                        issuerModel.headerTAndC = splitData[1]
+                                        issuerModel.footerTAndC = splitData[2]
+                                    } else {
+                                        issuerModel.issuerId = splitData[0]
+                                        issuerModel.headerTAndC = splitData[1]
+                                    }
+
                                     runBlocking(Dispatchers.IO) {
                                         IssuerTAndCTable.performOperation(issuerModel)
                                     }
@@ -1932,7 +1953,8 @@ enum class PrefConstant(val keyName: Any) {
     INIT_AFTER_SETTLEMENT("init_after_settlement"),
     VOID_ROC_INCREMENT("void_roc_increment"),
     SERVER_HIT_STATUS("server_hit_status"),
-    APP_UPDATE_CONFIRMATION_TO_HOST("app_update_confirmation_to_host")
+    APP_UPDATE_CONFIRMATION_TO_HOST("app_update_confirmation_to_host"),
+    TMK_DOWNLOAD("tmk_download")
 }
 
 //Below Enum Class is used to detect different card Types:-

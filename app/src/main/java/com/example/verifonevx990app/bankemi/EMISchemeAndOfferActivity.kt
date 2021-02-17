@@ -125,11 +125,8 @@ internal class EMISchemeAndOfferAdapter(
     private var index = -1
 
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): EMISchemeOfferHolder {
-        val inflater = LayoutInflater.from(p0.context).inflate(
-            R.layout.item_emi_scheme_offer,
-            p0,
-            false
-        )
+        val inflater =
+            LayoutInflater.from(p0.context).inflate(R.layout.item_emi_scheme_offer, p0, false)
         return EMISchemeOfferHolder(inflater)
     }
 
@@ -142,8 +139,10 @@ internal class EMISchemeAndOfferAdapter(
         if (modelData != null) {
             holder.transactionAmount.text =
                 divideAmountBy100(modelData.transactionAmount.toInt()).toString()
-            val tenureDuration = "${modelData.tenure} months"
+            val tenureDuration = "${modelData.tenure} Months"
+            val tenureHeadingDuration = "${modelData.tenure} Months Scheme"
             holder.tenure.text = tenureDuration
+            holder.tenureHeadingTV.text = tenureHeadingDuration
             holder.loanAmount.text = divideAmountBy100(modelData.loanAmount.toInt()).toString()
             holder.emiAmount.text = divideAmountBy100(modelData.emiAmount.toInt()).toString()
 
@@ -192,6 +191,7 @@ internal class EMISchemeAndOfferAdapter(
         val cashBackAmount = view.findViewById<TextView>(R.id.tv_cashback_amount)
         val totalInterestPay = view.findViewById<TextView>(R.id.tv_total_interest_pay)
         val totalEmiPay = view.findViewById<TextView>(R.id.tv_total_emi_pay)
+        val tenureHeadingTV = view.findViewById<TextView>(R.id.tenure_heading_tv)
         val parentEmiLayout = view.findViewById<LinearLayout>(R.id.parent_emi_view_ll)
         val discountLinearLayout = view.findViewById<LinearLayout>(R.id.discountLL)
         val cashBackLinearLayout = view.findViewById<LinearLayout>(R.id.cashBackLL)

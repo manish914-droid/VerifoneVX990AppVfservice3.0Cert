@@ -324,6 +324,7 @@ sealed class VxEvent {
     object Home : VxEvent()
     object InitTerminal : VxEvent()
     object AppUpdate : VxEvent()
+    object DownloadTMKForHDFC : VxEvent()
 }
 
 

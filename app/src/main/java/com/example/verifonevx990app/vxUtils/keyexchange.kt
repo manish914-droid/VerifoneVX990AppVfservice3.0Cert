@@ -1,6 +1,7 @@
 package com.example.verifonevx990app.vxUtils
 
 import android.content.Context
+import android.text.TextUtils
 import android.util.Log
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.main.MainActivity
@@ -179,7 +180,10 @@ class KeyExchanger(
                                                 )
                                             }
                                         } else {
-                                            AppPreference.saveBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString() , true)
+                                            AppPreference.saveBoolean(
+                                                PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString(),
+                                                true
+                                            )
                                             launch { AppPreference.saveLogin(false) }
                                             backToCalled("Error in key insertion", false, false)
                                         }
@@ -187,13 +191,19 @@ class KeyExchanger(
                                 } else backToCalled("Key exchange error", false, false)
                             }
                         } else {
-                            AppPreference.saveBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString() , true)
+                            AppPreference.saveBoolean(
+                                PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString(),
+                                true
+                            )
                             val msg = iso.isoMap[58]?.parseRaw2String() ?: ""
                             backToCalled(msg, false, false)
                         }
                     }
                 } else {
-                    AppPreference.saveBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString() , true)
+                    AppPreference.saveBoolean(
+                        PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString(),
+                        true
+                    )
                     backToCalled(result, false, false)
                 }
 
@@ -203,6 +213,121 @@ class KeyExchanger(
 
         }
     }
+
+    //region===============Below method is used to Download TMK and also insert PPK and DPK on Press of Download TMK from Bank Functions:-
+    fun downloadTMKForHDFC() {
+        GlobalScope.launch {
+            val isoW = createKeyExchangeIso()
+            val bData = isoW.generateIsoByteRequest()
+            HitServer.hitServer(bData, { result, success ->
+                if (success && !TextUtils.isEmpty(result)) {
+                    launch {
+                        val iso = readIso(result)
+                        logger(TAG, iso.isoMap)
+                        val resp = iso.isoMap[39]
+                        val f11 = iso.isoMap[11]
+
+                        val f48 = iso.isoMap[48]
+
+                        if (f48 != null) ConnectionTimeStamps.saveStamp(f48.parseRaw2String())
+                        if (f11 != null) ROCProviderV2.incrementFromResponse(
+                            f11.rawData,
+                            AppPreference.HDFC_BANK_CODE
+                        ) else ROCProviderV2.increment(AppPreference.HDFC_BANK_CODE)
+                        if (resp != null && resp.rawData.hexStr2ByteArr().byteArr2Str() == "00") {
+                            Log.d("Success:- ", "Logon Success")
+                            if (tmk.isEmpty()) {
+                                tmk = iso.isoMap[59]?.rawData
+                                    ?: "" // tmk len should be 256 byte or 512 hex char
+                                logger(TAG, "RAW TMK = $tmk")
+                                if (tmk.length == 518) {  // if tmk len is 259 byte , it means last 3 bytes are tmk KCV
+                                    tmkKcv = tmk.substring(512, 518).hexStr2ByteArr()
+                                    tmk = tmk.substring(0, 512)
+                                } else if (tmk.length == 524) { // if tmk len is 262 byte, it means last 6 bytes are tmk KCV and tmk wallet KCV
+                                    tmkKcv = tmk.substring(512, 518).hexStr2ByteArr()
+                                    tmk = tmk.substring(0, 512)
+                                    AppPreference.saveString("TMK", tmk)
+                                }
+                                downloadTMKForHDFC()
+                            } else {
+                                val ppkDpk = iso.isoMap[59]?.rawData ?: ""
+                                logger(TAG, "RAW PPKDPK = $ppkDpk")
+                                if (ppkDpk.length == 64 || ppkDpk.length == 76) { // if ppkDpk.length is 76 it mean last 6 bytes belongs to KCV of dpk and ppk
+
+                                    var ppkKcv = byteArrayOf()
+                                    var dpkKcv = byteArrayOf()
+                                    val dpk = ppkDpk.substring(0, 32)
+                                    val ppk = ppkDpk.substring(32, 64)
+                                    AppPreference.saveString("dpk", dpk)
+                                    AppPreference.saveString("ppk", ppk)
+
+                                    if (ppkDpk.length == 76) ppkDpk.substring(32) else {
+                                        ppkKcv = ppkDpk.substring(64, 70).hexStr2ByteArr()
+                                        dpkKcv = ppkDpk.substring(70).hexStr2ByteArr()
+                                    }
+
+                                    insertAfterSettlementSecurityKeys(
+                                        ppk.hexStr2ByteArr(),
+                                        dpk.hexStr2ByteArr(),
+                                        ppkKcv,
+                                        onTMKCall = true,
+                                        dpkKcv = dpkKcv
+                                    ) {
+                                        if (it) {
+                                            launch {
+                                                AppPreference.saveLogin(true)
+                                            }
+                                            AppPreference.saveBoolean(
+                                                PrefConstant.INSERT_PPK_DPK.keyName.toString(),
+                                                false
+                                            )
+                                            (context as MainActivity).hideProgress()
+                                            GlobalScope.launch(Dispatchers.Main) {
+                                                (context as MainActivity).alertBoxWithAction(
+                                                    null, null,
+                                                    context.getString(R.string.logon),
+                                                    context.getString(R.string.logon_successfull),
+                                                    false,
+                                                    "",
+                                                    {},
+                                                    {})
+                                            }
+                                            //backToCalled("Logon successful", it, false)
+                                        } else {
+                                            launch { AppPreference.saveLogin(false) }
+                                            AppPreference.saveBoolean(
+                                                PrefConstant.INSERT_PPK_DPK.keyName.toString(),
+                                                true
+                                            )
+                                            backToCalled("Error in key insertion", false, false)
+                                        }
+                                    }
+                                } else backToCalled("Key exchange error", false, false)
+                            }
+                        } else {
+                            AppPreference.saveBoolean(
+                                PrefConstant.INSERT_PPK_DPK.keyName.toString(),
+                                true
+                            )
+                            val msg = iso.isoMap[58]?.parseRaw2String() ?: ""
+                            backToCalled(msg, false, false)
+                        }
+                    }
+                } else {
+                    AppPreference.saveBoolean(PrefConstant.TMK_DOWNLOAD.keyName.toString(), true)
+                    if (!TextUtils.isEmpty(result))
+                        backToCalled(result, false, false)
+                    else
+                        backToCalled("No Response Error", false, false)
+                }
+
+            }, {
+                backToCalled(it, false, true)
+            })
+
+        }
+    }
+    //endregion
 
     fun insertPPKDPKAfterSettlement() {
         tmk = "TestData" //This is for Scenerio When we only want to do PPK & DPK Insertion:-
@@ -264,7 +389,8 @@ class KeyExchanger(
                                     ppk.hexStr2ByteArr(),
                                     dpk.hexStr2ByteArr(),
                                     ppkKcv,
-                                    dpkKcv
+                                    dpkKcv,
+                                    onTMKCall = false
                                 ) {
                                     if (it) {
                                         launch {
@@ -529,21 +655,30 @@ class KeyExchanger(
         }
     }
 
-    private fun insertAfterSettlementSecurityKeys(ppk: ByteArray, dpk: ByteArray,
-                                   ppkKcv:ByteArray, dpkKcv:ByteArray,callback: (Boolean) -> Unit) {
-        var result : Boolean? = true
+    private fun insertAfterSettlementSecurityKeys(
+        ppk: ByteArray, dpk: ByteArray,
+        ppkKcv: ByteArray, dpkKcv: ByteArray, onTMKCall: Boolean, callback: (Boolean) -> Unit
+    ) {
+        var result: Boolean? = true
         try {
             ROCProviderV2.resetRoc(AppPreference.getBankCode())
-            //val dTmkArr = RSAProvider.decriptTMK(tmk.hexStr2ByteArr(), rsa)
-            //val decriptedTmk = dTmkArr[0].hexStr2ByteArr()
 
-            //val x = "TMK=${decriptedTmk.byteArr2HexStr()}\nPPK=${ppk.byteArr2HexStr()} KCV=${ppkKcv.byteArr2HexStr()}\nDPK=${dpk.byteArr2HexStr()} KCV=${dpkKcv.byteArr2HexStr()}"
-            //logger(TAG, x)
-           result = VFService.injectTMK(null , ppk , ppkKcv , dpk , dpkKcv , isLoadMainKey = false)
-            if(result == true){
+            result = if (onTMKCall) {
+                val dTmkArr = RSAProvider.decriptTMK(tmk.hexStr2ByteArr(), rsa)
+                val decriptedTmk = dTmkArr[0].hexStr2ByteArr()
+
+                val x =
+                    "TMK=${decriptedTmk.byteArr2HexStr()}\nPPK=${ppk.byteArr2HexStr()} KCV=${ppkKcv.byteArr2HexStr()}\nDPK=${dpk.byteArr2HexStr()} KCV=${dpkKcv.byteArr2HexStr()}"
+                logger(TAG, x)
+                VFService.injectTMK(decriptedTmk, ppk, ppkKcv, dpk, dpkKcv)
+            } else {
+                VFService.injectTMK(null, ppk, ppkKcv, dpk, dpkKcv, isLoadMainKey = false)
+            }
+
+            if (result == true) {
                 VFService.vfBeeper?.startBeep(200)
             }
-            Log.d("Key Insert Success:- " , result.toString())
+            Log.d("Key Insert Success:- ", result.toString())
             if (result != null) {
                 callback(result)
             }

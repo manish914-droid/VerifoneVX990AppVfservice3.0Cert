@@ -2598,7 +2598,7 @@ class PrintUtil(context: Context?) {
                     }
                 }
             } else {
-                alignLeftRightText(textInLineFormatBundle, printerReceiptData.bankEmiTAndC, "")
+                alignLeftRightText(textInLineFormatBundle, "# ${issuerTAndCData.headerTAndC}", "")
             }
             //endregion
 
@@ -2621,7 +2621,11 @@ class PrintUtil(context: Context?) {
                     }
                 }
             } else {
-                alignLeftRightText(textInLineFormatBundle, printerReceiptData.bankEmiTAndC, "")
+                alignLeftRightText(
+                    textInLineFormatBundle,
+                    "# ${printerReceiptData.bankEmiTAndC}",
+                    ""
+                )
             }
             //endregion
 
@@ -2685,21 +2689,34 @@ class PrintUtil(context: Context?) {
 
             printSeperator(textFormatBundle)
 
-            //region=========================Print BankEMI Footer TAndC:-
-            /*if (bankEmiFooterTAndC.size > 1) {
-                for (i in 0 until bankEmiFooterTAndC.size) {
-                    val limit = 48
-                    val emiTnc = "#" + bankEmiFooterTAndC[i]
-                    val chunks: List<String> = chunkTnC(emiTnc, limit)
-                    for (st in chunks) {
-                        logger("TNC", st, "e")
-                            alignLeftRightText(textInLineFormatBundle, st, "")
+            printer?.feedLine(1)
+            //region=======================Issuer Footer Terms and Condition=================
+            if (!TextUtils.isEmpty(issuerTAndCData.footerTAndC)) {
+                val issuerFooterTAndC =
+                    issuerTAndCData.footerTAndC.split(SplitterTypes.POUND.splitter)
+                if (issuerFooterTAndC.size > 1) {
+                    for (i in 1 until issuerFooterTAndC.size) {
+                        if (!TextUtils.isEmpty(issuerFooterTAndC[i])) {
+                            val limit = 48
+                            val emiTnc = "#" + issuerFooterTAndC[i]
+                            val chunks: List<String> = chunkTnC(emiTnc, limit)
+                            for (st in chunks) {
+                                logger("TNC", st, "e")
+                                alignLeftRightText(textInLineFormatBundle, st, "")
+                            }
+                        }
                     }
+                } else {
+                    alignLeftRightText(
+                        textInLineFormatBundle,
+                        "# ${issuerTAndCData.footerTAndC}",
+                        ""
+                    )
                 }
-            }*/
+            }
             //endregion
-            printer?.feedLine(2)
 
+            printer?.feedLine(2)
 
             // start print here and callback of printer:-
             printer?.startPrint(object : PrinterListener.Stub() {

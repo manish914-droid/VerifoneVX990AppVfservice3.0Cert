@@ -16,3 +16,7 @@ so that we can fetch all result values in VFTransactionActivity OnActivityResult
 First Gen AC with Selected EMI Scheme Offer Transaction Amount
 6.Then Create BankEMI Packet in CreateTransactionPacket class as it is like SALE Transaction just we need to add BankEMI Scheme Offer Data Field58.
 7.Hit Host with ISO Packet and Receive Response on the basis of Response Code we will save Bank EMI Data in DB and Print Charge Slip of it.
+
+Note:- as of 16th Feb 2020 BANK EMI ChargeSlip Data Missing from Host End are:-
+1.Tenure TAndC Data which will come in Scheme and Offer Packet Response
+2.Issuer Footer TAndC which will come in IssuerTAndC Packet Response

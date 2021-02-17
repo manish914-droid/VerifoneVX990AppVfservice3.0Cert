@@ -30,6 +30,7 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 enum class EOptionGroup {
     FUNCTIONS, REPORT, NONE
@@ -37,6 +38,7 @@ enum class EOptionGroup {
 
 enum class BankOptions(val _name: String, val group: EOptionGroup, val res: Int = 0) {
     INITT("INIT", EOptionGroup.FUNCTIONS, R.drawable.ic_init),
+    DOWNLOAD_TMK("Download TMK", EOptionGroup.FUNCTIONS, R.drawable.ic_key_exchange),
     TPT("Terminal Param", EOptionGroup.FUNCTIONS, R.drawable.ic_tpt_img),
     CPT("Com Param", EOptionGroup.FUNCTIONS, R.drawable.ic_copt),
     ENV("ENV Param", EOptionGroup.FUNCTIONS, R.drawable.ic_env),
@@ -441,6 +443,19 @@ SubMenuFragment : Fragment(), IOnSubMenuItemSelectListener {
                 BankOptions.APPUPDATE -> {
                     iDiag?.onEvents(VxEvent.AppUpdate)
                 }
+                BankOptions.DOWNLOAD_TMK -> {
+                    verifySuperAdminPasswordDialog(requireActivity()) { correctPasswordSuccess ->
+                        if (correctPasswordSuccess) {
+                            iDiag?.alertBoxWithAction(null, null,
+                                getString(R.string.download_tmk),
+                                getString(R.string.do_you_want_to_download_tmk),
+                                true,
+                                getString(R.string.yes),
+                                { iDiag?.onEvents(VxEvent.DownloadTMKForHDFC) },
+                                { Log.d("NO:- ", "Clicked") })
+                        }
+                    }
+                }
                 else -> {
                     verifySuperAdminPasswordDialog(requireActivity()) { success ->
                         if (success) {
@@ -518,7 +533,7 @@ SubMenuFragment : Fragment(), IOnSubMenuItemSelectListener {
 
                                                 ROCProviderV2.saveBatchInPreference(batchList)
                                                 //Delete All BatchFile Data from Table after Settlement:-
-                                                deleteBatchTableDataInDB()
+                                                runBlocking(Dispatchers.IO) { deleteBatchTableDataInDB() }
                                                 VFService.showToast("Batch Deleted Successfully")
                                             }, {
 
