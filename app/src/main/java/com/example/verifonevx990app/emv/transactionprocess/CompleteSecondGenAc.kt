@@ -55,11 +55,13 @@ class CompleteSecondGenAc(var data: IsoDataReader, var isoData: IsoDataWriter? =
         val tagDatatag91 = f55Hash[ta91] ?: ""
         //  mDevCltr.mEmvState.tc = tagDatatag91.hexStr2ByteArr()
         val mba = ArrayList<Byte>()
+        val mba1 = ArrayList<Byte>()
         try {
             if (tagDatatag91.isNotEmpty()) {
                 val ba = tagDatatag91.hexStr2ByteArr()
                 mba.addAll(ba.asList())
-                //when checking jcb or union pay comment below(mba.addAll(tagData8a.str2ByteArr().asList())) line Only,If VISA uncomment this
+                mba1.addAll(ba.asList())
+                //
                 mba.addAll(tagData8a.str2ByteArr().asList())
 
                 //rtn = EMVCallback.EMVSetTLVData(ta.toShort(), mba.toByteArray(), mba.size)
@@ -103,15 +105,15 @@ class CompleteSecondGenAc(var data: IsoDataReader, var isoData: IsoDataWriter? =
             }
             onlineResult.putString(ConstIPBOC.inputOnlineResult.onlineResult.KEY_authCode_String, "00")
 
-            if (field55 != null && field55.isNotEmpty() && mba.size == 8) {
+            if (field55 != null && field55.isNotEmpty() && mba1.size == 8) {
                 onlineResult.putString(ConstIPBOC.inputOnlineResult.onlineResult.KEY_field55_String, Integer.toHexString(ta91) + "0A" + Utility.byte2HexStr(mba.toByteArray()) + f72)
                   //At least 0A length for 91
                 println("Field55 value inside ---> " + Integer.toHexString(ta91) + "0A" + Utility.byte2HexStr(mba.toByteArray()) + f72)
             }
-            else if (field55 != null && field55.isNotEmpty() && mba.size == 10) {
-                onlineResult.putString(ConstIPBOC.inputOnlineResult.onlineResult.KEY_field55_String, Integer.toHexString(ta91) + "0A"  + f72)
+            else if (field55 != null && field55.isNotEmpty() && mba1.size >= 10) {
+                onlineResult.putString(ConstIPBOC.inputOnlineResult.onlineResult.KEY_field55_String, field55)
                 //At least 0A length for 91
-                println("Field55 value inside ---> " + Integer.toHexString(ta91) + "0A"  + f72)
+                println("Field55 value inside ---> " + field55)
             }
             else {
                 onlineResult.putString(ConstIPBOC.inputOnlineResult.onlineResult.KEY_field55_String, "")
