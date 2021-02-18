@@ -61,10 +61,11 @@ class CreateTransactionPacket(
             addField(22, cardProcessedData.getPosEntryMode().toString())
 
             //Pan Sequence Number Field 23
-            addFieldByHex(
-                23,
-                addPad(cardProcessedData.getApplicationPanSequenceValue().toString(), "0", 3, true)
-            )
+            if(null !=cardProcessedData.getApplicationPanSequenceValue())
+              addFieldByHex(23, addPad(cardProcessedData.getApplicationPanSequenceValue().toString(), "0", 3, true))
+            else{
+                addFieldByHex(23, addPad("00", "0", 3, true))
+            }
 
             //NII Field 24
             addField(24, Nii.DEFAULT.nii)

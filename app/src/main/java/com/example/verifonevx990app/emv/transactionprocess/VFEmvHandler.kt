@@ -121,6 +121,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                         cardProcessedDataModal.setAID(Utility.byte2HexStr(tlv))
                     }
                 } else {
+                  //  tagOfF55?.put(tag,"00")
                     Log.e(MainActivity.TAG, "getCardData:" + Integer.toHexString(tag) + ", fails")
                 }
             }
@@ -286,6 +287,10 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                         logger("CTLS_EMV", it, "e")
                     }
                 }
+
+                //Here we make a callback for first time card read in case of bank emi:-
+              //  if (isFirstBankEMICardRead)
+                //    vfEmvHandlerCallback(cardProcessedDataModal)
 
                 if (!cardProcessedDataModal.getPanNumberData()?.let { cardLuhnCheck(it) }!!) {
                     val bun = Bundle()
@@ -729,12 +734,12 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
         GlobalScope.launch(Dispatchers.IO) {
             if (tagOfF55 != null) {
                 for (i in 0 until tagOfF55!!.size()) {
-                    val tag = tagOfF55!!.keyAt(i)
-                    val value = tagOfF55!!.valueAt(i)
+                    val tag = tagOfF55?.keyAt(i)
+                    val value = tagOfF55?.valueAt(i)
 
                     val indexedValue: Boolean = tag == 24372
                     if (indexedValue) {
-                        val applicationPanSequenceNumber = tagOfF55!!.valueAt(i)
+                        val applicationPanSequenceNumber = tagOfF55?.valueAt(i)
                         if (applicationPanSequenceNumber != null) {
                             cardProcessedDataModal.setApplicationPanSequenceValue("" + applicationPanSequenceNumber)
                         }
@@ -746,19 +751,19 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
 
                 when (cardProcessedDataModal.getReadCardType()) {
                     DetectCardType.EMV_CARD_TYPE -> {
-                        val f55 = getField55(false)
+                        val f55 = getField55(false,cardProcessedDataModal)
                         cardProcessedDataModal.setField55(f55)
                         //println("Field 55 is -> " + f55)
                         vfEmvHandlerCallback(cardProcessedDataModal)
                     }
                     DetectCardType.CONTACT_LESS_CARD_TYPE -> {
-                        val f55 = getField55()
+                        val f55 = getField55(cardProcessedDataModal = cardProcessedDataModal)
                         cardProcessedDataModal.setField55(f55)
                         //println("Field 55 is -> " + f55)
                         vfEmvHandlerCallback(cardProcessedDataModal)
                     }
                     DetectCardType.CONTACT_LESS_CARD_WITH_MAG_TYPE -> {
-                        val f55 = getField55()
+                        val f55 = getField55(cardProcessedDataModal = cardProcessedDataModal)
                         cardProcessedDataModal.setField55(f55)
                         //println("Field 55 is -> " + f55)
                         vfEmvHandlerCallback(cardProcessedDataModal)

@@ -106,7 +106,8 @@ enum class Mti(val mti: String) {
     APP_UPDATE_MTI("0800"),
     CROSS_SELL_MTI("0800"),
     BANK_EMI("0800"),
-    EIGHT_HUNDRED_MTI("0800")
+    EIGHT_HUNDRED_MTI("0800"),
+    BANKI_EMI("0800")
 }
 
 enum class ProcessingCode(val code: String) {

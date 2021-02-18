@@ -57,6 +57,11 @@
             android:theme="@style/VxAppThemeNoActionBar"
             android:windowSoftInputMode="adjustNothing" />
 
+        <activity
+            android:name=".bankemi.EMISchemeAndOfferActivity"
+            android:theme="@style/VxAppThemeNoActionBar"
+            android:windowSoftInputMode="adjustNothing" />
+
         <activity android:name=".nontransaction.EmiActivity" />
 
         <!-- registering the receiver -->

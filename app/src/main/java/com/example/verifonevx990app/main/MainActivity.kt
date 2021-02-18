@@ -117,6 +117,12 @@ class MainActivity : BaseActivity(), IFragmentRequest,
         setContentView(binding?.root)
         initUI()
         decideHome()
+
+        Handler().postDelayed({
+                VFService.setAidRid(addPad("000000" ?: "", "0", 12, true),
+                    addPad("000000" ?: "", "0", 12, true))
+            }, 2000)
+
         refreshToolbarLogos(this)
         Log.d("AppVerAndRev:- ", getAppVersionNameAndRevisionID())
 
@@ -2066,6 +2072,10 @@ enum class ConnectionError(val errorCode: Int) {
     ConnectionRefusedorOtherError(409),
     NetworkError(504),
     Success(200)
+}
+enum class CardAid(val aid: String) {
+    Rupay("A0000005241010"),
+
 }
 
 //region==============================Enum Class for Splitter Types:-

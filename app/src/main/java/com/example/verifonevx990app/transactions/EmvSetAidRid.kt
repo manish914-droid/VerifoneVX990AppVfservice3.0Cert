@@ -9,11 +9,7 @@ import com.vfi.smartpos.deviceservice.aidl.IEMV
 import com.vfi.smartpos.deviceservice.constdefine.ConstIPBOC
 
 
-class EmvSetAidRid(
-    private var ipboc: IEMV?,
-    private var updateCVMValue: String,
-    private var ctlsUpdateTransLimit: String
-) {
+class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String, private var ctlsUpdateTransLimit: String) {
     private val TAG = "EMV-SetAidRid"
     private var ctlsVal: String? = null
     private var cvmVal: String? = null
@@ -77,10 +73,10 @@ class EmvSetAidRid(
                 // Visa credit or debit	10 10
                 // Visa credit or debit	10 10
 
-                "9F3303E020C8" +     //Terminal capability
+                       "9F3303E020C8" +     //Terminal capability
                         "DF1A06000000012000" +
                         "9F0607A0000000031010" + //Application Aid
-                        "9F40056F00F0F001" +  //Additional terminal cpability
+                        "9F40056F00F0F001" +  //Additional terminal capability
                         "DF010100" +
                         "DF2006009999999999" +
                         "DF14039F3704" +
@@ -103,8 +99,7 @@ class EmvSetAidRid(
 
                 // Visa credit or debit	10 10
                 // Visa credit or debit	10 10
-                "9F3303E0F0C8" +
-                        "9F40056200002001" +
+                       "9F3303E0F0C8" +
                         "97099F02065F2A029A0390" +
                         "9F40056F00F0F001" + //additional terminal capability
                         "9F0607A0000000031010" +
@@ -127,8 +122,7 @@ class EmvSetAidRid(
 
                 // Visa credit or debit	10 10
                 // Visa credit or debit	10 10
-                "9F3303E0F0C8" +
-                        "9F40056200002001" +
+                       "9F3303E0F0C8" +
                         "97099F02065F2A029A0390" +
                         "9F40056F00F0F001" + //additional terminal capability
                         "9F0608A000000003101001" +
@@ -152,7 +146,6 @@ class EmvSetAidRid(
                 // Visa credit or debit	10 10
                 // Visa credit or debit	10 10
                        "9F3303E0F0C8" +
-                        "9F40056200002001" +
                         "97099F02065F2A029A0390" +
                         "9F40056F00F0F001" + //additional terminal capability
                         "9F0608A000000003101002" +
@@ -175,8 +168,7 @@ class EmvSetAidRid(
 
                 // Visa Electron	20 10
                 // Visa Electron	20 10
-                "9F3303E0F0C8" +
-                        "9F40056200002001" +
+                        "9F3303E0F0C8" +
                         "97099F02065F2A029A0390" +
                         "9F40056F00F0F001" + //additional terminal capability
                         "9F0607A0000000032010" +
@@ -199,7 +191,10 @@ class EmvSetAidRid(
 // =============================================Visa Contact card Aids Ends============================================================================================
 // ===================================================Masters Contact card Aids starts=================================================================================
                 // MasterCard credit or debit	10 10
-                "9F0607A0000000041010" +
+                        "9F3303E0F0C8" + //terminal capability
+                        "97099F02065F2A029A0390" +
+                        "9F40056F00F0F001" + //additional terminal capability
+                        "9F0607A0000000041010" +
                         "DF2006009999999999" +
                         "DF010100" +
                         "DF140111" +
@@ -218,7 +213,10 @@ class EmvSetAidRid(
                         "DF13050000400000",
 
                 // MasterCard(debit card)_	30 60
-                "9F0607A0000000043060" +
+                        "9F3303E0F0C8" + //terminal capability
+                        "97099F02065F2A029A0390" +
+                        "9F40056F00F0F001" + //additional terminal capability
+                        "9F0607A0000000043060" +
                         "DF2006009999999999" +
                         "DF010100" +
                         "DF140111" +
@@ -237,7 +235,10 @@ class EmvSetAidRid(
                         "DF13050000400000",
 
                 // MasterCard
-                "9F0607A0000000044010" +
+                       "9F3303E0F0C8" + //terminal capability
+                        "97099F02065F2A029A0390" +
+                        "9F40056F00F0F001" + //additional terminal capability
+                        "9F0607A0000000044010" +
                         "DF2006009999999999" +
                         "DF010100" +
                         "DF140111" +
@@ -259,7 +260,10 @@ class EmvSetAidRid(
 
 // ===============================================PBOC card Aids starts=======================================================================================================
                 // PBOC
-                "9F0608A000000333010103" +
+                        "9F3303E0F0C8" + //terminal capability
+                        "97099F02065F2A029A0390" +
+                        "9F40056F00F0F001" + //additional terminal capability
+                        "9F0608A000000333010103" +
                         "DF2006009999999999" +
                         "DF010100" +
                         "DF14039F3704" +
@@ -277,7 +281,10 @@ class EmvSetAidRid(
                         "9F7B06000000100000" +
                         "DF13050010000000",
 
-                "9F0608A000000333010101" +
+                        "9F3303E0F0C8" + //terminal capability
+                        "97099F02065F2A029A0390" +
+                        "9F40056F00F0F001" + //additional terminal capability
+                        "9F0608A000000333010101" +
                         "DF2006009999999999" +
                         "DF010100" +
                         "DF14039F3704" +
@@ -295,7 +302,10 @@ class EmvSetAidRid(
                         "9F7B06000000100000" +
                         "DF13050010000000",
 
-                "9F0608A000000333010106" +
+                       "9F3303E0F0C8" + //terminal capability
+                        "97099F02065F2A029A0390" +
+                        "9F40056F00F0F001" + //additional terminal capability
+                       "9F0608A000000333010106" +
                         "DF2006009999999999" +
                         "DF010100" +
                         "DF14039F3704" +
@@ -312,7 +322,10 @@ class EmvSetAidRid(
                         "9F7B06000000100000" +
                         "DF13050010000000",
 
-                "9F0608A000000333010102" +
+                        "9F3303E0F0C8" + //terminal capability
+                        "97099F02065F2A029A0390" +
+                        "9F40056F00F0F001" + //additional terminal capability
+                       "9F0608A000000333010102" +
                         "DF2006009999999999" +
                         "DF010100" +
                         "DF14039F3704" +
@@ -334,7 +347,7 @@ class EmvSetAidRid(
 
 
 // ================================================JCB contatct card Aids starts=============================================================================================================
-                // JCB
+                       // JCB
                         "9F3303E0F0C8" +      //Terminal capability
                         "97099F02065F2A029A0390" +
                         "9F40056F00F0F001" + //additional terminal capability
@@ -358,8 +371,10 @@ class EmvSetAidRid(
 // ==================================================JCB contact card Aids ends============================================================================================================
 
 //=====================================================================Diners card Aids starts========================================================
-
-                "9F0607A0000001523010" +
+                       "9F3303E0F0C8" +      //Terminal capability
+                        "97099F02065F2A029A0390" +
+                        "9F40056F00F0F001" + //additional terminal capability
+                        "9F0607A0000001523010" +
                         "DF2006009999999999" +
                         "DF010100" +
                         "DF140111" +
@@ -409,17 +424,14 @@ class EmvSetAidRid(
                         "DF2006009999999999DF010100DF14039F3704DF1701009F09020001DF180100DF1205CC000000009F1B0400000000DF160101DF150400000000DF1105CC00000000DF19060000000000009F7B06000000100000DF130500000000009F1A020356",
                 "9F0606A00000002501" +
                         "DF2006009999999999DF010100DF14039F3704DF1701999F09020001DF180101DF1205CC000080009F1B0400000000DF160199DF150400000000DF1105CC00000000DF19060000000000009F7B06000010000000DF130500000000009F1A020356",
-/*                "9F0607A0000003241010" +
-                        "DF2006009999999999DF010100DF14039F3704DF1701999F09020001DF180101DF1205FCE09CF8009F1B0400000000DF160199DF150400000000DF1105DC00002000DF19060000000000009F7B06000000000000DF130500100000009F1A020356",
-                "9F0605A000000000" +
-                        "DF2006009999999999DF010100DF140111DF1701019F09020001DF180100DF120500000000009F1B0400000064DF160101DF150400000001DF11050000000000DF19060000000000009F7B06000000000100DF130500000000009F1A020356"*/
+
             )
         val AID_CTLS_Card = arrayOf(
 
             //American express Aid's
             "9F0606F00000002501" +
                     "DF0306009999999999DF2006009999999999DF010100DF14039F37049F6601225F2A020356DF1701009F09020001DF180100DF1205CC000000009F1B04000000009F1A020356DF2106000000100000DF160101DF150400000000DF1105CC00000000DF0406000000000501DF1906000000000000DF13050000000000",
-            /*  "9F0606A00000002501" +     // AID
+            /*"9F0606A00000002501" +     // AID
                     "DF0306009999999999" +
                     "DF2006${ctlsVal}" + //Contact less Maximum Transaction Limit
                     "DF010100" +     //Application id
@@ -438,8 +450,8 @@ class EmvSetAidRid(
                     "DF11050000000000" +     //TAC Default
                     "DF0406000000000000" +   //
                     "DF1906000000000000" +   //Contact less offline minimum
-                    "DF13050000000000",    //TAC Refuse*/
-
+                    "DF13050000000000",    //TAC Refuse
+*/
             /*  "9f0607A0000001523010"+*/
 /*            "9F0607A0000003241010" +
                     "DF0306009999999999" +
@@ -451,7 +463,6 @@ class EmvSetAidRid(
             // Visa, Plus	80 10
 
             "9F3303E0F0C8" +
-                    "9F40056200002001" +
                     "97099F02065F2A029A0390" +
                     "9F40056F00F0F001" + //additional terminal capability
                     "9F0607A0000000038010" +
@@ -476,9 +487,9 @@ class EmvSetAidRid(
                     "DF13050010000000",
 
 
-            "9F3303E0F0C8" +
-                    "9F40056200002001" +
+                    "9F3303E0F0C8" +
                     "97099F02065F2A029A0390" +
+                    "9F40056F00F0F001" +  //Additional terminal capability
                     "9F0607A0000000031010" +
                     "DF0306009999999999" +
                     "DF2006009999999999" + //Contact less Maximum Transaction Limit
@@ -500,9 +511,9 @@ class EmvSetAidRid(
                     "DF1906000000000000" +    //Contact less offline minimum
                     "DF13055C40000000",       //TAC Refuse
 
-            "9F3303E0F0C8" +
-                    "9F40056200002001" +
+                    "9F3303E0F0C8" +
                     "97099F02065F2A029A0390" +
+                    "9F40056F00F0F001" +  //Additional terminal capability
                     "9F0608A000000003101001" +
                     "DF2006009999999999" +
                     "DF010100" +
@@ -524,8 +535,8 @@ class EmvSetAidRid(
                     "DF13055C40000000",
 
             "9F3303E0F0C8" +
-                    "9F40056200002001" +
                     "97099F02065F2A029A0390" +
+                    "9F40056F00F0F001" +  //Additional terminal capability
                     "9F0608A000000003101002" +
                     "DF2006009999999999" +
                     "DF010100" +
@@ -551,8 +562,8 @@ class EmvSetAidRid(
 
             // MasterCard credit or debit	10 10
             "9F3303E0F0C8" + //terminal capability
-                    "9F40056200002001" + // additional terminal capability
                     "97099F02065F2A029A0390" +
+                    "9F40056F00F0F001" + //additional terminal capability
                     "9F0607A0000000041010" +
                     "DF0306009999999999" +
                     "DF2006009999999999" + // Max^m txn limit
@@ -605,7 +616,7 @@ class EmvSetAidRid(
 
 //==================================================================Rupay Contactless card Aids Start==========================================================================================
 
-            "9F3303E0F0C8" + // terminal capability
+                    "9F3303E0F0C8" + // terminal capability
                     "97099F02065F2A029A0390" +
                     "9F40056F00F0F001" + //additional terminal capability
                     "9f0607A0000005241010" +
@@ -646,17 +657,6 @@ class EmvSetAidRid(
             e.printStackTrace()
         }
 
-
-// =================================PBOC card Aids Ends========================================================
-
-// PBOC
-        "9F0608A000000333010102" +
-                "DF0306009999999999DF2006009999999999DF010100DF14039F37049F6601265F2A020156DF1701999F09020020DF180101DF1205DC4004F8009F1B04000000649F1A020156DF2106000000100000DF160199DF150400000000DF1105DC4000A800DF0406000000000000DF1906000000000000DF13050010000000"
-        "9F0608A000000333010101" +
-                "DF0306009999999999DF2006009999999999DF010100DF14039F37049F6601265F2A020156DF1701999F09020020DF180101DF1205DC4004F8009F1B04000000649F1A020156DF2106000000100000DF160199DF150400000000DF1105DC4000A800DF0406000000000000DF1906000000000000DF13050010000000"
-        "9F0608A000000333010106" +
-                "DF0306009999999999DF2006009999999999DF010100DF14039F37049F6601265F2A020156DF1701999F09020020DF180101DF1205DC4004F8009F1B04000000649F1A020156DF2106000000100000DF160199DF150400000000DF1105DC4000A800DF0406000000000000DF1906000000000000DF13050010000000"
-// =================================PBOC card Aids Ends========================================================
 
         val smartCardAidType = ConstIPBOC.updateAID.aidType.smart_card
         val ctlsAidType = ConstIPBOC.updateAID.aidType.contactless
@@ -753,7 +753,7 @@ class EmvSetAidRid(
                     "DF0281F8" + "CF98DFEDB3D3727965EE7797723355E0751C81D2D3DF4D18EBAB9FB9D49F38C8C4A826B99DC9DEA3F01043D4BF22AC3550E2962A59639B1332156422F788B9C16D40135EFD1BA94147750575E636B6EBC618734C91C1D1BF3EDC2A46A43901668E0FFC136774080E888044F6A1E65DC9AAA8928DACBEB0DB55EA3514686C6A732CEF55EE27CF877F110652694A0E3484C855D882AE191674E25C296205BBB599455176FDD7BBC549F27BA5FE35336F7E29E68D783973199436633C67EE5A680F05160ED12D1665EC83D1997F10FD05BBDBF9433E8F797AEE3E9F02A34228ACE927ABE62B8B9281AD08D3DF5C7379685045D7BA5FCDE58637" + //Module
                     "DF040103" + //exponent
                     "DF0314C729CF2FD262394ABC4CC173506502446AA9B9FD",  //CheckSum
-
+//=========================================================================== Visa cap keys Starts==================================================================================================================================================================================================================================
             //Visa Test cap Keys 92
             "9F0605A000000003" +
                     "9F220192" +
@@ -781,7 +781,8 @@ class EmvSetAidRid(
                     "DF0314EE1511CEC71020A9B90443B37B1D5F6E703030F6" +
                     "BF010131" +
                     "DF070101",
-
+//=========================================================================== Visa cap keys ends==================================================================================================================================================================================================================================
+//=========================================================================== Master cap keys starts==================================================================================================================================================================================================================================
             // MasterCard
             // MasterCard
             "9F0605A000000004" +
@@ -805,11 +806,15 @@ class EmvSetAidRid(
                     "DF050420231231DF0281B0A0DCF4BDE19C3546B4B6F0414D174DDE294AABBB828C5A834D73AAE27C99B0B053A90278007239B6459FF0BBCD7B4B9C6C50AC02CE91368DA1BD21AAEADBC65347337D89B68F5C99A09D05BE02DD1F8C5BA20E2F13FB2A27C41D3F85CAD5CF6668E75851EC66EDBF98851FD4E42C44C1D59F5984703B27D5B9F21B8FA0D93279FBBF69E090642909C9EA27F898959541AA6757F5F624104F6E1D3A9532F2A6E51515AEAD1B43B3D7835088A2FAFA7BE7DF040103DF0314D8E68DA167AB5A85D8C3D55ECB9B0517A1A5B4BBBF010131DF070101",
             "9F0605A000000004" +
                     "9F220103" + //Live
-                    "DF050420291231DF028180C2490747FE17EB0584C88D47B1602704150ADC88C5B998BD59CE043EDEBF0FFEE3093AC7956AD3B6AD4554C6DE19A178D6DA295BE15D5220645E3C8131666FA4BE5B84FE131EA44B039307638B9E74A8C42564F892A64DF1CB15712B736E3374F1BBB6819371602D8970E97B900793C7C2A89A4A1649A59BE680574DD0B60145DF040103DF03145ADDF21D09278661141179CBEFF272EA384B13BBBF010131DF070101",
+                    "DF050420291231" +
+                    "DF028180" +
+                    "C2490747FE17EB0584C88D47B1602704150ADC88C5B998BD59CE043EDEBF0FFEE3093AC7956AD3B6AD4554C6DE19A178D6DA295BE15D5220645E3C8131666FA4BE5B84FE131EA44B039307638B9E74A8C42564F892A64DF1CB15712B736E3374F1BBB6819371602D8970E97B900793C7C2A89A4A1649A59BE680574DD0B60145" +
+                    "DF040103DF03145ADDF21D09278661141179CBEFF272EA384B13BBBF010131DF070101",
             "9F0605A000000004" +
                     "9F220109" + //
                     "DF050420291231DF028180C132F436477A59302E885646102D913EC86A95DD5D0A56F625F472B67F52179BC8BD258A7CD43EF1720AC0065519E3FFCECC26F978EDF9FB8C6ECDF145FDCC697D6B72562FA2E0418B2B80A038D0DC3B769EB027484087CCE6652488D2B3816742AC9C2355B17411C47EACDD7467566B302F512806E331FAD964BF000169F641DF040103DF0300BF010131DF070101",
-
+//=========================================================================== Master cap keys ends==================================================================================================================================================================================================================================
+//=========================================================================== Diners cap keys starts==================================================================================================================================================================================================================================
             //Diners Capk keys
             //  DINERS CAPK
             "9F0605A000000152" + // Aids
@@ -843,8 +848,125 @@ class EmvSetAidRid(
                     "DF0281F8AD938EA9888E5155F8CD272749172B3A8C504C17460EFA0BED7CBC5FD32C4A80FD810312281B5A35562800CDC325358A9639C501A537B7AE43DF263E6D232B811ACDB6DDE979D55D6C911173483993A423A0A5B1E1A70237885A241B8EEBB5571E2D32B41F9CC5514DF83F0D69270E109AF1422F985A52CCE04F3DF269B795155A68AD2D6B660DDCD759F0A5DA7B64104D22C2771ECE7A5FFD40C774E441379D1132FAF04CDF55B9504C6DCE9F61776D81C7C45F19B9EFB3749AC7D486A5AD2E781FA9D082FB2677665B99FA5F1553135A1FD2A2A9FBF625CA84A7D736521431178F13100A2516F9A43CE095B032B886C7A6AB126E203BE7" + // Module
                     "DF040103" + // exponent
                     "DF0314B51EC5F7DE9BB6D8BCE8FB5F69BA57A04221F39BBF010131" + // checksum
-                    "DF070101"// ARITH_IND
-        )
+                    "DF070101",// ARITH_IND
+//=========================================================================== Diners cap keys ends==================================================================================================================================================================================================================================
+//=========================================================================== JCB cap keys starts==================================================================================================================================================================================================================================
+            // JCB
+            // JCB
+            "9F0605A000000065" + // Aids
+                    "9F22010F" + // Key Id
+                    "DF050420291231" + // Expiry Date
+                    "DF0281909EFBADDE4071D4EF98C969EB32AF854864602E515D6501FDE576B310964A4F7C2CE842ABEFAFC5DC9E26A619BCF2614FE07375B9249BEFA09CFEE70232E75FFD647571280C76FFCA87511AD255B98A6B577591AF01D003BD6BF7E1FCE4DFD20D0D0297ED5ECA25DE261F37EFE9E175FB5F12D2503D8CFB060A63138511FE0E125CF3A643AFD7D66DCF9682BD246DDEA1" + // Module
+                    "DF040103" + // exponent
+                    "DF03142A1B82DE00F5F0C401760ADF528228D3EDE0F403BF010131" + // checksum
+                    "DF070101", //ARITH_IND
+
+            "9F0605A000000065" + //Aids
+                    "9F220113" + // Key id
+                    "DF050420250101" + // Expiry Date
+                    "DF0281F8A3270868367E6E29349FC2743EE545AC53BD3029782488997650108524FD051E3B6EACA6A9A6C1441D28889A5F46413C8F62F3645AAEB30A1521EEF41FD4F3445BFA1AB29F9AC1A74D9A16B93293296CB09162B149BAC22F88AD8F322D684D6B49A12413FC1B6AC70EDEDB18EC1585519A89B50B3D03E14063C2CA58B7C2BA7FB22799A33BCDE6AFCBEB4A7D64911D08D18C47F9BD14A9FAD8805A15DE5A38945A97919B7AB88EFA11A88C0CD92C6EE7DC352AB0746ABF13585913C8A4E04464B77909C6BD94341A8976C4769EA6C0D30A60F4EE8FA19E767B170DF4FA80312DBA61DB645D5D1560873E2674E1F620083F30180BD96CA589" +
+                    "DF040103" + // exponent
+                    "DF031454CFAE617150DFA09D3F901C9123524523EBEDF3BF010131" + //checksum
+                    "DF070101", //ARITH_IND
+ //=========================================================================== JCB cap keys ends==================================================================================================================================================================================================================================
+//=========================================================================== People's bank of china cap keys starts==================================================================================================================================================================================================================================
+            // PBOC
+            // PBOC
+            "9F0605A000000333" +  //Aids
+                    "9F220108" +  //Key Id
+                    "DF050420291231" + //Expiry Date
+                    "DF028190B61645EDFD5498FB246444037A0FA18C0F101EBD8EFA54573CE6E6A7FBF63ED21D66340852B0211CF5EEF6A1CD989F66AF21A8EB19DBD8DBC3706D135363A0D683D046304F5A836BC1BC632821AFE7A2F75DA3C50AC74C545A754562204137169663CFCC0B06E67E2109EBA41BC67FF20CC8AC80D7B6EE1A95465B3B2657533EA56D92D539E5064360EA4850FED2D1BF" + // Module
+                    "DF040103" + // exponent
+                    "DF0314EE23B616C95C02652AD18860E48787C079E8E85ABF010131" + //Checksum
+                    "DF070101", //ARITH_IND
+
+            "9F0605A000000333" +  //Aids
+                    "9F220109" +  //Key Id
+                    "DF050420291231" + //Expiry Date
+                    "DF0281B0EB374DFC5A96B71D2863875EDA2EAFB96B1B439D3ECE0B1826A2672EEEFA7990286776F8BD989A15141A75C384DFC14FEF9243AAB32707659BE9E4797A247C2F0B6D99372F384AF62FE23BC54BCDC57A9ACD1D5585C303F201EF4E8B806AFB809DB1A3DB1CD112AC884F164A67B99C7D6E5A8A6DF1D3CAE6D7ED3D5BE725B2DE4ADE23FA679BF4EB15A93D8A6E29C7FFA1A70DE2E54F593D908A3BF9EBBD760BBFDC8DB8B54497E6C5BE0E4A4DAC29E5" + //Module
+                    "DF040103" + //exponent
+                    "DF0314A075306EAB0045BAF72CDD33B3B678779DE1F527BF010131" + //CheckSum
+                    "DF070101", //ARITH_IND
+
+            // PBOC credit or debit
+            // PBOC credit or debit
+            "9F0605A000000333" + //Aids
+                    "9F22010B" + //KEY ID
+                    "DF050420291231" + //expiry Date
+                    "DF0281F8CF9FDF46B356378E9AF311B0F981B21A1F22F250FB11F55C958709E3C7241918293483289EAE688A094C02C344E2999F315A72841F489E24B1BA0056CFAB3B479D0E826452375DCDBB67E97EC2AA66F4601D774FEAEF775ACCC621BFEB65FB0053FC5F392AA5E1D4C41A4DE9FFDFDF1327C4BB874F1F63A599EE3902FE95E729FD78D4234DC7E6CF1ABABAA3F6DB29B7F05D1D901D2E76A606A8CBFFFFECBD918FA2D278BDB43B0434F5D45134BE1C2781D157D501FF43E5F1C470967CD57CE53B64D82974C8275937C5D8502A1252A8A5D6088A259B694F98648D9AF2CB0EFD9D943C69F896D49FA39702162ACB5AF29B90BADE005BC157" + //Module
+                    "DF040103" + //exponent
+                    "DF03140000000000000000000000000000000000000000BF010131" + //checksum
+                    "DF070101", //ARITH_IND
+
+            "9F0605A000000333" + //Aids
+                    "9F220184" + //KEY ID
+                    "DF050420291231DF0281B0F9EA5503CFE43038596C720645A94E0154793DE73AE5A935D1FB9D0FE77286B61261E3BB1D3DFEC547449992E2037C01FF4EFB88DA8A82F30FEA3198D5D16754247A1626E9CFFB4CD9E31399990E43FCA77C744A93685A260A20E6A607F3EE3FAE2ABBE99678C9F19DFD2D8EA76789239D13369D7D2D56AF3F2793068950B5BD808C462571662D4364B30A2582959DB238333BADACB442F9516B5C336C8A613FE014B7D773581AE10FDF7BDB2669012D" + //Module
+                    "DF040103" + //exponent
+                    "DF03144D4E6D415F2CF8C394D40C49FB2459110578CF22BF010131" + //checksum
+                    "DF070101", //ARITH_IND
+
+            "9F0605A000000333" + //AIDS
+                    "9F220180" + //KEY ID
+                    "DF050420291231" + //expiry Date
+                    "DF0281809DD730669F27892944A68C0C62344C0E8EC57C2AA78004B014C26A0B0F3B517A0B60D355DFBC8929BBC59CEBCD0CCA13CDAA0C94E91C84A26E7DBE6B58595C4EFF2D717CB9EB965C15D287AF60AC28D06BC51282BC4A518B0EA3ABA9343F1778545FFB49EE840BBCEA457DBAABBFD755BA0F943A08A59CFFB6066B4084767599" + //Module
+                    "DF0403010001" + //exponent
+                    "DF0314A35663495B5702D2ADE19104ADB8EE07F97E8B2ABF010131" + //checksum
+                    "DF070101", //ARITH IND
+
+            "9F0605A000000333" + //AIDS
+                    "9F220183" + //KEY ID
+                    "DF050420291231" + //expiry Date
+                    "DF028190E46C9D054471D24A3DAEEA13875ECFB92C34D309106092E6AF57BD612C18E4E2BB3FBBC9E14F86D8660A065848B821347D04521578D4B789FD57231185DF92F45C5733C7912C291D7B13E649B094B33B1B75151C0E4E71E45CCDFD5217DC9F3EF39C3D324CA460DDC40C45CC27B2E421A2B409A47FAAEFD65F8A7F58A269B38CFD9C18210856A493A6624141677F5E95" + //Module
+                    "DF040103" + //exponent
+                    "DF03141CC9BA05BC70F3D049F817404051122E35AC9683BF010131" + //checksum
+                    "DF070101", //ARITH IND
+
+            "9F0605A000000333" + //AIDS
+                    "9F220185" + //KEY ID
+                    "DF050420291231" + //expiry Date
+                    "DF0281F8CD026B3E11A7234EFC24FB5976D9F51F7188A1598861AA8A6CA8D9A55300C6E6C39ED97E128973306E7D15DF603823A2C0C2E4C01C5AC0D4E71127DFEC69F2B17DAB12F2E8A84CD30AFC791AE71CD6D69D1B7E7648B2F0BB2140791C585E9CAC6642230B13C81A66E52E927681594EC08CFB30E10658F4199B8BF48B55F140925DEEEF4341E2C6C91E039944A5C44DD72379C2227F02105F462C0E977A2E79D2841143941EB4B4BC1ADAC274E3B0129DE7FDCC77C75BBC29A2861DCE7F748EBEE1E69339348667B729C2900EC6A6D43881622555FA8F8B85E18BD2B8B6F56EBD47643181FF7039D883CB5D723D9DEBD073A5A0CD7B980F0D" + //module
+                    "DF040103" + //exponent
+                    "DF031496C22F92B7644934F03B4065F1C37BC9DBEA45B0BF010131" + //checksum
+                    "DF070101", //ARITH IND
+//=========================================================================== People's bank of china cap keys ends==================================================================================================================================================================================================================================
+//=========================================================================== Rupay Cap keys starts==================================================================================================================================================================================================================================
+            //Rupay Cap Keys
+              //Test
+             "9F0605A000000524"+ //Aids
+                     "9F22016A" + //Key Id
+                     "DF050420221231" + //expiry Date
+                     "DF02"+"8180"+"92795EAA4FE39EB30441FE952D5423778E02F86783B89DD7C587AE80A69F4D6DC55EAFB6604040D875C72002425EE529CE4EA26FD864BAD760160C2AA0C5AF92381894A5CBBC8AB3AF2641606C379B927A397CB1E9B9EA2EF8C0A9C0DDEBB81B0F8913A118F7044156EA7D23AF626EAF30C2C9ECE8534D3563EF5FE95DE76249"+ //Module
+                     "DF040103"+ //exponent
+                     "DF031451ED4570323CD41A0348BDFEA81CCC0B8D9BAB3F" + //checksum
+                     "DF070101", //ARITH IND
+
+              //Test
+             "9F0605A000000524"+ //Aids
+                     "9F22016C" + //Key Id
+                     "DF050420221231" + //expiry Date
+                     "DF02"+"81B0"+"C76259FF785ABD5FF613223C01F5BDA0F36F9342CF336B66C32D4B2CD5096E094D8E04DFA11A9B2E3BC78DA63B5C10148D8ED79EBA685D5D0EFE1C58B3F929D861B40FF3AAA3B527148D0C24921EE42DA048E01E38F6A3A49DFA67DD1CD5DD2091412DD36D3269FAF7D2E0FFB1A3E028969CB6BA5A9303A6FF65540F421B069A31B553398EE525EFA5C2CE26BCB81C5345018D5E3E9B7130F72F598C0EAA4682D4DA2F2204518780A8108F82DDC9CF1F"+ //Module
+                     "DF040103"+ //exponent
+                     "DF03"+"14"+"3B18A21BF34F781208145D7567982513D1CE8C92" + //checksum
+                     "DF070101", //ARITH IND
+              //Test
+              "9F0605A000000524"+ //Aids
+                     "9F22016D" + //Key Id
+                     "DF050420221231" + //expiry Date
+                     "DF02"+"81F8"+"B747E8CB3615E8D26231355488F3C76C4746F7BB1C381E6C6E6ABF0A6D7CD93CFC6B2C310288CA8BE7EE1730DE621A59D1BB2D8C02C9148FA06E5D1F5E672EEFCE8AECBAD4A1C18F3175F1BEA1AEF539376592366B46A5044E32E59B3F35F50E85F843BA01851E5386B7EBE27367D3D483C5472D3020AF42116DDDA32341557EBABB043EBC6006B99A652009045BFA50C527028586E05942E1D594223B49FE8566931C31FBE8C903ABD4F283E1FAB03D758247EC4B728A85A9897601B753293263ADBD10BE988D0C52FE0091C2721DC02C5130FC7663E95739A70EE2F84DFD2E50C88A1A26587EF7CC047FCA2D03C2CF0CE4B524B4EC3F07"+ //Module
+                     "DF040103"+ //exponent
+                     "DF03"+"14"+"411008F9921B89C62E2160F6D0358614115ECD4A" + //checksum
+                     "DF070101", //ARITH IND
+
+                //Test
+              "9F0605A000000524"+ //Aids
+                     "9F22016B" + //Key Id
+                     "DF050420221231" + //expiry Date
+                     "DF02"+"8190"+"C9DFDB625ADA4B5E86049F85A0237627B59524F52BD499B4C5482C1EE012D61A1446E9383CC0B7EE2922D323A5ECDA12941EA8177CFA512DA6B5B7663A89B793B10D314CBB776EB96D0B1734EDE7E1591713915E9991B7B4E8A017A6901279AEBDD6136C9FE7E0C6CBF94C77FA606B629D00B1F890473905EB4DAD1AD93B29C2C1829A82F880B08986B9387611EE409D"+ //Module
+                     "DF040103"+ //exponent
+                     "DF03"+"14"+"9602428A46271C63CCC6DD99477CDB70435D6D5B" + //checksum
+                     "DF070101" //ARITH IND
+//=========================================================================== Rupay Cap keys ends==================================================================================================================================================================================================================================
+               )
         try {
             isSuccess = ipboc!!.updateRID(3, null)
             Log.d("TAG", "Clear RID :$isSuccess")

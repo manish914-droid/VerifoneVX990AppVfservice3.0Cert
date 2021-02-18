@@ -43,8 +43,7 @@ class CompleteSecondGenAc(var data: IsoDataReader, var isoData: IsoDataWriter? =
             if (tagData8a.isNotEmpty()) {
                 val ba = tagData8a.hexStr2ByteArr()
                 // rtn = EMVCallback.EMVSetTLVData(ta.toShort(), ba, ba.size)
-                logger(
-                    VFTransactionActivity.TAG,
+                logger(VFTransactionActivity.TAG,
                     "On setting ${Integer.toHexString(ta8A)} tag status = $",
                     "e"
                 )
@@ -61,7 +60,7 @@ class CompleteSecondGenAc(var data: IsoDataReader, var isoData: IsoDataWriter? =
                 val ba = tagDatatag91.hexStr2ByteArr()
                 mba.addAll(ba.asList())
                 //when checking jcb or union pay comment below(mba.addAll(tagData8a.str2ByteArr().asList())) line Only,If VISA uncomment this
-                  mba.addAll(tagData8a.str2ByteArr().asList())
+                mba.addAll(tagData8a.str2ByteArr().asList())
 
                 //rtn = EMVCallback.EMVSetTLVData(ta.toShort(), mba.toByteArray(), mba.size)
                 logger("Data:- ", "On setting ${Integer.toHexString(ta91)} tag status = $", "e")
@@ -96,40 +95,26 @@ class CompleteSecondGenAc(var data: IsoDataReader, var isoData: IsoDataWriter? =
 
         try {
             val onlineResult = Bundle()
-            onlineResult.putBoolean(
-                ConstIPBOC.inputOnlineResult.onlineResult.KEY_isOnline_boolean,
-                true
-            )
+            onlineResult.putBoolean(ConstIPBOC.inputOnlineResult.onlineResult.KEY_isOnline_boolean, true)
             if (null != resCode && resCode.isNotEmpty() && hexString2String(resCode).equals("00")) {
-                onlineResult.putString(
-                    ConstIPBOC.inputOnlineResult.onlineResult.KEY_respCode_String,
-                    "00"
-                )  //tagData8a
+                onlineResult.putString(ConstIPBOC.inputOnlineResult.onlineResult.KEY_respCode_String, "00")  //tagData8a
             } else {
-                onlineResult.putString(
-                    ConstIPBOC.inputOnlineResult.onlineResult.KEY_respCode_String,
-                    tagData8a
-                )
+                onlineResult.putString(ConstIPBOC.inputOnlineResult.onlineResult.KEY_respCode_String, tagData8a)
             }
-            onlineResult.putString(
-                ConstIPBOC.inputOnlineResult.onlineResult.KEY_authCode_String,
-                "00"
-            )
-            if (field55 != null && field55.isNotEmpty()) {
-                onlineResult.putString(
-                    ConstIPBOC.inputOnlineResult.onlineResult.KEY_field55_String,
-                    Integer.toHexString(ta91) + "0A" + Utility.byte2HexStr(mba.toByteArray()) + f72
-                ) //At least 0A length for 91
-                /*println(
-                    "Field55 value inside ---> " + Integer.toHexString(ta91) + "0A" + Utility.byte2HexStr(
-                        mba.toByteArray()
-                    ) + f72
-                )*/
-            } else {
-                onlineResult.putString(
-                    ConstIPBOC.inputOnlineResult.onlineResult.KEY_field55_String,
-                    ""
-                )
+            onlineResult.putString(ConstIPBOC.inputOnlineResult.onlineResult.KEY_authCode_String, "00")
+
+            if (field55 != null && field55.isNotEmpty() && mba.size == 8) {
+                onlineResult.putString(ConstIPBOC.inputOnlineResult.onlineResult.KEY_field55_String, Integer.toHexString(ta91) + "0A" + Utility.byte2HexStr(mba.toByteArray()) + f72)
+                  //At least 0A length for 91
+                println("Field55 value inside ---> " + Integer.toHexString(ta91) + "0A" + Utility.byte2HexStr(mba.toByteArray()) + f72)
+            }
+            else if (field55 != null && field55.isNotEmpty() && mba.size == 10) {
+                onlineResult.putString(ConstIPBOC.inputOnlineResult.onlineResult.KEY_field55_String, Integer.toHexString(ta91) + "0A"  + f72)
+                //At least 0A length for 91
+                println("Field55 value inside ---> " + Integer.toHexString(ta91) + "0A"  + f72)
+            }
+            else {
+                onlineResult.putString(ConstIPBOC.inputOnlineResult.onlineResult.KEY_field55_String, "")
             }
 
             /*println(
@@ -177,15 +162,8 @@ class CompleteSecondGenAc(var data: IsoDataReader, var isoData: IsoDataWriter? =
                         getValueOfTVRAndAID(tvrData ?: "", aidData ?: "", tsiData ?: "")
 
                     //Here we are Adding AID , TVR and TSI Data in Triple<String , String , String> to return values:-
-                    if (!TextUtils.isEmpty(aidData) && !TextUtils.isEmpty(tvrData) && !TextUtils.isEmpty(
-                            tsiData
-                        )
-                    )
-                        printData = Triple(
-                            subsequenceData.first,
-                            subsequenceData.second,
-                            subsequenceData.third
-                        )
+                    if (!TextUtils.isEmpty(aidData) && !TextUtils.isEmpty(tvrData) && !TextUtils.isEmpty(tsiData))
+                        printData = Triple(subsequenceData.first, subsequenceData.second, subsequenceData.third)
 
                     when (result) {
                         ConstOnlineResultHandler.onProccessResult.result.TC -> {
