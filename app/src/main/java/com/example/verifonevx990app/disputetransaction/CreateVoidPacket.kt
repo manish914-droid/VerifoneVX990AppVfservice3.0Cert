@@ -14,10 +14,16 @@ class CreateVoidPacket(val batch: BatchFileDataTable) : IVoidExchange {
         // packing data
         mti = Mti.DEFAULT_MTI.mti
 
-        addField(3, ProcessingCode.VOID.code)
+        if (batch.transactionType == TransactionType.REFUND.type) {
+            addField(3, ProcessingCode.VOID_REFUND.code)
+        } else {
+            addField(3, ProcessingCode.VOID.code)
+        }
+
+
         addField(4, batch.transactionalAmmount)
 
-        addField(11,  ROCProviderV2.getRoc(AppPreference.getBankCode()).toString())
+        addField(11, ROCProviderV2.getRoc(AppPreference.getBankCode()).toString())
 
         addIsoDateTime(this)
 

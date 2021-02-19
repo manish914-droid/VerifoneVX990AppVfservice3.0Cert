@@ -6,6 +6,18 @@
     android:orientation="vertical"
     android:padding="@dimen/pad_8">
 
+    <com.example.verifonevx990app.vxUtils.BHTextView
+        android:id="@+id/transType"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:textSize="@dimen/text_size_xregular"
+        app:fname="bold"
+
+        />
+
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -126,7 +138,6 @@
 
     </LinearLayout>
 
-
     <!--Buttons-->
     <LinearLayout
         android:layout_width="match_parent"
@@ -141,7 +152,6 @@
 
         <com.example.verifonevx990app.vxUtils.BHButton
             android:id="@+id/cancel_btnn"
-            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/basic_button_bg"
@@ -153,7 +163,7 @@
 
         <com.example.verifonevx990app.vxUtils.BHButton
             android:id="@+id/ok_btnn"
-            style="?android:attr/buttonBarButtonStyle"
+
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/basic_button_bg"

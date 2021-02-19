@@ -295,13 +295,13 @@ suspend fun saveToDB(spliter: List<String>) {
             }
 
         }
-        spliter[2] == "108" -> {
+      /*  spliter[2] == "108" -> {
             val emiBinTable = EmiBinTable()
             parseData(emiBinTable, spliter)
             EmiBinTable.performOperation(emiBinTable) {
                 logger("saveToDB", "ebt")
             }
-        }
+        }*/
         spliter[2] == "107" -> {
             val cardDataTable = CardDataTable()
             parseData(cardDataTable, spliter)
@@ -311,72 +311,75 @@ suspend fun saveToDB(spliter: List<String>) {
 
         }
 
-        spliter[2] == "109" -> {
-            val brandDataTable = BrandDataTable()
-            parseData(brandDataTable, spliter)
-            BrandDataTable.performOperation(brandDataTable) {
-                logger("saveToDB", "bdt")
-            }
-        }
-        spliter[2] == "110" -> {
-            val productCategoryTable = ProductCategoryTable()
-            parseData(productCategoryTable, spliter)
-            ProductCategoryTable.performOperation(productCategoryTable) {
-                logger("saveToDB", "pct")
-            }
-        }
-        spliter[2] == "111" -> {
-            val productTable = ProductTable()
-            parseData(productTable, spliter)
-            ProductTable.performOperation(productTable) {
-                logger("saveToDB", "pt")
-            }
-        }
-        spliter[2] == "112" -> {
-            val schemeTable = SchemeTable()
-            parseData(schemeTable, spliter)
-            SchemeTable.performOperation(schemeTable) {
-                logger("saveToDB", "st")
-            }
-        }
-        spliter[2] == "113" -> {
-            val tenureTable = TenureTable()
-            parseData(tenureTable, spliter)
-            TenureTable.performOperation(tenureTable) {
-                logger("saveToDB", "tt")
-            }
-        }
+        /*
+       spliter[2] == "109" -> {
+           val brandDataTable = BrandDataTable()
+           parseData(brandDataTable, spliter)
+           BrandDataTable.performOperation(brandDataTable) {
+               logger("saveToDB", "bdt")
+           }
+       }
+      spliter[2] == "110" -> {
+           val productCategoryTable = ProductCategoryTable()
+           parseData(productCategoryTable, spliter)
+           ProductCategoryTable.performOperation(productCategoryTable) {
+               logger("saveToDB", "pct")
+           }
+       }
+       spliter[2] == "111" -> {
+           val productTable = ProductTable()
+           parseData(productTable, spliter)
+           ProductTable.performOperation(productTable) {
+               logger("saveToDB", "pt")
+           }
+       }
+       spliter[2] == "112" -> {
+           val schemeTable = SchemeTable()
+           parseData(schemeTable, spliter)
+           SchemeTable.performOperation(schemeTable) {
+               logger("saveToDB", "st")
+           }
+       }
+       spliter[2] == "113" -> {
+           val tenureTable = TenureTable()
+           parseData(tenureTable, spliter)
+           TenureTable.performOperation(tenureTable) {
+               logger("saveToDB", "tt")
+           }
+       }
 
-        spliter[2] == "114" -> {
-            val emiSchemeTable = EmiSchemeTable()
-            parseData(emiSchemeTable, spliter)
-            EmiSchemeTable.performOperation(emiSchemeTable) {
-                logger("saveToDB", "est")
-            }
-        }
-        spliter[2] == "115" -> {
-            val benifitSlabTable = BenifitSlabTable()
-            parseData(benifitSlabTable, spliter)
-            BenifitSlabTable.performOperation(benifitSlabTable) {
-                logger("saveToDB", "bst")
-            }
-        }
-        spliter[2] == "116" -> {
-            val emiSchemeProductTable = EmiSchemeProductTable()
-            parseData(emiSchemeProductTable, spliter)
-            EmiSchemeProductTable.performOperation(emiSchemeProductTable) {
-                logger("saveToDB", "bst")
-            }
-        }
+       spliter[2] == "114" -> {
+           val emiSchemeTable = EmiSchemeTable()
+           parseData(emiSchemeTable, spliter)
+           EmiSchemeTable.performOperation(emiSchemeTable) {
+               logger("saveToDB", "est")
+           }
+       }
+       spliter[2] == "115" -> {
+           val benifitSlabTable = BenifitSlabTable()
+           parseData(benifitSlabTable, spliter)
+           BenifitSlabTable.performOperation(benifitSlabTable) {
+               logger("saveToDB", "bst")
+           }
+       }
+       spliter[2] == "116" -> {
+           val emiSchemeProductTable = EmiSchemeProductTable()
+           parseData(emiSchemeProductTable, spliter)
+           EmiSchemeProductTable.performOperation(emiSchemeProductTable) {
+               logger("saveToDB", "bst")
+           }
+       }
 
-        spliter[2] == "117" -> {
-            val emiSchemeGroupTable = EmiSchemeGroupTable()
-            parseData(emiSchemeGroupTable, spliter)
-            EmiSchemeGroupTable.performOperation(emiSchemeGroupTable) {
-                logger("saveToDB", "table117")
-            }
-          //  logger("Table 117", spliter.joinToString("|"))
-        }
+       spliter[2] == "117" -> {
+           val emiSchemeGroupTable = EmiSchemeGroupTable()
+           parseData(emiSchemeGroupTable, spliter)
+           EmiSchemeGroupTable.performOperation(emiSchemeGroupTable) {
+               logger("saveToDB", "table117")
+           }
+         //  logger("Table 117", spliter.joinToString("|"))
+       }
+
+     */
 
         //region=====New Tables added for HDFC=====
         spliter[2] == "201" -> {  // HDFC TPT
@@ -387,7 +390,8 @@ suspend fun saveToDB(spliter: List<String>) {
             }
         }
 
-        spliter[2] == "202" -> {   // HDFC CDT
+        // HDFC CDT
+        spliter[2] == "202" -> {
             val hdfcCdt = HdfcCdt()
             parseData(hdfcCdt, spliter)
             HdfcCdt.performOperation(hdfcCdt) {
@@ -395,9 +399,7 @@ suspend fun saveToDB(spliter: List<String>) {
             }
         }
         //endregion
-
     }
-
 }
 
 fun unzipZipedBytes(ba: ByteArray) {
@@ -1599,6 +1601,18 @@ fun chunkTnC(s: String, limit: Int = 48): List<String> {
     parts.add(str)
     return parts
 }
+
+fun getTransactionNameByTransType(transactionType: Int): String {
+    var tTyp = ""
+    for (e in TransactionType.values()) {
+        if (e.type == transactionType) {
+            tTyp = e.txnTitle
+            break
+        }
+    }
+    return tTyp
+}
+
 
 //region================================AppVersionName + AppRevisionID returning method:-
 fun getAppVersionNameAndRevisionID(): String {

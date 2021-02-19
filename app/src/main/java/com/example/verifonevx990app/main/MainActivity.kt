@@ -119,9 +119,11 @@ class MainActivity : BaseActivity(), IFragmentRequest,
         decideHome()
 
         Handler().postDelayed({
-                VFService.setAidRid(addPad("000000" ?: "", "0", 12, true),
-                    addPad("000000" ?: "", "0", 12, true))
-            }, 2000)
+            VFService.setAidRid(
+                addPad("000000", "0", 12, true),
+                addPad("000000", "0", 12, true)
+            )
+        }, 2000)
 
         refreshToolbarLogos(this)
         Log.d("AppVerAndRev:- ", getAppVersionNameAndRevisionID())
@@ -1092,7 +1094,9 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                 if (checkInternetConnection()) {
                     val bundle = Bundle()
                     bundle.putSerializable("type", action)
-                    if (checkHDFCTPTFieldsBitOnOff(TransactionType.VOID)) {
+                    //TODO,  In live build code set ---> checkHDFCTPTFieldsBitOnOff(TransactionType.VOID) in if condition
+                    // setting hardcoded true is for only test purpose.
+                    if (true) {
                         verifyAdminPasswordFromHDFCTPT(this) {
                             transactFragment(VoidTransactionFragment().apply {
                                 arguments = Bundle().apply {
@@ -1237,6 +1241,31 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                     addPad(tpt?.minCtlsTransAmt ?: "", "0", 12, true),
                     addPad(tpt?.maxCtlsTransAmt ?: "", "0", 12, true)
                 )
+            }
+
+            EDashboardItem.VOID_REFUND -> {
+                if (!AppPreference.getBoolean(PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString()) &&
+                    !AppPreference.getBoolean(PrefConstant.INSERT_PPK_DPK.keyName.toString()) &&
+                    !AppPreference.getBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString())
+                ) {
+                    if (checkInternetConnection()) {
+                        transactFragment(VoidOfRefund()
+                            .apply {
+                                arguments = Bundle().apply {
+                                    putSerializable("trans_type", TransactionType.VOID_REFUND)
+                                    putSerializable("type", action)
+                                    putString(
+                                        INPUT_SUB_HEADING,
+                                        SubHeaderTitle.VOID_REFUND_SUBHEADER_VALUE.title
+                                    )
+                                }
+                            })
+                    } else {
+                        VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                    }
+                } else {
+                    checkAndPerformOperation()
+                }
             }
 
             else -> showToast("To be implemented...")

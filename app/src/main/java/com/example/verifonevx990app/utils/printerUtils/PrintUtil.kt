@@ -25,6 +25,7 @@ import com.example.verifonevx990app.realmtables.*
 import com.example.verifonevx990app.transactions.EBenefitCalculation
 import com.example.verifonevx990app.transactions.IssuerDataModel
 import com.example.verifonevx990app.transactions.TenureDataModel
+import com.example.verifonevx990app.utils.MoneyUtil
 import com.example.verifonevx990app.utils.printerUtils.PrinterFonts.initialize
 import com.example.verifonevx990app.vxUtils.*
 import com.vfi.smartpos.deviceservice.aidl.IPrinter
@@ -512,29 +513,42 @@ class PrintUtil(context: Context?) {
                 }
 
             if (isTipAllowed && tipAmount.toDouble() > 0) {
-                saleAmount = "%.2f".format((saleAmount.toDouble() - tipAmount.toDouble()))
+                if (printerReceiptData.transactionType != TransactionType.TIP_SALE.type) {
+                    saleAmount = "%.2f".format((saleAmount.toDouble() - tipAmount.toDouble()))
+                }
             }
-
 
             when (printerReceiptData.transactionType) {
                 TransactionType.SALE_WITH_CASH.type -> {
                     printer?.addTextInLine(
                         fmtAddTextInLine,
-                        "SALE AMOUNT  :    Rs  $saleAmount",
+                        "SALE AMOUNT  :    Rs  ${
+                            MoneyUtil.fen2yuan(
+                                saleAmount.toDouble().toLong()
+                            )
+                        }",
                         "",
                         "",
                         PrinterConfig.addTextInLine.mode.Devide_flexible
                     )
                     printer?.addTextInLine(
                         fmtAddTextInLine,
-                        "CASH AMOUNT  :    Rs  $cashAmount",
+                        "CASH AMOUNT  :    Rs  ${
+                            MoneyUtil.fen2yuan(
+                                cashAmount.toDouble().toLong()
+                            )
+                        }",
                         "",
                         "",
                         PrinterConfig.addTextInLine.mode.Devide_flexible
                     )
                     printer?.addTextInLine(
                         fmtAddTextInLine,
-                        "TOTAL AMOUNT  :    Rs  $totalAmount",
+                        "TOTAL AMOUNT  :    Rs  ${
+                            MoneyUtil.fen2yuan(
+                                totalAmount.toDouble().toLong()
+                            )
+                        }",
                         "",
                         "",
                         PrinterConfig.addTextInLine.mode.Devide_flexible
@@ -543,12 +557,15 @@ class PrintUtil(context: Context?) {
                 TransactionType.SALE.type -> {
                     printer?.addTextInLine(
                         fmtAddTextInLine,
-                        "SALE AMOUNT  :    Rs  $saleAmount",
+                        "SALE AMOUNT  :    Rs  ${
+                            MoneyUtil.fen2yuan(
+                                saleAmount.toDouble().toLong()
+                            )
+                        }",
                         "",
                         "",
                         PrinterConfig.addTextInLine.mode.Devide_flexible
                     )
-
                     if (isTipAllowed && printerReceiptData.tipAmmount.toDouble() <= 0) {
                         printer?.addTextInLine(
                             fmtAddTextInLine,
@@ -560,7 +577,11 @@ class PrintUtil(context: Context?) {
                     } else if (isTipAllowed && tipAmount.toDouble() > 0) {
                         printer?.addTextInLine(
                             fmtAddTextInLine,
-                            "TIP AMOUNT  :    Rs  $tipAmount",
+                            "TIP AMOUNT  :    Rs  ${
+                                MoneyUtil.fen2yuan(
+                                    tipAmount.toDouble().toLong()
+                                )
+                            }",
                             "",
                             "",
                             PrinterConfig.addTextInLine.mode.Devide_flexible
@@ -568,7 +589,11 @@ class PrintUtil(context: Context?) {
                     }
                     printer?.addTextInLine(
                         fmtAddTextInLine,
-                        "TOTAL AMOUNT  :    Rs  $totalAmount",
+                        "TOTAL AMOUNT  :    Rs  ${
+                            MoneyUtil.fen2yuan(
+                                totalAmount.toDouble().toLong()
+                            )
+                        }",
                         "",
                         "",
                         PrinterConfig.addTextInLine.mode.Devide_flexible
@@ -577,21 +602,29 @@ class PrintUtil(context: Context?) {
                 TransactionType.TIP_SALE.type -> {
                     printer?.addTextInLine(
                         fmtAddTextInLine,
-                        "SALE AMOUNT  :    Rs  $saleAmount",
+                        "SALE AMOUNT  :    Rs  ${
+                            MoneyUtil.fen2yuan(
+                                saleAmount.toDouble().toLong()
+                            )
+                        }",
                         "",
                         "",
                         PrinterConfig.addTextInLine.mode.Devide_flexible
                     )
                     printer?.addTextInLine(
                         fmtAddTextInLine,
-                        "TIP AMOUNT  :    Rs  $tipAmount",
+                        "TIP AMOUNT  :    Rs  ${MoneyUtil.fen2yuan(tipAmount.toDouble().toLong())}",
                         "",
                         "",
                         PrinterConfig.addTextInLine.mode.Devide_flexible
                     )
                     printer?.addTextInLine(
                         fmtAddTextInLine,
-                        "TOTAL AMOUNT  :    Rs  $totalAmount",
+                        "TOTAL AMOUNT  :    Rs  ${
+                            MoneyUtil.fen2yuan(
+                                totalAmount.toDouble().toLong()
+                            )
+                        }",
                         "",
                         "",
                         PrinterConfig.addTextInLine.mode.Devide_flexible
@@ -600,21 +633,27 @@ class PrintUtil(context: Context?) {
                 else -> {
                     printer?.addTextInLine(
                         fmtAddTextInLine,
-                        "BASE AMOUNT  :    Rs  $saleAmount",
+                        "BASE AMOUNT  :    Rs  ${
+                            MoneyUtil.fen2yuan(
+                                totalAmount.toDouble().toLong()
+                            )
+                        }",
                         "",
                         "",
                         PrinterConfig.addTextInLine.mode.Devide_flexible
                     )
                     printer?.addTextInLine(
                         fmtAddTextInLine,
-                        "TOTAL AMOUNT  :    Rs  $totalAmount",
+                        "TOTAL AMOUNT  :    Rs  ${
+                            MoneyUtil.fen2yuan(
+                                totalAmount.toDouble().toLong()
+                            )
+                        }",
                         "",
                         "",
                         PrinterConfig.addTextInLine.mode.Devide_flexible
                     )
                 }
-
-
             }
 
             printSeperator(format)

@@ -214,6 +214,7 @@ class VerifoneApp : Application() {
         Realm.setDefaultConfiguration(
             RealmConfiguration.Builder()
                 .name("verifoneMpos.db")
+                .allowWritesOnUiThread(true)
                 .encryptionKey(key)
                 .deleteRealmIfMigrationNeeded()
                 .build()

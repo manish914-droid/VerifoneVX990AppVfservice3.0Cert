@@ -42,6 +42,7 @@ import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.*
 
+//Todo  Unused Class... Check And delete it
 object VFEmv : ISO8583(), OnXmlDataParsed {
 
 
@@ -127,7 +128,6 @@ object VFEmv : ISO8583(), OnXmlDataParsed {
         this.createNormalPackage(mIsoWriter, transactionalAmmount, cashBackAmount,mXmlModel)
 
     }
-
 
 
     fun initializeEMV(vfIEMV: IEMV?, vfPinPad: IPinpad?,
@@ -216,20 +216,18 @@ object VFEmv : ISO8583(), OnXmlDataParsed {
                     val a = track2.indexOf('D')
                     if (a > 0) {
                         track22 = track2.substring(0, a)
-                    }
-                    else {
+                    } else {
                         val a = track2.indexOf('=')
 
                         if (a > 0) {
                             track22 = track2.substring(0, a)
                         }
                     }
-                       try {
-                           mIsoWriter?.panNumber = track22!!
-                       }
-                       catch (ex : Exception){
-                           ex.printStackTrace()
-                       }
+                    try {
+                        mIsoWriter?.panNumber = track22!!
+                    } catch (ex : Exception){
+                        ex.printStackTrace()
+                    }
 
 
                     cardDataTable = track22?.let { CardDataTable.selectFromCardDataTable(it) }
@@ -269,12 +267,11 @@ object VFEmv : ISO8583(), OnXmlDataParsed {
                 isNoPin = isOnlinePin
                 if(isNoPin as Boolean && isOnlinePin){
                     TransactionTypeValues.saleType = TransactionTypeValues.SALETYPE.EMV_POS_ENTRY_PIN
-                }
-                else {
+                } else {
                     TransactionTypeValues.saleType = TransactionTypeValues.SALETYPE.EMV_POS_ENTRY_OFFLINE_PIN
                 }
                 //Here we are inflating PinPad on App UI:-
-            //    VFService.openPinPad(isoPackageWriter,isOnlinePin)
+                //    VFService.openPinPad(isoPackageWriter,isOnlinePin)
 
             }
 
@@ -333,7 +330,6 @@ object VFEmv : ISO8583(), OnXmlDataParsed {
                 onlineRequest.run()
                 Log.d(MainActivity.TAG, "online request finished")
                 // import the online result
-
 
 
             }
@@ -521,7 +517,6 @@ object VFEmv : ISO8583(), OnXmlDataParsed {
         this.createNormalPackage(mIsoWriter, transactionalAmmount, cashBackAmount, mXmlModel)
 
     }
-
 
 
     val mField55 = intArrayOf(
@@ -1095,7 +1090,7 @@ object VFEmv : ISO8583(), OnXmlDataParsed {
 
                 if (transactionType != TransactionTypeValues.PRE_AUTH_COMPLETE) {
                     isoPackageWriter.posEntryValue ="523" //(mag without pin)    //"552"(EMV without pin)
-                            /*TransactionTypeValues.getPosValue().toString()*/  //911 in case of Contacless without pin // 523 //(mag without pin)
+                    /*TransactionTypeValues.getPosValue().toString()*/  //911 in case of Contacless without pin // 523 //(mag without pin)
                     packageWriterModel!!.posEntryValue = isoPackageWriter.posEntryValue
                     isoPackageWriter.setFieldValues("22", isoPackageWriter.posEntryValue ?: "")
                 }
@@ -1645,12 +1640,13 @@ object VFEmv : ISO8583(), OnXmlDataParsed {
     }
 
     //Below method is a wrapper method on checkReversal method for the settlement case:-
-     fun checkReversalForSettlement(isSettlementReversal : Boolean = false , settlementByteArray: ByteArray){
+    fun checkReversalForSettlement(isSettlementReversal : Boolean = false , settlementByteArray: ByteArray){
         this.settlementReversalStatus = isSettlementReversal
         this.settlementByteArrayValue = settlementByteArray
         this.packageWriterModel = checkReversal()
         isoPackageWriterForReversal = IsoPackageWriter(this.context, this)
     }
+
     //Below method is to check Reversal:-
     private fun checkReversal(): PackageWriterModel? {
         val gson = Gson()

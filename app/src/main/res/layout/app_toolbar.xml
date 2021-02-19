@@ -43,7 +43,11 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/pad_4"
                     android:layout_marginEnd="@dimen/pad_16"
-
+                    android:background="@drawable/bonushub_logo_round"
+                    android:paddingStart="@dimen/pad_4"
+                    android:paddingTop="@dimen/pad_2"
+                    android:paddingEnd="@dimen/pad_4"
+                    android:paddingBottom="@dimen/pad_2"
                     android:contentDescription="@string/app_name"
 
                     android:src="@drawable/ic_hdfcsvg"
@@ -61,7 +65,6 @@
                     android:paddingEnd="@dimen/pad_4"
                     android:paddingBottom="@dimen/pad_2"
                     android:src="@drawable/bonushub_image"
-
                     android:textSize="@dimen/text_size_xregular" />
             </LinearLayout>
 

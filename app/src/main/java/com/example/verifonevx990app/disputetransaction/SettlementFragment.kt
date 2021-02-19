@@ -28,6 +28,7 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class SettlementFragment : Fragment(R.layout.activity_settlement_view) {
 
@@ -94,9 +95,11 @@ class SettlementFragment : Fragment(R.layout.activity_settlement_view) {
                                                                 settlementByteArray
                                                             ) {
                                                                 if (!it)
-                                                                    enableDisableSettlementButton(
-                                                                        true
-                                                                    )
+                                                                    runBlocking(Dispatchers.Main) {
+                                                                        enableDisableSettlementButton(
+                                                                            true
+                                                                        )
+                                                                    }
                                                             }
                                                         } catch (ex: Exception) {
                                                             (activity as MainActivity).hideProgress()
@@ -317,6 +320,7 @@ class SettlementFragment : Fragment(R.layout.activity_settlement_view) {
 
     //region==============================method to enable/disable settlement Floating button:-
     private fun enableDisableSettlementButton(isEnable: Boolean) {
+
         settlement_batch_btn?.isEnabled = isEnable
     }
     //endregion

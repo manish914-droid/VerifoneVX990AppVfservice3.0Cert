@@ -17,7 +17,6 @@ import com.example.verifonevx990app.realmtables.BatchFileDataTable
 import com.example.verifonevx990app.realmtables.IssuerParameterTable
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
 import com.example.verifonevx990app.utils.HexStringConverter
-import com.example.verifonevx990app.utils.MoneyUtil
 import com.example.verifonevx990app.utils.printerUtils.EPrintCopyType
 import com.example.verifonevx990app.utils.printerUtils.PrintUtil
 import com.example.verifonevx990app.utils.printerUtils.checkForPrintReversalReceipt
@@ -74,6 +73,12 @@ class TipAdjustFragment : Fragment() {
             }
             val batch = BatchFileDataTable.selectAnyReceipts(invoice)
             if (batch != null && amount != 0f && batch.transactionType == TransactionType.SALE.type) {
+                if (batch.tipAmmount.toLong() > 0L) {
+                    val msg = "Tip is already adjusted"
+                    VFService.showToast(msg)
+                    return
+                }
+
                 val maxTipPercent =
                     if (tpt?.maxTipPercent?.isEmpty() == true) 0f else (tpt?.maxTipPercent?.toFloat())?.div(
                         100
@@ -98,7 +103,6 @@ class TipAdjustFragment : Fragment() {
                 } else { // percent tip check is applied
                     val saleAmt = batch.transactionalAmmount.toFloat() / 100
                     //   val per = amount * 100 / saleAmt
-
                     //   var perc=maxTipPercent * saleAmt
                     // Converting percent to decimal:
                     val maxAmountTip = (maxTipPercent / 100) * saleAmt
@@ -159,14 +163,12 @@ class TipAdjustFragment : Fragment() {
                      batch.totalAmmount = (batch.transactionalAmmount.toLong() + tip).toString()
                      batch.transactionalAmmount = batch.totalAmmount
  */
-                    batch.baseAmmount = MoneyUtil.fen2yuan(batch.transactionalAmmount.toLong())
-                    batch.tipAmmount = MoneyUtil.fen2yuan(tip).toString()
-                    batch.totalAmmount =
-                        MoneyUtil.fen2yuan((batch.transactionalAmmount.toLong() + tip)).toString()
-
+                    // Todo needs to check this.....
+                    batch.baseAmmount = (batch.transactionalAmmount.toString())
+                    batch.tipAmmount = (tip).toString()
+                    batch.totalAmmount = (batch.transactionalAmmount.toLong() + tip).toString()
 
                     //     batch.aqrRefNo = resp.isoMap[31]?.parseRaw2String() ?: ""
-
                     /*RRN -->37
                     Auth code--> 38
                     */
@@ -177,13 +179,22 @@ class TipAdjustFragment : Fragment() {
                     batch.authCode = (responseIsoData.isoMap[38]?.parseRaw2String().toString())
 
                     batch.roc = ROCProviderV2.getRoc(AppPreference.getBankCode()).toString()
-                    ROCProviderV2.incrementFromResponse(ROCProviderV2.getRoc(AppPreference.getBankCode()).toString(), AppPreference.getBankCode())
-
+                    ROCProviderV2.incrementFromResponse(
+                        ROCProviderV2.getRoc(AppPreference.getBankCode()).toString(),
+                        AppPreference.getBankCode()
+                    )
                     batch.transactionType = TransactionType.TIP_SALE.type
                     BatchFileDataTable.performOperation(batch)
-                   /* GlobalScope.launch(Dispatchers.Main){
-                        context.showProgress("Printing")
-                    }*/
+
+// Saving for last success report
+                    val lastSuccessReceiptData = Gson().toJson(batch)
+                    AppPreference.saveString(
+                        AppPreference.LAST_SUCCESS_RECEIPT_KEY,
+                        lastSuccessReceiptData
+                    )
+                    /* GlobalScope.launch(Dispatchers.Main){
+                         context.showProgress("Printing")
+                     }*/
                     PrintUtil(context).startPrinting(
                         batch, EPrintCopyType.MERCHANT,
                         context

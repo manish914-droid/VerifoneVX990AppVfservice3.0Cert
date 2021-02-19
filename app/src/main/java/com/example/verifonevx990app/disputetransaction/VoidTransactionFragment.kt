@@ -41,7 +41,11 @@ class VoidTransactionFragment : Fragment() {
     private var voidRefundBT: BHButton? = null
     private var binding: FragmentVoidRefundViewBinding? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         // Inflate the layout for this fragment
         binding = FragmentVoidRefundViewBinding.inflate(inflater, container, false)
         return binding?.root
@@ -70,7 +74,7 @@ class VoidTransactionFragment : Fragment() {
                     if (invoiceNumberET?.text.isNullOrBlank()) {
                         VFService.showToast("Enter Invoice")
                     } else {
-                        voidRefundBT?.isEnabled=false
+                        voidRefundBT?.isEnabled = false
                         showConfirmation(invoiceNumberET?.text.toString())
                     }
                 }
@@ -82,7 +86,8 @@ class VoidTransactionFragment : Fragment() {
     private fun showConfirmation(invoice: String) {
         var voidData: BatchFileDataTable? = null
         GlobalScope.launch {
-            val bat = BatchFileDataTable.selectVoidTransSaleDataByInvoice(invoiceWithPadding(invoice))
+            val bat =
+                BatchFileDataTable.selectVoidTransSaleDataByInvoice(invoiceWithPadding(invoice))
             try {
                 voidData = bat.first { it?.invoiceNumber?.toLong() == invoice.toLong() }
             } catch (ex: Exception) {
@@ -94,7 +99,7 @@ class VoidTransactionFragment : Fragment() {
                 }
             else {
                 withContext(Dispatchers.Main) {
-                    voidRefundBT?.isEnabled=true
+                    voidRefundBT?.isEnabled = true
                 }
                 VFService.showToast(getString(R.string.no_data_found))
             }
@@ -113,7 +118,8 @@ class VoidTransactionFragment : Fragment() {
             ViewGroup.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.WRAP_CONTENT
         )
-
+        val transactionName = "VOID " + getTransactionNameByTransType(voidData.transactionType)
+        dialog.findViewById<BHTextView>(R.id.transType)?.text = transactionName
         dialog.findViewById<BHTextView>(R.id.dateET)?.text = voidData.transactionDate
 
         val time = voidData.time
@@ -132,13 +138,13 @@ class VoidTransactionFragment : Fragment() {
         dialog.findViewById<BHTextView>(R.id.tidET)?.text = voidData.tid
         dialog.findViewById<BHTextView>(R.id.invoiceET)?.text =
             invoiceWithPadding(voidData.invoiceNumber)
-        var amt = voidData.totalAmmount.toFloat()
-        if (voidData.tipAmmount == "") {
-            dialog.findViewById<BHTextView>(R.id.amountTV)?.text = voidData.totalAmmount
-        } else {
-            amt /= 100
-            dialog.findViewById<BHTextView>(R.id.amountTV)?.text = "%.2f".format(amt)
-        }
+        val amt = voidData.totalAmmount.toFloat() / 100f
+        /* if (voidData.tipAmmount.toLong() <=0L) {
+             dialog.findViewById<BHTextView>(R.id.amountTV)?.text = voidData.totalAmmount
+         } else {*/
+        //   amt /= 100
+        dialog.findViewById<BHTextView>(R.id.amountTV)?.text = "%.2f".format(amt)
+        //  }
         dialog.findViewById<Button>(R.id.cancel_btnn).setOnClickListener {
             voidRefundBT?.isEnabled = true
             dialog.dismiss()
@@ -152,6 +158,7 @@ class VoidTransactionFragment : Fragment() {
     }
 
     private fun onContinueClicked(voidData: BatchFileDataTable) {
+        //Sync Reversal
         if (!TextUtils.isEmpty(AppPreference.getString(AppPreference.GENERIC_REVERSAL_KEY))) {
             activity?.runOnUiThread { (activity as MainActivity).showProgress(getString(R.string.reversal_data_sync)) }
             SyncReversalToHost(AppPreference.getReversal()) { isSyncToHost, transMsg ->
@@ -161,11 +168,12 @@ class VoidTransactionFragment : Fragment() {
                     onContinueClicked(voidData)
                 } else {
                     GlobalScope.launch(Dispatchers.Main) {
-                       // VFService.showToast(transMsg)
+                        // VFService.showToast(transMsg)
                     }
                 }
             }
         } else {
+            //Sync Main Transaction(VOID transaction)
             if (TextUtils.isEmpty(AppPreference.getString(AppPreference.GENERIC_REVERSAL_KEY))) {
                 GlobalScope.launch {
                     delay(1000)
@@ -173,12 +181,13 @@ class VoidTransactionFragment : Fragment() {
                         activity as MainActivity, voidData
                     ) { code, respnosedatareader, msg ->
                         GlobalScope.launch(Dispatchers.Main) {
-                            voidRefundBT?.isEnabled=true
+                            voidRefundBT?.isEnabled = true
                             when (code) {
                                 0 -> {
                                     if (msg.isNotEmpty()) Toast.makeText(
                                         activity as Context,
-                                        respnosedatareader?.isoMap?.get(58)?.parseRaw2String().toString(),
+                                        respnosedatareader?.isoMap?.get(58)?.parseRaw2String()
+                                            .toString(),
                                         Toast.LENGTH_SHORT
                                     ).show()
                                     ROCProviderV2.incrementFromResponse(
@@ -223,7 +232,12 @@ class VoidTransactionFragment : Fragment() {
                                                                             it
                                                                         )*/
 
-                                            voidData.transactionType = TransactionType.VOID.type
+                                            if (voidData.transactionType == TransactionType.REFUND.type) {
+                                                voidData.transactionType =
+                                                    TransactionType.VOID_REFUND.type
+                                            } else {
+                                                voidData.transactionType = TransactionType.VOID.type
+                                            }
                                             //   voidData.isRefundSale=false
                                             //   (activity as MainActivity).showProgress()
                                             //    BatchFileDataTable.updateVoidRefundStatus(voidData.invoiceNumber)
@@ -241,6 +255,7 @@ class VoidTransactionFragment : Fragment() {
                                                     .toString(),
                                                 AppPreference.getBankCode()
                                             )
+
                                             BatchFileDataTable.performOperation(voidData)
 
                                             // Saving for Last Success Receipt
@@ -273,7 +288,7 @@ class VoidTransactionFragment : Fragment() {
                                     }
 
                                 }
-                                2->{
+                                2 -> {
                                     checkForPrintReversalReceipt(activity) {
 
                                     }
@@ -287,7 +302,11 @@ class VoidTransactionFragment : Fragment() {
         }
     }
 
-    internal class VoidHelper(val context: Activity, val batch: BatchFileDataTable, private val callback: (Int, IsoDataReader?, String) -> Unit) {
+    internal class VoidHelper(
+        val context: Activity,
+        val batch: BatchFileDataTable,
+        private val callback: (Int, IsoDataReader?, String) -> Unit
+    ) {
         companion object
 
         val TAG = VoidHelper::class.java.simpleName
@@ -313,48 +332,58 @@ class VoidTransactionFragment : Fragment() {
 
             if (TextUtils.isEmpty(AppPreference.getString(AppPreference.GENERIC_REVERSAL_KEY))) {
                 //  (context as MainActivity).showProgress((context).getString(R.string.please_wait_offline_sale_sync))
-                SyncVoidTransactionToHost(transactionISOByteArray, cardProcessedDataModal = CardProcessedDataModal()) { syncStatus, responseCode, transactionMsg, printExtraData ->
+                SyncVoidTransactionToHost(
+                    transactionISOByteArray,
+                    cardProcessedDataModal = CardProcessedDataModal()
+                ) { syncStatus, responseCode, transactionMsg, printExtraData ->
                     (context as MainActivity).hideProgress()
-                    if(syncStatus) {
+                    if (syncStatus) {
                         if (syncStatus && responseCode == "00") {
                             try {
-                                val responseIsoData: IsoDataReader = readIso(transactionMsg.toString(), false)
+                                val responseIsoData: IsoDataReader =
+                                    readIso(transactionMsg.toString(), false)
                                 batch.isVoid = true
                                 //   batch.isChecked = false
                                 AppPreference.clearReversal()
-                                callback(1, responseIsoData, responseIsoData.isoMap[39]?.parseRaw2String().toString())
-                                }
-                            catch (ex: Exception){
+                                callback(
+                                    1,
+                                    responseIsoData,
+                                    responseIsoData.isoMap[39]?.parseRaw2String().toString()
+                                )
+                            } catch (ex: Exception) {
                                 ex.printStackTrace()
                                 callback(1, null, "")
                             }
                         } else if (syncStatus && responseCode != "00") {
                             GlobalScope.launch(Dispatchers.Main) {
-                          //      VFService.showToast("$responseCode ------> $transactionMsg")
+                                //      VFService.showToast("$responseCode ------> $transactionMsg")
                                 try {
-                                    val responseIsoData: IsoDataReader = readIso(transactionMsg.toString(), false)
-                                    callback(0, responseIsoData, responseIsoData.isoMap[39]?.parseRaw2String().toString())
+                                    val responseIsoData: IsoDataReader =
+                                        readIso(transactionMsg.toString(), false)
+                                    callback(
+                                        0,
+                                        responseIsoData,
+                                        responseIsoData.isoMap[39]?.parseRaw2String().toString()
+                                    )
                                     AppPreference.clearReversal()
-                                    }
-                                catch (ex: Exception){
+                                } catch (ex: Exception) {
                                     ex.printStackTrace()
                                     callback(1, null, "")
                                 }
                             }
-                        }else{
+                        } else {
                             (context).runOnUiThread {
                                 (context).hideProgress()
                                 callback(2, null, "")
                             }
                         }
-                    }
-                    else {
+                    } else {
                         (context).runOnUiThread {
                             (context).hideProgress()
                             callback(2, null, "")
                         }
                         //  val responseIsoData: IsoDataReader = readIso(transactionMsg, false)
-                     //   callback(0, IsoDataReader(), "")
+                        //   callback(0, IsoDataReader(), "")
                     }
                 }
             }
@@ -366,7 +395,7 @@ class VoidTransactionFragment : Fragment() {
     private fun syncOfflineSaleAndAskAutoSettlement(autoSettleCode: String) {
         val offlineSaleData = BatchFileDataTable.selectOfflineSaleBatchData()
         if (offlineSaleData.size > 0) {
-            ( activity as BaseActivity).showProgress(getString(R.string.please_wait_offline_sale_sync))
+            (activity as BaseActivity).showProgress(getString(R.string.please_wait_offline_sale_sync))
             SyncOfflineSaleToHost(
                 activity as BaseActivity,
                 autoSettleCode
@@ -403,7 +432,8 @@ class VoidTransactionFragment : Fragment() {
                         } else {
                             startActivity(
                                 Intent((activity as BaseActivity), MainActivity::class.java).apply {
-                                    flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                    flags =
+                                        Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                 })
                         }
                     }
@@ -413,10 +443,13 @@ class VoidTransactionFragment : Fragment() {
                         //VFService.showToast(validationMsg)
                         (activity as BaseActivity).alertBoxWithAction(null, null,
                             getString(R.string.offline_sale_uploading),
-                            getString(R.string.fail)+validationMsg,
+                            getString(R.string.fail) + validationMsg,
                             false, getString(R.string.positive_button_ok), {
                                 startActivity(
-                                    Intent((activity as BaseActivity), MainActivity::class.java).apply {
+                                    Intent(
+                                        (activity as BaseActivity),
+                                        MainActivity::class.java
+                                    ).apply {
                                         flags =
                                             Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                     })

@@ -30,7 +30,7 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 enum class EOptionGroup {
     FUNCTIONS, REPORT, NONE
@@ -533,8 +533,12 @@ SubMenuFragment : Fragment(), IOnSubMenuItemSelectListener {
 
                                                 ROCProviderV2.saveBatchInPreference(batchList)
                                                 //Delete All BatchFile Data from Table after Settlement:-
-                                                runBlocking(Dispatchers.IO) { deleteBatchTableDataInDB() }
-                                                VFService.showToast("Batch Deleted Successfully")
+                                                GlobalScope.launch(Dispatchers.IO) {
+                                                    deleteBatchTableDataInDB()
+                                                    withContext(Dispatchers.Main) {
+                                                        VFService.showToast("Batch Deleted Successfully")
+                                                    }
+                                                }
                                             }, {
 
                                             }

@@ -36,7 +36,8 @@ class CreateSettlementPacket(private var settlementProcessingCode: String? = nul
             }
 
             //ROC will not go in case of AMEX on all PORT:-
-            //addField(11, settlementRoc.toString())
+            // Sending ROC in case of HDFC ........
+            addField(11, ROCProviderV2.getRoc(AppPreference.getBankCode()).toString())
 
             //adding nii
             addField(24, Nii.DEFAULT.nii)

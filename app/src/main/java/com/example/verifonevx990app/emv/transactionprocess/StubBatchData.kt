@@ -10,7 +10,6 @@ import com.example.verifonevx990app.realmtables.BatchFileDataTable
 import com.example.verifonevx990app.realmtables.CardDataTable
 import com.example.verifonevx990app.realmtables.IssuerParameterTable
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
-import com.example.verifonevx990app.utils.MoneyUtil
 import com.example.verifonevx990app.utils.TransactionTypeValues
 import com.example.verifonevx990app.vxUtils.*
 import com.google.gson.Gson
@@ -67,8 +66,7 @@ class StubBatchData(
         batchFileData.destinationNII = Nii.DEFAULT.nii
         batchFileData.mti = Mti.DEFAULT_MTI.mti
         batchFileData.transactionType = transactionType
-        batchFileData.transactionalAmmount =
-            cardProcessedDataModal.getTransactionAmount().toString()
+
         batchFileData.emiTransactionAmount =
             cardProcessedDataModal.getEmiTransactionAmount().toString()
         batchFileData.nii = Nii.DEFAULT.nii
@@ -142,6 +140,7 @@ class StubBatchData(
         //batchFileData.indicator = isoPackageWriter.indicator (Need to Discuss by Ajay)
         batchFileData.field55Data = cardProcessedDataModal.getFiled55() ?: ""
 
+
         // setting base amount
         // ( getOtherAmount is not zero in CAsh at pos And sale with Cash type other then this it will be zero)
 
@@ -154,18 +153,24 @@ class StubBatchData(
                 baseAmount = cardProcessedDataModal.getSaleAmount() ?: 0L
                 cashAmount = cardProcessedDataModal.getOtherAmount() ?: 0L
                 totalAmount = cardProcessedDataModal.getTransactionAmount() ?: 0L
-                batchFileData.baseAmmount = MoneyUtil.fen2yuan(baseAmount).toString()
-                batchFileData.cashBackAmount = MoneyUtil.fen2yuan(cashAmount).toString()
-                batchFileData.totalAmmount = MoneyUtil.fen2yuan(totalAmount).toString()
+                batchFileData.baseAmmount = (baseAmount).toString()
+                batchFileData.cashBackAmount = (cashAmount).toString()
+                batchFileData.totalAmmount = (totalAmount).toString()
+                // this is used in settlement and iso packet amount
+                batchFileData.transactionalAmmount =
+                    cardProcessedDataModal.getTransactionAmount().toString()
             }
             else -> {
                 baseAmount = cardProcessedDataModal.getTransactionAmount() ?: 0L
                 totalAmount = cardProcessedDataModal.getTransactionAmount() ?: 0L
                 saleWithTipAmount = cardProcessedDataModal.getTipAmount() ?: 0L
-                batchFileData.baseAmmount = MoneyUtil.fen2yuan(baseAmount).toString()
-                batchFileData.tipAmmount = MoneyUtil.fen2yuan(saleWithTipAmount).toString()
-                batchFileData.cashBackAmount = MoneyUtil.fen2yuan(cashAmount).toString()
-                batchFileData.totalAmmount = MoneyUtil.fen2yuan(totalAmount).toString()
+                batchFileData.baseAmmount = (baseAmount).toString()
+                batchFileData.tipAmmount = (saleWithTipAmount).toString()
+                batchFileData.cashBackAmount = (cashAmount).toString()
+                batchFileData.totalAmmount = (totalAmount).toString()
+                // this is used in settlement and iso packet amount
+                batchFileData.transactionalAmmount =
+                    cardProcessedDataModal.getTransactionAmount().toString()
             }
         }
 
