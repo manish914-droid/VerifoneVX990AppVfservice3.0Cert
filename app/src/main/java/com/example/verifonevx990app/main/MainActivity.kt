@@ -1098,24 +1098,24 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                     // setting hardcoded true is for only test purpose.
                     if (true) {
                         verifyAdminPasswordFromHDFCTPT(this) {
-                            transactFragment(VoidTransactionFragment().apply {
-                                arguments = Bundle().apply {
-                                    putSerializable("type", action)
-                                    putString(
-                                        INPUT_SUB_HEADING,
-                                        SubHeaderTitle.VOID_SUBHEADER_VALUE.title
-                                    )
-                                }
-                            })
+                            if (it) {
+                                transactFragment(VoidTransactionFragment().apply {
+                                    arguments = Bundle().apply {
+                                        putSerializable("type", action)
+                                        putString(
+                                            INPUT_SUB_HEADING,
+                                            SubHeaderTitle.VOID_SUBHEADER_VALUE.title
+                                        )
+                                    }
+                                })
+                            }
                         }
                     } else {
-                        VFService.showToast("VOID NOT ALLOWEED...!!")
+                        VFService.showToast("VOID NOT ALLOWED...!!")
                     }
                 } else {
                     VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
                 }
-
-
             }
 
             EDashboardItem.REFUND -> {
@@ -1601,7 +1601,15 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
                                 //Added by Manish Kumar
                                 //Reset Roc and Invoice by 1.
-                                ROCProviderV2.resetRoc(AppPreference.getBankCode())
+                                //  ROCProviderV2.resetRoc(AppPreference.getBankCode())
+
+                                // Added by lucky
+                                //Now ROC is not reset we increment and use it
+                                ROCProviderV2.incrementFromResponse(
+                                    ROCProviderV2.getRoc(
+                                        AppPreference.getBankCode()
+                                    ).toString(), AppPreference.getBankCode()
+                                )
 
                                 //Added by Ajay Thakur
                                 TerminalParameterTable.updateTerminalDataInvoiceNumber("0")
@@ -1731,7 +1739,16 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
                                     //Added by Manish Kumar
                                     //Reset Roc and Invoice by 1.
-                                    ROCProviderV2.resetRoc(AppPreference.getBankCode())
+                                    //   ROCProviderV2.resetRoc(AppPreference.getBankCode())
+
+                                    // Added by lucky
+                                    //Now ROC is not reset we increment and use it
+                                    ROCProviderV2.incrementFromResponse(
+                                        ROCProviderV2.getRoc(
+                                            AppPreference.getBankCode()
+                                        ).toString(), AppPreference.getBankCode()
+                                    )
+
 
                                     //Added by Ajay Thakur
                                     TerminalParameterTable.updateTerminalDataInvoiceNumber("0")

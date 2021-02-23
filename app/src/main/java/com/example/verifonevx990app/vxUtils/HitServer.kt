@@ -86,21 +86,25 @@ object HitServer {
     }
 
     @Synchronized
-    suspend fun hitServersale(data: ByteArray, callbackSale: ServerMessageCallbackSale, progressMsg: ProgressCallback, irh: IReversalHandler? = null) {
+    suspend fun hitServersale(
+        data: ByteArray,
+        callbackSale: ServerMessageCallbackSale,
+        progressMsg: ProgressCallback
+    ) {
         this@HitServer.callbackSale = callbackSale
 
         try {
             if (checkInternetConnection()) {
-            with(ConnectionTimeStamps) {
-                reset()
-                dialStart = getF48TimeStamp()
-            }
-            Log.d("OpenSocket:- " , "Socket Start")
-            logger("Connection Details:- ", VFService.getIpPort().toString(), "d")
+                with(ConnectionTimeStamps) {
+                    reset()
+                    dialStart = getF48TimeStamp()
+                }
+                Log.d("OpenSocket:- ", "Socket Start")
+                logger("Connection Details:- ", VFService.getIpPort().toString(), "d")
                 var responseStr : String? = null
             openSocketSale { socket ->
                 try {
-                irh?.saveReversal()
+                    // irh?.saveReversal()
                 logger(TAG, "address = ${socket.inetAddress}, port = ${socket.port}", "e")
                 ConnectionTimeStamps.dialConnected = getF48TimeStamp()
                 progressMsg("Please wait sending data to Bonushub server")
@@ -121,7 +125,7 @@ object HitServer {
                     //println("Data Recieve"+response.byteArr2HexStr())
                     logger(TAG, "len=$len, data = $responseStr")
                     socket.close()
-                    irh?.clearReversal()
+                    //   irh?.clearReversal()
                 } catch (ex: SocketTimeoutException) {
                     println("Read Time out error1" + ex.message)
                     //println("Read Time out error"+ex.message)

@@ -293,7 +293,7 @@ class TableEditFragment : Fragment() {
                                 "0"
                         )
                     )
-                    //In Case Of AMEX only below arraylist iteams options are shown to user (In TPT table)
+                    //In Case Of AMEX only below arrayList items options are shown to user (In TPT table)
                     val requiredField = arrayListOf(
                         "Terminal Id",
                         "Merchant Id",

@@ -121,7 +121,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                         cardProcessedDataModal.setAID(Utility.byte2HexStr(tlv))
                     }
                 } else {
-                  //  tagOfF55?.put(tag,"00")
+                    //  tagOfF55?.put(tag,"00")
                     Log.e(MainActivity.TAG, "getCardData:" + Integer.toHexString(tag) + ", fails")
                 }
             }
@@ -189,7 +189,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
         try {
             iemv?.importCertConfirmResult(ConstIPBOC.importCertConfirmResult.option.CONFIRM)
             logger("onConfirmCertInfo","certInfo--->"+certInfo.toString()+"certType---> "+certType.toString(),"e")
-            }
+        }
         catch (ex: DeadObjectException){
             ex.printStackTrace()
             Handler(Looper.getMainLooper()).postDelayed(Runnable {
@@ -309,7 +309,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                 }
 
                 //Here we make a callback for first time card read in case of bank emi:-
-              //  if (isFirstBankEMICardRead)
+                //  if (isFirstBankEMICardRead)
                 //    vfEmvHandlerCallback(cardProcessedDataModal)
 
                 if (!cardProcessedDataModal.getPanNumberData()?.let { cardLuhnCheck(it) }!!) {
@@ -317,10 +317,10 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                     bun.putString("ERROR", "Invalid Card Number")
                     onTransactionResult(DetectError.IncorrectPAN.errorCode, bun)
                 } else {
-                   // var track21 = "35|" + track2.replace("D", "=").replace("F", "")
+                    // var track21 = "35|" + track2.replace("D", "=").replace("F", "")
 
-                       var track21 =    "35,36|${track2.replace("D", "=").replace("F", "")}" + "|" +cardHolderName + applicationlabel  + cardissuercountrycode +
-                    cardProcessedDataModal?.getTypeOfTxnFlag() + "~" + cardProcessedDataModal?.getPinEntryFlag()
+                    var track21 =    "35,36|${track2.replace("D", "=").replace("F", "")}" + "|" +cardHolderName + applicationlabel  + cardissuercountrycode +
+                            cardProcessedDataModal?.getTypeOfTxnFlag() + "~" + cardProcessedDataModal?.getPinEntryFlag()
 
                     println("Field 57 before encryption is -> 35|${track2.replace("D", "=").replace("F", "")}" + "|" +cardHolderName + applicationlabel  + cardissuercountrycode +
                             cardProcessedDataModal?.getTypeOfTxnFlag() + "~" + cardProcessedDataModal?.getPinEntryFlag())
@@ -343,12 +343,12 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                         Utility.byte2HexStr(encryptedTrack2ByteArray)
                     )
 
-        //    VFService.showToast("onConfirmCardInfo:$result")
+                    //    VFService.showToast("onConfirmCardInfo:$result")
                     //  checkEmiInstaEmi(cardProcessedDataModal)
                     if (cardProcessedDataModal.getTransType() == TransactionType.SALE.type) {
                         (activity as VFTransactionActivity).checkEmiInstaEmi(cardProcessedDataModal) {
                             if (cardProcessedDataModal.getTransType() == TransactionType.EMI_SALE.type) {
-                                 //  iemv?.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed)
+                                //  iemv?.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed)
                             } else if (cardProcessedDataModal.getTransType() == TransactionType.SALE.type) {
                                 iemv?.importCardConfirmResult(ConstIPBOC.importCardConfirmResult.pass.allowed)
                             }
@@ -613,32 +613,32 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                }
            }*/
 
-   /*     Log.d(MainActivity.TAG, "onTransactionResult")
-        val msg = data?.getString("ERROR")
-        //VFService.showToast("onTransactionResult result = $result,msg = $msg")
+        /*     Log.d(MainActivity.TAG, "onTransactionResult")
+             val msg = data?.getString("ERROR")
+             //VFService.showToast("onTransactionResult result = $result,msg = $msg")
 
-        println("Errror msg in transaction result is$msg")
+             println("Errror msg in transaction result is$msg")
 
-        when (result) {
-            ConstPBOCHandler.onTransactionResult.result.EMV_CARD_BIN_CHECK_FAIL -> {
-                // read card fail
-                //VFService.showToast("read card fail")
-                return
-            }
-            ConstPBOCHandler.onTransactionResult.result.EMV_MULTI_CARD_ERROR -> {
-                // multi-cards found
-                data?.getString(ConstPBOCHandler.onTransactionResult.data.KEY_ERROR_String)
-                    ?.let {
-                        //VFService.showToast(it)
-                    }
-                return
-            }
-        }*/
+             when (result) {
+                 ConstPBOCHandler.onTransactionResult.result.EMV_CARD_BIN_CHECK_FAIL -> {
+                     // read card fail
+                     //VFService.showToast("read card fail")
+                     return
+                 }
+                 ConstPBOCHandler.onTransactionResult.result.EMV_MULTI_CARD_ERROR -> {
+                     // multi-cards found
+                     data?.getString(ConstPBOCHandler.onTransactionResult.data.KEY_ERROR_String)
+                         ?.let {
+                             //VFService.showToast(it)
+                         }
+                     return
+                 }
+             }*/
     }
 
     //3,2,1 --->
     override fun onRequestInputPIN(isOnlinePin: Boolean, retryTimes: Int) {
-    //    VFService.showToast("onRequestInputPIN isOnlinePin:$isOnlinePin")
+        //    VFService.showToast("onRequestInputPIN isOnlinePin:$isOnlinePin")
         println("Invalid pin"+retryTimes)
         cardProcessedDataModal.setPinEntryFlag("1")
         retryTimess = retryTimes
@@ -704,16 +704,16 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                 when (retryTimess) {
                     2 -> {
                         VFService.openPinPad(cardProcessedDataModal, activity)
-                  /*      GlobalScope.launch(Dispatchers.Main) {
-                            (activity as BaseActivity).alertBoxWithAction(
-                                null, null, "Invalid PIN",
-                                "Wrong PIN please try again", false, "OK", {}) { alertCallback ->
-                                if (alertCallback) {
+                        /*      GlobalScope.launch(Dispatchers.Main) {
+                                  (activity as BaseActivity).alertBoxWithAction(
+                                      null, null, "Invalid PIN",
+                                      "Wrong PIN please try again", false, "OK", {}) { alertCallback ->
+                                      if (alertCallback) {
 
-                                    VFService.openPinPad(cardProcessedDataModal, activity)
-                                }
-                            }
-                        }*/
+                                          VFService.openPinPad(cardProcessedDataModal, activity)
+                                      }
+                                  }
+                              }*/
                     }
                     1 -> {
                         GlobalScope.launch(Dispatchers.Main) {

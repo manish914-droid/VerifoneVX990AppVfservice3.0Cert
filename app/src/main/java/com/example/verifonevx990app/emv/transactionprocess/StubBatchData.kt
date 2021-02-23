@@ -136,7 +136,8 @@ class StubBatchData(
         if (AppPreference.getBankCode() == "07")
             batchFileData.cardHolderName = cardProcessedDataModal.getCardHolderName() ?: "Amex"
         else
-            batchFileData.cardHolderName = VerifoneApp.appContext.getString(R.string.hdfc)
+            batchFileData.cardHolderName = cardProcessedDataModal.getCardHolderName()
+                ?: VerifoneApp.appContext.getString(R.string.hdfc)
         //batchFileData.indicator = isoPackageWriter.indicator (Need to Discuss by Ajay)
         batchFileData.field55Data = cardProcessedDataModal.getFiled55() ?: ""
 
