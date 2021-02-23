@@ -246,8 +246,28 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
         if(null != tlv && !(tlv.isEmpty())){
             var cardholderName = Utility.byte2HexStr(tlv)
             cardProcessedDataModal.setCardHolderName(hexString2String(cardholderName))
-            //println("Card Holder Name ---> "+ hexString2String(cardholderName))
+            println("Card Holder Name ---> "+ hexString2String(cardholderName))
         }
+        val tlvapplabel = iemv?.getCardData("9F12")   // application label  TAG
+        if(null != tlvapplabel && !(tlvapplabel.isEmpty())){
+            var applicationlabel = Utility.byte2HexStr(tlvapplabel)
+            cardProcessedDataModal.setApplicationLabel(hexString2String(applicationlabel))
+            println("Application label ---> "+ hexString2String(applicationlabel))
+        }
+
+        val tlvcardissuer = iemv?.getCardData("5F28")   // card issuer country code  TAG
+        if(null != tlvcardissuer && !(tlvcardissuer.isEmpty())){
+            var cardissuercountrycode = Utility.byte2HexStr(tlvcardissuer)
+            cardProcessedDataModal.setCardIssuerCountryCode(cardissuercountrycode)
+            println("Card issuer country code ---> "+ cardissuercountrycode)
+        }
+
+        cardProcessedDataModal.setPinEntryFlag("0")
+
+        var dash             = "~"
+        var cardHolderName   =  if(isNullOrEmpty(cardProcessedDataModal.getCardHolderName())) "" else cardProcessedDataModal.getCardHolderName() + dash
+        var applicationlabel     =  if(isNullOrEmpty(cardProcessedDataModal.getApplicationLabel())) "" else cardProcessedDataModal.getApplicationLabel() + dash
+        var cardissuercountrycode     =  if(isNullOrEmpty(cardProcessedDataModal.getCardIssuerCountryCode())) "" else cardProcessedDataModal.getCardIssuerCountryCode() + dash
 
         //println("Card Type is ---> " + info?.getInt(ConstPBOCHandler.onConfirmCardInfo.info.KEY_CARD_TYPE_String))
 
@@ -297,8 +317,14 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                     bun.putString("ERROR", "Invalid Card Number")
                     onTransactionResult(DetectError.IncorrectPAN.errorCode, bun)
                 } else {
-                    var track21 = "35|" + track2.replace("D", "=").replace("F", "")
-                    //println("Track 2 data is$track21")
+                   // var track21 = "35|" + track2.replace("D", "=").replace("F", "")
+
+                       var track21 =    "35,36|${track2.replace("D", "=").replace("F", "")}" + "|" +cardHolderName + applicationlabel  + cardissuercountrycode +
+                    cardProcessedDataModal?.getTypeOfTxnFlag() + "~" + cardProcessedDataModal?.getPinEntryFlag()
+
+                    println("Field 57 before encryption is -> 35|${track2.replace("D", "=").replace("F", "")}" + "|" +cardHolderName + applicationlabel  + cardissuercountrycode +
+                            cardProcessedDataModal?.getTypeOfTxnFlag() + "~" + cardProcessedDataModal?.getPinEntryFlag())
+
                     val DIGIT_8 = 8
 
                     val mod = track21.length % DIGIT_8
@@ -314,9 +340,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                         )
                     )*/
                     cardProcessedDataModal.setTrack2Data(
-                        Utility.byte2HexStr(
-                            encryptedTrack2ByteArray
-                        )
+                        Utility.byte2HexStr(encryptedTrack2ByteArray)
                     )
 
         //    VFService.showToast("onConfirmCardInfo:$result")
@@ -435,7 +459,8 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                 ) { alertCBBool ->
                     if (alertCBBool)
                         try {
-                            (activity as VFTransactionActivity).declinedTransaction()
+                            cardProcessedDataModal.setFallbackType(EFallbackCode.EMV_fallback.fallBackCode)
+                            (activity as VFTransactionActivity).doProcessCard()
                         } catch (ex: Exception) {
                             ex.printStackTrace()
                         }
@@ -615,7 +640,8 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
     override fun onRequestInputPIN(isOnlinePin: Boolean, retryTimes: Int) {
     //    VFService.showToast("onRequestInputPIN isOnlinePin:$isOnlinePin")
         println("Invalid pin"+retryTimes)
-           retryTimess = retryTimes
+        cardProcessedDataModal.setPinEntryFlag("1")
+        retryTimess = retryTimes
         if (isOnlinePin) {
             //For Online Pin
             //Here we are inflating PinPad on App UI:-

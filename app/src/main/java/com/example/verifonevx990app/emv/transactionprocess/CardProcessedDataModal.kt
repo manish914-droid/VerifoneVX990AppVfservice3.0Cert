@@ -47,6 +47,13 @@ class CardProcessedDataModal : Serializable {
     private var acqReferalNumber: String? = null
     private var mobileBillExtraData: Pair<String, String>? = null
 
+    //region==================================================Extra Field 57 TLE Data Variables:-
+    private var applicationLabel: String? = null
+    private var cardIssuerCountryCode: String? = null
+    private var typeOfTxnFlag: String? = null
+    private var pinEntryFlag: String? = null
+    //endregion
+
     fun getTrack1Data(): String? {
         return track1Data
     }
@@ -326,6 +333,38 @@ class CardProcessedDataModal : Serializable {
 
     fun setCardHolderName(cardholderName: String?) {
         this.cardholderName = cardholderName
+    }
+
+    fun setApplicationLabel(label: String) {
+        this.applicationLabel = label
+    }
+
+    fun getApplicationLabel(): String? {
+        return applicationLabel
+    }
+
+    fun setCardIssuerCountryCode(countryCode: String) {
+        this.cardIssuerCountryCode = countryCode
+    }
+
+    fun getCardIssuerCountryCode(): String? {
+        return cardIssuerCountryCode
+    }
+
+    fun setTypeOfTxnFlag(txnFlag: String) {
+        this.typeOfTxnFlag = txnFlag
+    }
+
+    fun getTypeOfTxnFlag(): String? {
+        return typeOfTxnFlag
+    }
+
+    fun setPinEntryFlag(entryFlag: String) {
+        this.pinEntryFlag = entryFlag
+    }
+
+    fun getPinEntryFlag(): String? {
+        return pinEntryFlag
     }
 
     fun getEmiType() : Int{

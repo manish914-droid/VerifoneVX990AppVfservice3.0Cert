@@ -784,10 +784,14 @@ object ROCProviderV2 {
     }
 
     //Below method is used to encrypt track2 data:-
-    fun getEncryptedTrackData(track2Data: String?): String? {
+    fun getEncryptedTrackData(track2Data: String?,cardProcessedData: CardProcessedDataModal?): String? {
         var encryptedbyteArrrays: ByteArray? = null
         if (null != track2Data) {
-            var track21 = "35|" + track2Data.replace("D", "=").replace("F", "")
+          //  var track21 = "35|" + track2Data.replace("D", "=").replace("F", "")
+
+            var track21  = "35,36|${track2Data.replace("D", "=").replace("F", "")}" + "|" + cardProcessedData?.getCardHolderName() + "~~~" +
+                    cardProcessedData?.getTypeOfTxnFlag() + "~" + cardProcessedData?.getPinEntryFlag()
+
             //println("Track 2 data is$track21")
             val DIGIT_8 = 8
 
@@ -1178,6 +1182,17 @@ fun getEncryptedField57DataForOfflineSale(
         //println("Track 2 with encryption is --->" + Utility.byte2HexStr(encryptedByteArrray))
         return Utility.byte2HexStr(encryptedByteArrray)
     } else return "TRACK57_LENGTH<8"
+}
+
+fun isNullOrEmpty(str: String?): Boolean {
+    if (str != null && !str.isEmpty())
+        return false
+    return true
+}
+fun isNullOrEmptyByteArray(str: ByteArray?): Boolean {
+    if (str != null && !str.isEmpty())
+        return false
+    return true
 }
 
 //Method to Handle Force start after App crashes:

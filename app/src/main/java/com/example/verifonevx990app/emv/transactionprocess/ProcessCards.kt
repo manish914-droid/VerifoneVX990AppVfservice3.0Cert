@@ -55,10 +55,7 @@ class ProcessCard(
                 //This Override Function will only execute in case of Mag stripe card type:-
                 override fun onCardSwiped(track: Bundle) {
                     // Process Swipe card with or without PIN .
-                    fun processSwipeCardWithPINorWithoutPIN(
-                        ispin: Boolean,
-                        cardProcessedDataModal: CardProcessedDataModal
-                    ) {
+                    fun processSwipeCardWithPINorWithoutPIN(ispin: Boolean, cardProcessedDataModal: CardProcessedDataModal) {
                         if (ispin) {
 
                             val param = Bundle()
@@ -88,9 +85,7 @@ class ProcessCard(
                             )
 
 
-                            VFService.vfPinPad?.startPinInput(
-                                2, param, globleparam,
-                                object : PinInputListener.Stub() {
+                            VFService.vfPinPad?.startPinInput(2, param, globleparam, object : PinInputListener.Stub() {
                                     override fun onInput(len: Int, key: Int) {
                                         Log.d("Data", "PinPad onInput, len:$len, key:$key")
                                     }
@@ -150,6 +145,7 @@ class ProcessCard(
                     try {
                         iemv?.stopCheckCard()
                         println("Mag is calling")
+                        cardProcessedDataModal.setTypeOfTxnFlag("1")
                         if (fallbackType != EFallbackCode.Swipe_fallback.fallBackCode) {
                             Log.d(MainActivity.TAG, "onCardSwiped ...")
                             VFService.vfBeeper?.startBeep(200)
@@ -211,7 +207,7 @@ class ProcessCard(
                                 cardProcessedDataModal.setReadCardType(DetectCardType.MAG_CARD_TYPE)
                                 if (track2 != null) {
                                     cardProcessedDataModal.setTrack2Data(
-                                        getEncryptedTrackData(track2).toString()
+                                        getEncryptedTrackData(track2,cardProcessedDataModal).toString()
                                     )
                                 }
                                 if (track1 != null) {
@@ -403,6 +399,7 @@ class ProcessCard(
                         println("Contact is calling")
                         iemv?.stopCheckCard()
                         iemv?.abortEMV()
+                        cardProcessedDataModal.setTypeOfTxnFlag("2")
                         cardProcessedDataModal.setReadCardType(DetectCardType.EMV_CARD_TYPE)
 
                         VFService.vfBeeper?.startBeep(200)
@@ -522,6 +519,7 @@ class ProcessCard(
                         println("Contactless is calling")
                         iemv?.stopCheckCard()
                         iemv?.abortEMV()
+                        cardProcessedDataModal.setTypeOfTxnFlag("3")
                         cardProcessedDataModal.setReadCardType(DetectCardType.CONTACT_LESS_CARD_TYPE)
                         VFService.vfBeeper?.startBeep(200)
                         println("Transactionamount is calling" + transactionalAmt.toString() + "Handler is" + handler)
