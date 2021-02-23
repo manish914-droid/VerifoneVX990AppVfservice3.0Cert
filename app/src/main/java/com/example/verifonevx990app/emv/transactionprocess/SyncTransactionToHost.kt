@@ -16,8 +16,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var cardProcessedDataModal: CardProcessedDataModal? = null,
-                            var syncTransactionCallback: (Boolean, String, String? , Triple<String , String , String>?) -> Unit) {
+class SyncTransactionToHost(
+    var transactionISOByteArray: IsoDataWriter?,
+    var cardProcessedDataModal: CardProcessedDataModal? = null,
+    var syncTransactionCallback: (Boolean, String, String?, Triple<String, String, String>?) -> Unit
+) {
     private val iemv: IEMV? by lazy { VFService.vfIEMV }
     private var successResponseCode: String? = null
 
@@ -29,12 +32,19 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
 
     //Below method is used to sync Transaction Packet Data to host:-
     private suspend fun sendTransactionPacketToHost(transactionISOData: IsoDataWriter?) {
-            when (cardProcessedDataModal?.getTransType()) {
-                TransactionType.PRE_AUTH.type ->{ transactionISOData?.mti= Mti.PRE_AUTH_MTI.mti}
-                else ->{ transactionISOData?.mti= Mti.DEFAULT_MTI.mti}
+        when (cardProcessedDataModal?.getTransType()) {
+            TransactionType.PRE_AUTH.type -> {
+                transactionISOData?.mti = Mti.PRE_AUTH_MTI.mti
             }
+            else -> {
+                transactionISOData?.mti = Mti.DEFAULT_MTI.mti
+            }
+        }
         //Setting ROC again because if reversal send first and then transaction packet goes to host the ROC is similar in that case because we are creating Trans packet at initial stage
-        transactionISOData?.addField(11, ROCProviderV2.getRoc(AppPreference.getBankCode()).toString())
+        transactionISOData?.addField(
+            11,
+            ROCProviderV2.getRoc(AppPreference.getBankCode()).toString()
+        )
         val transactionISOByteArray = transactionISOData?.generateIsoByteRequest()
         if (transactionISOData != null) {
             logger("Transaction REQUEST PACKET --->>", transactionISOData.isoMap, "e")
@@ -42,8 +52,8 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
         if (cardProcessedDataModal?.getReadCardType() != DetectCardType.EMV_CARD_TYPE) {
             val reversalPacket = Gson().toJson(transactionISOData)
             AppPreference.saveString(GENERIC_REVERSAL_KEY, reversalPacket)
-          //  transactionISOByteArray?.byteArr2HexStr()?.let { logger("PACKET-->", it) }
-       }
+            //  transactionISOByteArray?.byteArr2HexStr()?.let { logger("PACKET-->", it) }
+        }
 
         if (transactionISOByteArray != null) {
             HitServer.hitServersale(transactionISOByteArray, { result, success, readtimeout ->
@@ -154,17 +164,30 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
                                                     AppPreference.getString(GENERIC_REVERSAL_KEY)
                                                 )
                                             ) {
-                                                CompleteSecondGenAc(
-                                                    responseIsoData,
-                                                    transactionISOData
-                                                ) { printExtraData ->
+                                                if (cardProcessedDataModal?.getTransType() != TransactionType.REFUND.type) {
+                                                    CompleteSecondGenAc(
+                                                        responseIsoData,
+                                                        transactionISOData
+                                                    ) { printExtraData ->
+                                                        syncTransactionCallback(
+                                                            true,
+                                                            successResponseCode.toString(),
+                                                            result,
+                                                            printExtraData
+                                                        )
+                                                    }
+                                                } else {
+                                                    clearReversal()
                                                     syncTransactionCallback(
                                                         true,
                                                         successResponseCode.toString(),
                                                         result,
-                                                        printExtraData
+                                                        null
                                                     )
+
                                                 }
+
+
                                             } else {
                                                 clearReversal()
                                                 syncTransactionCallback(
@@ -174,7 +197,6 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
                                                     null
                                                 )
                                             }
-
                                         }
 
                                         else -> logger(
@@ -202,14 +224,24 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
                                         }
                                         DetectCardType.EMV_CARD_TYPE -> {
                                             clearReversal()
-                                            CompleteSecondGenAc(responseIsoData) { printExtraData ->
+                                            if (cardProcessedDataModal?.getTransType() != TransactionType.REFUND.type) {
+                                                CompleteSecondGenAc(responseIsoData) { printExtraData ->
+                                                    syncTransactionCallback(
+                                                        true,
+                                                        successResponseCode.toString(),
+                                                        result,
+                                                        printExtraData
+                                                    )
+                                                }
+                                            } else {
                                                 syncTransactionCallback(
                                                     true,
                                                     successResponseCode.toString(),
                                                     result,
-                                                    printExtraData
+                                                    null
                                                 )
                                             }
+
                                         }
                                         else -> logger(
                                             "CARD_ERROR:- ",

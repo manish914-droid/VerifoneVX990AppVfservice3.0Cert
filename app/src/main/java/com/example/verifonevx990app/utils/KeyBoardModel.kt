@@ -19,7 +19,11 @@ class KeyboardModel {
 
     fun onKeyClicked(str: String) {
         GlobalScope.launch(Dispatchers.IO) {
-            VFService.vfBeeper?.startBeep(100)
+            try {
+                VFService.vfBeeper?.startBeep(100)
+            } catch (ex: java.lang.Exception) {
+                ex.printStackTrace()
+            }
             try {
                 if (view != null) {
                     when (view) {

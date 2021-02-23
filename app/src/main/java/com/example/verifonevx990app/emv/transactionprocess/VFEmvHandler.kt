@@ -244,9 +244,10 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
 
         val tlv = iemv?.getCardData("5F20")   // CardHolder Name TAG
         if(null != tlv && !(tlv.isEmpty())){
-            var cardholderName = Utility.byte2HexStr(tlv)
+            val cardholderName = Utility.byte2HexStr(tlv)
             cardProcessedDataModal.setCardHolderName(hexString2String(cardholderName))
-            //println("Card Holder Name ---> "+ hexString2String(cardholderName))
+            //Logging card name
+            cardProcessedDataModal.getCardHolderName()?.let { Log.e("Card Holder Name ---> ", it) }
         }
 
         //println("Card Type is ---> " + info?.getInt(ConstPBOCHandler.onConfirmCardInfo.info.KEY_CARD_TYPE_String))

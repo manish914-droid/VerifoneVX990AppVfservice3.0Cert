@@ -286,7 +286,7 @@ open class BatchFileDataTable() : RealmObject(), Parcelable {
         gccMsg = parcel.readString().toString()
 
 
-     //   accountType = parcel.readString().toString()
+        //   accountType = parcel.readString().toString()
         merchantBillNo = parcel.readString().toString()
         serialNo = parcel.readString().toString()
         customerName = parcel.readString().toString()
@@ -307,7 +307,7 @@ open class BatchFileDataTable() : RealmObject(), Parcelable {
         brandId = parcel.readString().toString()
         productId = parcel.readString().toString()
         processingFee = parcel.readString().toString()
-        cashBackPercent=parcel.readString().toString()
+        cashBackPercent = parcel.readString().toString()
         isCashBackInPercent = parcel.readByte() != 0.toByte()
     }
 
@@ -1842,7 +1842,7 @@ open class TerminalParameterTable() : RealmObject(), Parcelable {
     @field:BHFieldParseIndex(47)
     var reservedValues: String = ""
 
-    @field:BHFieldName("STAN")
+    @field:BHFieldName("roc")
     var stan: String = ""
 
     @field:BHFieldParseIndex(48)
@@ -1906,6 +1906,11 @@ open class TerminalParameterTable() : RealmObject(), Parcelable {
     @field:BHFieldParseIndex(63)
     @field:BHFieldName("Tid Name")
     var tidName = ""  // name of bank
+
+    @field:BHFieldParseIndex(67)
+    @field:BHFieldName("STAN")
+    var roc = ""
+
     //endregion
 
 
@@ -1982,6 +1987,7 @@ open class TerminalParameterTable() : RealmObject(), Parcelable {
         tidIndex = parcel.readString().toString()
         tidBankCode = parcel.readString().toString()
         tidName = parcel.readString().toString()
+        roc = parcel.readString().toString()
         //endregion
 
     }
@@ -2059,6 +2065,7 @@ open class TerminalParameterTable() : RealmObject(), Parcelable {
         parcel.writeString(tidIndex)
         parcel.writeString(tidBankCode)
         parcel.writeString(tidName)
+        parcel.writeString(roc)
         //endregion
 
     }
@@ -2111,7 +2118,11 @@ open class TerminalParameterTable() : RealmObject(), Parcelable {
             getRealm {
                 val tp = it.where(TerminalParameterTable::class.java).findFirst()
                 it.beginTransaction()
-                tp?.batchNumber = invoiceWithPadding(batchNumber)
+                if (batchNumber.toInt() > 9999999) {
+                    tp?.batchNumber = invoiceWithPadding(1.toString())
+                } else {
+                    tp?.batchNumber = invoiceWithPadding(batchNumber)
+                }
                 it.commitTransaction()
             }.await()
         }
@@ -2128,11 +2139,26 @@ open class TerminalParameterTable() : RealmObject(), Parcelable {
 
 
         fun updateTerminalDataInvoiceNumber(invoiceNumber: String) = runBlocking {
+            //  var tpt: TerminalParameterTable? = null
+            getRealm {
+                val tp = it.where(TerminalParameterTable::class.java).findFirst()
+                it.beginTransaction()
+                if (invoiceNumber.toInt() > 999999) {
+                    tp?.invoiceNumber = invoiceWithPadding(1.toString())
+                } else {
+                    tp?.invoiceNumber =
+                        invoiceWithPadding((invoiceNumber.toInt().plus(1)).toString())
+                }
+                it.commitTransaction()
+            }.await()
+        }
+
+        fun updateTerminalDataROCNumber(roc: String) = runBlocking {
             var tpt: TerminalParameterTable? = null
             getRealm {
                 val tp = it.where(TerminalParameterTable::class.java).findFirst()
                 it.beginTransaction()
-                tp?.invoiceNumber = invoiceWithPadding((invoiceNumber.toInt().plus(1)).toString())
+                tp?.roc = invoiceWithPadding((roc.toInt().plus(1)).toString())
                 it.commitTransaction()
             }.await()
         }
@@ -3422,6 +3448,7 @@ open class EmiSchemeGroupTable() : RealmObject(), Parcelable {
 
     companion object {
         private val TAG: String = EmiSchemeGroupTable::class.java.simpleName
+
         @JvmField
         val CREATOR = object : Parcelable.Creator<EmiSchemeGroupTable> {
             override fun createFromParcel(parcel: Parcel): EmiSchemeGroupTable {

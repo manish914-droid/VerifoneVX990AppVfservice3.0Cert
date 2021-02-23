@@ -1,5 +1,7 @@
 package com.example.verifonevx990app.utils;
 
+import android.util.Log;
+
 import com.example.verifonevx990app.emv.transactionprocess.CardProcessedDataModal;
 
 /**
@@ -159,6 +161,8 @@ public class Utility {
             if (null != str && !str.isEmpty()) {
                 cardProcessedDataModal.setCardHolderName(str.substring(startindex + 1, endIndex));
                 //System.out.println("CardHoder Name is" + str.substring(startindex + 1, endIndex));
+                //Logging card name
+                Log.e("Card Holder Name ---> ", cardProcessedDataModal.getCardHolderName());
             }
 
         }

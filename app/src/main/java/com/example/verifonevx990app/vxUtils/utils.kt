@@ -281,11 +281,14 @@ suspend fun saveToDB(spliter: List<String>) {
             val terminalParameterTable = TerminalParameterTable()
             parseData(terminalParameterTable, spliter)
             terminalParameterTable.stan = "000001"
+
             TerminalParameterTable.performOperation(terminalParameterTable) {
                 logger("saveToDB", "mTpt")
                 // change the printer darkness
                 GlobalScope.launch {
                     val tpt = TerminalParameterTable.selectFromSchemeTable()
+                    ROCProviderV2.setRocAsPerTpt(AppPreference.getBankCode())
+                    Log.e("R_O_C", ROCProviderV2.getRoc(AppPreference.getBankCode()).toString())
                     /*if (tpt != null) {
                         val darkness =
                             if (tpt.printingImpact.isNotEmpty()) tpt.printingImpact else "0"
@@ -578,9 +581,7 @@ object ROCProviderV2 {
     init {
         mRocHash = try {
             val str = AppPreference.getString(AppPreference.ROC_V2)
-            mGson.fromJson<MutableMap<String, Int>>(
-                str, mType
-            )
+            mGson.fromJson<MutableMap<String, Int>>(str, mType)
         } catch (ex: Exception) {
             val tl = TerminalParameterTable.selectAll()
             val mm = mutableMapOf<String, Int>()
@@ -596,12 +597,18 @@ object ROCProviderV2 {
     fun resetRoc(bankCode: String) {
         mRocHash[bankCode] = 1
         AppPreference.saveString(AppPreference.ROC_V2, mGson.toJson(mRocHash, mType))
+        TerminalParameterTable.updateTerminalDataROCNumber(
+            ROCProviderV2.getRoc(AppPreference.getBankCode()).toString()
+        )
     }
 
     fun increment(bankCode: String) {
         mRocHash[bankCode] = mRocHash[bankCode] ?: 0 + 1
         check(bankCode)
         AppPreference.saveString(AppPreference.ROC_V2, mGson.toJson(mRocHash, mType))
+        TerminalParameterTable.updateTerminalDataROCNumber(
+            ROCProviderV2.getRoc(AppPreference.getBankCode()).toString()
+        )
     }
 
     /**
@@ -609,9 +616,13 @@ object ROCProviderV2 {
      * then roc is setted with value 1.
      * */
     private fun check(bankCode: String) {
-        if (mRocHash[bankCode] ?: 1000000 > 999999) {
+        if (mRocHash[bankCode] ?: 1 > 999999) {
             mRocHash[bankCode] = 1
         }
+
+        /*  if (mRocHash[bankCode] ?: 1000000 > 999999) {
+              mRocHash[bankCode] = 1
+          }*/
     }
 
     fun incrementFromResponse(num: String, bankCode: String) {
@@ -619,11 +630,25 @@ object ROCProviderV2 {
             mRocHash[bankCode] = num.toInt() + 1
             check(bankCode)
             AppPreference.saveString(AppPreference.ROC_V2, mGson.toJson(mRocHash, mType))
+            TerminalParameterTable.updateTerminalDataROCNumber(
+                ROCProviderV2.getRoc(AppPreference.getBankCode()).toString()
+            )
         } catch (ex: Exception) {
             logger(TAG, ex.message ?: "", "e")
             increment(bankCode)
         }
 
+    }
+
+
+    fun setRocAsPerTpt(bankCode: String) {
+        val tpt = TerminalParameterTable.selectFromSchemeTable()
+        try {
+            mRocHash[bankCode] = tpt?.roc?.toInt() ?: 1
+        } catch (ex: java.lang.Exception) {
+            mRocHash[bankCode] = 1
+        }
+        AppPreference.saveString(AppPreference.ROC_V2, mGson.toJson(mRocHash, mType))
     }
 
     //Below code to check Bank Code and on basis of that it will inflate Both bank & bonushub logo or only bank logo on basis of condition:-
