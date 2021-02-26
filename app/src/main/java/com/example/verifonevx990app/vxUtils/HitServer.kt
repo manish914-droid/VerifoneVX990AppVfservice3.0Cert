@@ -288,8 +288,7 @@ object HitServer {
                     }
                     socket.close()
                     fos.close()
-                    ROCProviderV2.resetRoc(AppPreference.getBankCode())
-
+                 //   ROCProviderV2.resetRoc(AppPreference.getBankCode())
                     this@HitServer.callback = null
                 }
 

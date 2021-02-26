@@ -321,17 +321,66 @@ class NewInputAmountFragment : Fragment() {
                     if (saleTipAmt > 0) {
                         validateTIP(trnsAmt, saleAmt)
                     } else {
-                        iFrReq?.onFragmentRequest(
-                            UiAction.START_SALE,
-                            Pair(trnsAmt.toString().trim(), cashAmount?.text.toString().trim())
-                        )
+                        if (tpt?.reservedValues?.substring(0, 1) == "1")
+                            showMobileBillDialog(
+                                activity,
+                                TransactionType.SALE.type
+                            ) { extraPairData ->
+                                iFrReq?.onFragmentRequest(
+                                    UiAction.START_SALE,
+                                    Pair(
+                                        trnsAmt.toString().trim(),
+                                        cashAmount?.text.toString().trim()
+                                    ), extraPairData
+                                )
+                            } else
+                            iFrReq?.onFragmentRequest(
+                                UiAction.START_SALE,
+                                Pair(trnsAmt.toString().trim(), cashAmount?.text.toString().trim())
+                            )
                     }
                 }
                 EDashboardItem.BANK_EMI -> {
-                    iFrReq?.onFragmentRequest(
-                        UiAction.BANK_EMI,
-                        Pair(binding?.saleAmount?.text.toString().trim(), "0")
-                    )
+                    if (tpt?.reservedValues?.substring(1, 2) == "1" && tpt.reservedValues.substring(
+                            2,
+                            3
+                        ) == "1"
+                    ) {
+                        showMobileBillDialog(
+                            activity,
+                            TransactionType.EMI_SALE.type
+                        ) { extraPairData ->
+                            iFrReq?.onFragmentRequest(
+                                UiAction.BANK_EMI,
+                                Pair(binding?.saleAmount?.text.toString().trim(), "0"),
+                                extraPairData
+                            )
+                        }
+                    } else if (tpt?.reservedValues?.substring(1, 2) == "1") {
+                        showMobileBillDialog(
+                            activity,
+                            TransactionType.EMI_SALE.type
+                        ) { extraPairData ->
+                            iFrReq?.onFragmentRequest(
+                                UiAction.BANK_EMI,
+                                Pair(binding?.saleAmount?.text.toString().trim(), "0"),
+                                extraPairData
+                            )
+                        }
+                    } else if (tpt?.reservedValues?.substring(2, 3) == "1") {
+                        showMobileBillDialog(
+                            activity,
+                            TransactionType.EMI_SALE.type
+                        ) { extraPairData ->
+                            iFrReq?.onFragmentRequest(
+                                UiAction.BANK_EMI,
+                                Pair(binding?.saleAmount?.text.toString().trim(), "0"),
+                                extraPairData
+                            )
+                        }
+                    }
+
+
                 }
                 EDashboardItem.CASH_ADVANCE -> {
                     iFrReq?.onFragmentRequest(
@@ -362,6 +411,23 @@ class NewInputAmountFragment : Fragment() {
                         UiAction.PRE_AUTH,
                         Pair(binding?.saleAmount?.text.toString().trim(), "0")
                     )
+                }
+                EDashboardItem.EMI_ENQUIRY -> {
+
+                    if (TerminalParameterTable.selectFromSchemeTable()?.bankEnquiryMobNumberEntry == true) {
+                        showMobileBillDialog(activity, TransactionType.EMI_ENQUIRY.type) {
+                            //  sendStartSale(inputAmountEditText?.text.toString(), extraPairData)
+                            iFrReq?.onFragmentRequest(
+                                UiAction.EMI_ENQUIRY,
+                                Pair(binding?.saleAmount?.text.toString().trim(), "0"), it
+                            )
+                        }
+                    } else {
+                        iFrReq?.onFragmentRequest(
+                            UiAction.EMI_ENQUIRY,
+                            Pair(binding?.saleAmount?.text.toString().trim(), "0")
+                        )
+                    }
                 }
                 else -> {
                 }
@@ -444,4 +510,8 @@ class NewInputAmountFragment : Fragment() {
             VFService.showToast("TPT not fount")
         }
     }
+
+    val tpt = TerminalParameterTable.selectFromSchemeTable()
+
+
 }

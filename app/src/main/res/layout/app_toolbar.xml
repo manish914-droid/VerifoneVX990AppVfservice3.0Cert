@@ -43,7 +43,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/pad_4"
                     android:layout_marginEnd="@dimen/pad_16"
-                    android:background="@drawable/bonushub_logo_round"
+
                     android:paddingStart="@dimen/pad_4"
                     android:paddingTop="@dimen/pad_2"
                     android:paddingEnd="@dimen/pad_4"

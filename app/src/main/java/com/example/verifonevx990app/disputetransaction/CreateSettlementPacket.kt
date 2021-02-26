@@ -1,13 +1,14 @@
 package com.example.verifonevx990app.disputetransaction
 
 import com.example.verifonevx990app.R
-import com.example.verifonevx990app.main.PrefConstant
 import com.example.verifonevx990app.realmtables.BatchFileDataTable
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
 import com.example.verifonevx990app.vxUtils.*
 
-class CreateSettlementPacket(private var settlementProcessingCode: String? = null
-                             , private var batchList: MutableList<BatchFileDataTable>) :
+class CreateSettlementPacket(
+    private var settlementProcessingCode: String? = null,
+    private var batchList: MutableList<BatchFileDataTable>
+) :
     ISettlementPacketExchange {
 
     override fun createSettlementISOPacket(): IWriter = IsoDataWriter().apply {
@@ -18,24 +19,25 @@ class CreateSettlementPacket(private var settlementProcessingCode: String? = nul
             //Processing Code:-
             addField(3, settlementProcessingCode ?: ProcessingCode.SETTLEMENT.code)
 
-            //adding stan (padding of stan is internally handled by iso)
-            var settlementRoc = 0
-            if (AppPreference.getIntData(PrefConstant.SETTLEMENT_ROC_INCREMENT.keyName.toString()) == 0) {
-                settlementRoc = if (batchList.size > 0)
-                    (batchList[batchList.size - 1].roc).toInt()
-                else
-                    ROCProviderV2.getRoc(AppPreference.getBankCode()).toInt()
-                AppPreference.setIntData(
-                    PrefConstant.SETTLEMENT_ROC_INCREMENT.keyName.toString(),
-                    settlementRoc
-                )
+            /*   //adding stan (padding of stan is internally handled by iso) No need of this
+               var settlementRoc = 0
+               if (AppPreference.getIntData(PrefConstant.SETTLEMENT_ROC_INCREMENT.keyName.toString()) == 0) {
+                   settlementRoc = if (batchList.size > 0)
+                       (batchList[batchList.size - 1].roc).toInt()
+                   else
+                       ROCProviderV2.getRoc(AppPreference.getBankCode()).toInt()
+                   AppPreference.setIntData(
+                       PrefConstant.SETTLEMENT_ROC_INCREMENT.keyName.toString(),
+                       settlementRoc
+                   )
 
-            } else {
-                settlementRoc =
-                    AppPreference.getIntData(PrefConstant.SETTLEMENT_ROC_INCREMENT.keyName.toString())
-            }
+               } else {
+                   settlementRoc =
+                       AppPreference.getIntData(PrefConstant.SETTLEMENT_ROC_INCREMENT.keyName.toString())
+               }
+   */
 
-            //ROC will not go in case of AMEX on all PORT:-
+            //ROC will not go in case of AMEX on all PORT but for HDFC it was mandatory:-
             // Sending ROC in case of HDFC ........
             addField(11, ROCProviderV2.getRoc(AppPreference.getBankCode()).toString())
 
@@ -80,31 +82,67 @@ class CreateSettlementPacket(private var settlementProcessingCode: String? = nul
                         ) +
                         version + addPad("0", "0", 9)
             )
-
             //adding field 63
             var saleCount = 0
-            var saleAmount = "0"
+            var saleAmount = 0L
+
             var refundCount = 0
             var refundAmount = "0"
 
+            //SEQUENCE-------> sale, emi sale ,sale with cash, cash only,auth comp,and tip transaction type will be included.
             //Manipulating Data based on condition for Field 63:-
             if (batchList.size > 0) {
                 for (i in 0 until batchList.size) {
-                    if (batchList[i].getTransactionType() == TransactionType.SALE.name) {
-                        saleCount = saleCount.plus(1)
-                        saleAmount = saleAmount.plus(batchList[i].transactionalAmmount)
-                    } else if (batchList[i].getTransactionType() == TransactionType.REFUND.name) {
-                        refundCount = refundCount.plus(1)
-                        refundAmount = refundAmount.plus(batchList[i].transactionalAmmount)
+                    when (batchList[i].transactionType) {
+                        TransactionType.SALE.type -> {
+                            saleCount = saleCount.plus(1)
+                            saleAmount = saleAmount.plus(batchList[i].transactionalAmmount.toLong())
+                        }
+                        TransactionType.EMI_SALE.type -> {
+                            saleCount = saleCount.plus(1)
+                            saleAmount = saleAmount.plus(batchList[i].transactionalAmmount.toLong())
+                        }
+                        TransactionType.SALE_WITH_CASH.type -> {
+                            saleCount = saleCount.plus(1)
+                            saleAmount = saleAmount.plus(batchList[i].transactionalAmmount.toLong())
+                        }
+                        TransactionType.CASH_AT_POS.type -> {
+                            saleCount = saleCount.plus(1)
+                            saleAmount = saleAmount.plus(batchList[i].transactionalAmmount.toLong())
+                        }
+                        TransactionType.PRE_AUTH_COMPLETE.type -> {
+                            saleCount = saleCount.plus(1)
+                            saleAmount = saleAmount.plus(batchList[i].transactionalAmmount.toLong())
+                        }
+                        TransactionType.TIP_SALE.type -> {
+                            saleCount = saleCount.plus(1)
+                            saleAmount = saleAmount.plus(batchList[i].totalAmmount.toLong())
+                        }
+                        TransactionType.REFUND.type -> {
+                            refundCount = refundCount.plus(1)
+                            refundAmount =
+                                refundAmount.plus(batchList[i].transactionalAmmount.toLong())
+                        }
                     }
                 }
+
                 val sCount = addPad(saleCount, "0", 3, true)
-                val sAmount = addPad(saleAmount, "0", 12, true)
+                val sAmount = addPad(saleAmount.toString(), "0", 12, true)
+
                 val rCount = addPad(refundCount, "0", 3, true)
                 val rAmount = addPad(refundAmount, "0", 12, true)
+
+                //   sale, emi sale ,sale with cash, cash only,auth comp,and tip transaction
+
+
                 addFieldByHex(
                     63,
-                    addPad(sCount + sAmount + rCount + rAmount, "0", 90, toLeft = false)
+                    addPad(
+                        sCount + sAmount + rCount + rAmount,
+                        "0",
+                        90,
+                        toLeft = false
+                    )
                 )
             } else {
                 addFieldByHex(63, addPad(0, "0", 90, toLeft = false))

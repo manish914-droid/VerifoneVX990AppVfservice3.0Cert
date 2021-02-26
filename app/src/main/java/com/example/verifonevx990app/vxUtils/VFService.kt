@@ -224,7 +224,6 @@ object VFService {
             1 -> param.putBoolean(ConstIPinpad.startPinInput.param.KEY_isOnline_boolean, true)
             2 -> param.putBoolean(ConstIPinpad.startPinInput.param.KEY_isOnline_boolean, false)
         }
-
         param.putString(ConstIPinpad.startPinInput.param.KEY_pan_String, panBlock)
         param.putString(ConstIPinpad.startPinInput.param.KEY_promptString_String, "Enter PIN")
         param.putInt(
@@ -236,7 +235,6 @@ object VFService {
         } catch (e: RemoteException) {
             e.printStackTrace()
         }
-
     }
 
     private fun initializePinInputListener(cardProcessedDataModal: CardProcessedDataModal,activity: Activity) {

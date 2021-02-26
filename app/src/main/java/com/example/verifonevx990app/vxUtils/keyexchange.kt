@@ -159,8 +159,8 @@ class KeyExchanger(
                                         dpkKcv = ppkDpk.substring(70).hexStr2ByteArr()
                                     }
 
-                                    ROCProviderV2.resetRoc(AppPreference.HDFC_BANK_CODE)
-                                    ROCProviderV2.resetRoc(AppPreference.AMEX_BANK_CODE)
+                                    //  ROCProviderV2.resetRoc(AppPreference.HDFC_BANK_CODE)
+                                    //   ROCProviderV2.resetRoc(AppPreference.AMEX_BANK_CODE)
 
                                     insertSecurityKeys(
                                         ppk.hexStr2ByteArr(),
@@ -382,8 +382,8 @@ class KeyExchanger(
                                     dpkKcv = ppkDpk.substring(70).hexStr2ByteArr()
                                 }
 
-                                ROCProviderV2.resetRoc(AppPreference.HDFC_BANK_CODE)
-                                ROCProviderV2.resetRoc(AppPreference.AMEX_BANK_CODE)
+                                //   ROCProviderV2.resetRoc(AppPreference.HDFC_BANK_CODE)
+                                //  ROCProviderV2.resetRoc(AppPreference.AMEX_BANK_CODE)
 
                                 insertAfterSettlementSecurityKeys(
                                     ppk.hexStr2ByteArr(),
@@ -449,7 +449,7 @@ class KeyExchanger(
             addField(
                 3, if (tmk.isEmpty()) {
                     //resume after
-                    ROCProviderV2.resetRoc(AppPreference.getBankCode())
+                    //  ROCProviderV2.resetRoc(AppPreference.getBankCode())
                     rsa = RSAProvider.generateKeyPair()
                     val publicKey = RSAProvider.getPublicKeyBytes(rsa)
                     val f59 = insertBitsInPublicKey(
@@ -661,7 +661,7 @@ class KeyExchanger(
     ) {
         var result: Boolean? = true
         try {
-            ROCProviderV2.resetRoc(AppPreference.getBankCode())
+            //  ROCProviderV2.resetRoc(AppPreference.getBankCode())
 
             result = if (onTMKCall) {
                 val dTmkArr = RSAProvider.decriptTMK(tmk.hexStr2ByteArr(), rsa)

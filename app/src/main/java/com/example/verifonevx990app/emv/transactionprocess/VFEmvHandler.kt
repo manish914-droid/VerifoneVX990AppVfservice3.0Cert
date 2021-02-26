@@ -111,7 +111,12 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
             for (tag in tagList) {
                 tlv = iemv?.getCardData(Integer.toHexString(tag).toUpperCase(Locale.ROOT))
                 if (null != tlv && tlv.isNotEmpty()) {
-                    Log.d(""+Integer.toHexString(tag), Utility.byte2HexStr(tlv))
+                    Log.e(
+                        "TLV F55 REQ--",
+                        "TAG--> " + Integer.toHexString(tag) + ", VALUE-->" + Utility.byte2HexStr(
+                            tlv
+                        )
+                    )
                     val length = Integer.toHexString(tlv.size)
                     count += Integer.valueOf(length)
                     tagOfF55?.put(tag, Utility.byte2HexStr(tlv)) // build up the field 55
@@ -135,6 +140,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
         Log.d(MainActivity.TAG, "online request finished")
     }
 
+    //1
     override fun onSelectApplication(appList: MutableList<Bundle>?) {
         try {
             if (appList != null) {
@@ -148,8 +154,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                     iemv?.importAppSelection(multiAppPosition)
                 }
             }
-        }
-        catch (ex: DeadObjectException){
+        } catch (ex: DeadObjectException){
             ex.printStackTrace()
             Handler(Looper.getMainLooper()).postDelayed(Runnable {
                 GlobalScope.launch {
@@ -161,8 +166,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                 }
             }, 200)
             println("VfEmvHandler error in onSelectApplication"+ex.message)
-        }
-        catch (ex: RemoteException){
+        } catch (ex: RemoteException){
             ex.printStackTrace()
             Handler(Looper.getMainLooper()).postDelayed(Runnable {
                 GlobalScope.launch {
@@ -174,8 +178,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                 }
             }, 200)
             println("VfEmvHandler error in onSelectApplication"+ex.message)
-        }
-        catch (ex: Exception){
+        } catch (ex: Exception){
             ex.printStackTrace()
             println("VfEmvHandler error in onSelectApplication"+ex.message)
         }
@@ -226,6 +229,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
         Log.d(TAG, "Request Amount.......")
     }
 
+    //2
     override fun onConfirmCardInfo(info: Bundle?) {
         Log.d(MainActivity.TAG, "onConfirmCardInfo...")
         savedPan =
@@ -319,11 +323,17 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                 } else {
                     // var track21 = "35|" + track2.replace("D", "=").replace("F", "")
 
-                    var track21 =    "35,36|${track2.replace("D", "=").replace("F", "")}" + "|" +cardHolderName + applicationlabel  + cardissuercountrycode +
-                            cardProcessedDataModal?.getTypeOfTxnFlag() + "~" + cardProcessedDataModal?.getPinEntryFlag()
+                    var track21 = "35,36|${
+                        track2.replace("D", "=").replace("F", "")
+                    }" + "|" + cardHolderName + applicationlabel + cardissuercountrycode +
+                            cardProcessedDataModal.getTypeOfTxnFlag() + "~" + cardProcessedDataModal.getPinEntryFlag()
 
-                    println("Field 57 before encryption is -> 35|${track2.replace("D", "=").replace("F", "")}" + "|" +cardHolderName + applicationlabel  + cardissuercountrycode +
-                            cardProcessedDataModal?.getTypeOfTxnFlag() + "~" + cardProcessedDataModal?.getPinEntryFlag())
+                    println(
+                        "Field 57 before encryption is -> 35|${
+                            track2.replace("D", "=").replace("F", "")
+                        }" + "|" + cardHolderName + applicationlabel + cardissuercountrycode +
+                                cardProcessedDataModal.getTypeOfTxnFlag() + "~" + cardProcessedDataModal.getPinEntryFlag()
+                    )
 
                     val DIGIT_8 = 8
 
@@ -397,6 +407,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
         }
     }
 
+    //3(In ERROR CASE)
     override fun onTransactionResult(result: Int, data: Bundle?) {
         Log.d("FallbackCode:- ", result.toString())
 

@@ -19,11 +19,8 @@ import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.offlinemanualsale.SyncOfflineSaleSettlementToHost
 import com.example.verifonevx990app.realmtables.BatchFileDataTable
 import com.example.verifonevx990app.utils.printerUtils.PrintUtil
-import com.example.verifonevx990app.vxUtils.AppPreference
+import com.example.verifonevx990app.vxUtils.*
 import com.example.verifonevx990app.vxUtils.AppPreference.GENERIC_REVERSAL_KEY
-import com.example.verifonevx990app.vxUtils.ProcessingCode
-import com.example.verifonevx990app.vxUtils.VFService
-import com.example.verifonevx990app.vxUtils.invoiceWithPadding
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -380,8 +377,13 @@ internal class SettlementAdapter(private val list: List<BatchFileDataTable>) : R
     override fun onBindViewHolder(p0: SettlementHolder, p1: Int) {
 
         p0.invoiceText.text = invoiceWithPadding(list[p1].invoiceNumber)
+        var amount = "0"
+        if (list[p1].transactionType == TransactionType.TIP_SALE.type || list[p1].transactionType == TransactionType.SALE_WITH_CASH.type) {
+            amount = "%.2f".format(list[p1].totalAmmount.toDouble() / 100)
+        } else {
+            amount = "%.2f".format(list[p1].transactionalAmmount.toDouble() / 100)
+        }
 
-        val amount = "%.2f".format(list[p1].transactionalAmmount.toDouble()/100)
         p0.baseAmountText.text = amount
         p0.transactionType.text = list[p1].getTransactionType()
         p0.transactionDateText.text = list[p1].transactionDate

@@ -369,6 +369,7 @@
     <string name="complete_pre_auth">Complete Pre-Auth</string>
     <string name="download_tmk">Download TMK</string>
     <string name="do_you_want_to_download_tmk">Do You Want To Download TMK?</string>
+    <string name="do_enquiry">Do Enquiry</string>
 
 
 </resources>
