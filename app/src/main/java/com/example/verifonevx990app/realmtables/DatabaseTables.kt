@@ -1142,6 +1142,8 @@ open class IssuerParameterTable() : RealmObject(), Parcelable {
     @field:BHFieldName("Reserved Value")
     var reservedForFutureUsed: String = ""
 
+    var isIssuerSelected: Boolean = false
+
     private constructor(parcel: Parcel) : this() {
         pcNo = parcel.readString().toString()
         actionId = parcel.readString().toString()
@@ -1170,6 +1172,8 @@ open class IssuerParameterTable() : RealmObject(), Parcelable {
         pushBillAllowed = parcel.readString().toString()
         reEnteredCustomerId = parcel.readString().toString()
         reservedForFutureUsed = parcel.readString().toString()
+        isIssuerSelected = parcel.readByte() != 0.toByte()
+
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -1200,6 +1204,7 @@ open class IssuerParameterTable() : RealmObject(), Parcelable {
         parcel.writeString(pushBillAllowed)
         parcel.writeString(reEnteredCustomerId)
         parcel.writeString(reservedForFutureUsed)
+        parcel.writeByte(if (isIssuerSelected) 1 else 0)
     }
 
     override fun describeContents(): Int {
@@ -1807,8 +1812,7 @@ open class TerminalParameterTable() : RealmObject(), Parcelable {
     @field:BHFieldParseIndex(40)
     @field:BHFieldName("Bank Emi")
     @field:BHDashboardItem(
-        EDashboardItem.BANK_EMI,
-        EDashboardItem.EMI_ENQUIRY
+        EDashboardItem.BANK_EMI
     )
     var bankEmi: String = ""
 
@@ -1911,6 +1915,12 @@ open class TerminalParameterTable() : RealmObject(), Parcelable {
     @field:BHFieldName("STAN")
     var roc = ""
 
+    @field:BHDashboardItem(EDashboardItem.EMI_ENQUIRY)
+    var bankEnquiry: String = ""
+
+    var bankEnquiryMobNumberEntry: Boolean = false
+
+
     //endregion
 
 
@@ -1988,6 +1998,8 @@ open class TerminalParameterTable() : RealmObject(), Parcelable {
         tidBankCode = parcel.readString().toString()
         tidName = parcel.readString().toString()
         roc = parcel.readString().toString()
+        bankEnquiry = parcel.readString().toString()
+        bankEnquiryMobNumberEntry = parcel.readByte() != 0.toByte()
         //endregion
 
     }
@@ -2066,6 +2078,8 @@ open class TerminalParameterTable() : RealmObject(), Parcelable {
         parcel.writeString(tidBankCode)
         parcel.writeString(tidName)
         parcel.writeString(roc)
+        parcel.writeString(bankEnquiry)
+        parcel.writeByte(if (bankEnquiryMobNumberEntry) 1 else 0)
         //endregion
 
     }
@@ -2153,12 +2167,11 @@ open class TerminalParameterTable() : RealmObject(), Parcelable {
             }.await()
         }
 
-        fun updateTerminalDataROCNumber(roc: String) = runBlocking {
-            var tpt: TerminalParameterTable? = null
+        fun updateTerminalDataROCNumber(roc: Int) = runBlocking {
             getRealm {
                 val tp = it.where(TerminalParameterTable::class.java).findFirst()
                 it.beginTransaction()
-                tp?.roc = invoiceWithPadding((roc.toInt().plus(1)).toString())
+                tp?.roc = invoiceWithPadding((roc).toString())
                 it.commitTransaction()
             }.await()
         }

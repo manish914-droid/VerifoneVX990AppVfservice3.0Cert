@@ -163,10 +163,12 @@ class TipAdjustFragment : Fragment() {
                      batch.totalAmmount = (batch.transactionalAmmount.toLong() + tip).toString()
                      batch.transactionalAmmount = batch.totalAmmount
  */
-                    // Todo needs to check this.....
                     batch.baseAmmount = (batch.transactionalAmmount.toString())
                     batch.tipAmmount = (tip).toString()
                     batch.totalAmmount = (batch.transactionalAmmount.toLong() + tip).toString()
+                    batch.baseAmmount = (batch.transactionalAmmount.toLong() + tip).toString()
+                    batch.transactionalAmmount =
+                        (batch.transactionalAmmount.toLong() + tip).toString()
 
                     //     batch.aqrRefNo = resp.isoMap[31]?.parseRaw2String() ?: ""
                     /*RRN -->37

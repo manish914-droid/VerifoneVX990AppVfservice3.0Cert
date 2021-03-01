@@ -54,19 +54,26 @@ fun getTransactionType(uiAction:UiAction):TransactionType{
     }
 }
 
-enum class TransactionType(val type: Int,val processingCode: ProcessingCode=ProcessingCode.NONE,val txnTitle:String="Not Defined") {
+enum class TransactionType(
+    val type: Int,
+    val processingCode: ProcessingCode = ProcessingCode.NONE,
+    val txnTitle: String = "Not Defined",
+    val settlementSequence: Int = 0
+) {
+    //   sale, emi sale ,sale with cash, cash only,auth comp,and tip transaction type will be included.
+
     NONE(0),
     KEY_EXCHANGE(1, ProcessingCode.KEY_EXCHANGE),
     INIT(2, ProcessingCode.INIT),
     LOGON(3, ProcessingCode.KEY_EXCHANGE),
-    SALE(4, ProcessingCode.SALE, "SALE"),
+    SALE(4, ProcessingCode.SALE, "SALE", 1),
     VOID(5, ProcessingCode.VOID, "VOID"),
     SETTLEMENT(6, ProcessingCode.SETTLEMENT),
     APP_UPDATE(7),
     BALANCE_ENQUIRY(8),
     REFUND(9, ProcessingCode.REFUND, "REFUND"),
     VOID_REFUND(10, ProcessingCode.VOID_REFUND, "VOID OF REFUND"),
-    SALE_WITH_CASH(11, ProcessingCode.SALE_WITH_CASH, "SALE-CASH"),
+    SALE_WITH_CASH(11, ProcessingCode.SALE_WITH_CASH, "SALE-CASH", 3),
     CASH(12),
     BATCH_UPLOAD(13),
     PRE_AUTH(14, ProcessingCode.PRE_AUTH, "PRE-AUTH"),
@@ -74,23 +81,24 @@ enum class TransactionType(val type: Int,val processingCode: ProcessingCode=Proc
     SALE_WITH_TIP(15),
     ADJUSTMENT(16),
     REVERSAL(17, ProcessingCode.REFUND),
-    EMI_SALE(18, ProcessingCode.SALE, "EMI SALE"),
+    EMI_SALE(18, ProcessingCode.SALE, "EMI SALE", 2),
     EMI(19),
     SALE_COMPLETION(20),
     TIP_ADJUSTMENT(21),
 
     OFF_SALE(22),
-    CASH_AT_POS(23, ProcessingCode.CASH_AT_POS, "CASH ONLY"),
+    CASH_AT_POS(23, ProcessingCode.CASH_AT_POS, "CASH ONLY", 4),
     BATCH_SETTLEMENT(24),
 
-    PRE_AUTH_COMPLETE(25, ProcessingCode.PRE_SALE_COMPLETE, "AUTH-COMP"),
+    PRE_AUTH_COMPLETE(25, ProcessingCode.PRE_SALE_COMPLETE, "AUTH-COMP", 5),
     VOID_PREAUTH(26, ProcessingCode.VOID_PREAUTH, "VOID PRE-AUTH"),
 
-    TIP_SALE(27, ProcessingCode.TIP_SALE, "TIP ADJUST"),
+    TIP_SALE(27, ProcessingCode.TIP_SALE, "TIP ADJUST", 6),
     PENDING_PREAUTH(28, ProcessingCode.PENDING_PREAUTH, "PRE AUTH TXN"),
     OFFLINE_SALE(29, ProcessingCode.OFFLINE_SALE, "OFFLINE SALE"),
     VOID_OFFLINE_SALE(30, ProcessingCode.VOID_OFFLINE_SALE, "VOID OFFLINE SALE"),
-    EMI_MASTER_DATA(31, ProcessingCode.BANK_EMI, "BRAND EMI")
+    EMI_MASTER_DATA(31, ProcessingCode.BANK_EMI, "BRAND EMI"),
+    EMI_ENQUIRY(32, ProcessingCode.BANK_EMI, "EMI ENQUIRY")
 }
 
 

@@ -47,6 +47,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import kotlin.experimental.and
 
+
 var isDashboardOpen = false
 var isExpanded = false
 
@@ -73,7 +74,7 @@ enum class UiAction(val tvalue: Int = 0, val title: String = "") {
     BANK_EMI(title = "Bank EMI"), OFFLINE_SALE(title = "Offline Sale"), CASH_AT_POS(title = "Cash Advance"), SALE_WITH_CASH(
         title = "Sale With Cash"
     ),
-    PRE_AUTH_COMPLETE(title = "Pre Auth Complete")
+    PRE_AUTH_COMPLETE(title = "Pre Auth Complete"), EMI_ENQUIRY(title = "Emi Enquiry")
 
 }
 
@@ -280,14 +281,22 @@ suspend fun saveToDB(spliter: List<String>) {
         spliter[2] == "106" -> {
             val terminalParameterTable = TerminalParameterTable()
             parseData(terminalParameterTable, spliter)
-            terminalParameterTable.stan = "000001"
+            //terminalParameterTable.stan = "000001"
+
+            //Check for Enabling EMI Enquiry on terminal by reservedValues check.
+            if (terminalParameterTable.reservedValues[6].toString().toInt() == 1) {
+                terminalParameterTable.bankEnquiry = "1"
+                //Check for Enabling Phone number at the time of EMI Enquiry on terminal by reservedValues check)
+                terminalParameterTable.bankEnquiryMobNumberEntry =
+                    terminalParameterTable.reservedValues[7].toString().toInt() == 1
+            }
 
             TerminalParameterTable.performOperation(terminalParameterTable) {
                 logger("saveToDB", "mTpt")
                 // change the printer darkness
                 GlobalScope.launch {
                     val tpt = TerminalParameterTable.selectFromSchemeTable()
-                    ROCProviderV2.setRocAsPerTpt(AppPreference.getBankCode())
+                    //     ROCProviderV2.setRocAsPerTpt(AppPreference.getBankCode())
                     Log.e("R_O_C", ROCProviderV2.getRoc(AppPreference.getBankCode()).toString())
                     /*if (tpt != null) {
                         val darkness =
@@ -298,13 +307,13 @@ suspend fun saveToDB(spliter: List<String>) {
             }
 
         }
-      /*  spliter[2] == "108" -> {
-            val emiBinTable = EmiBinTable()
-            parseData(emiBinTable, spliter)
-            EmiBinTable.performOperation(emiBinTable) {
-                logger("saveToDB", "ebt")
-            }
-        }*/
+        /*  spliter[2] == "108" -> {
+              val emiBinTable = EmiBinTable()
+              parseData(emiBinTable, spliter)
+              EmiBinTable.performOperation(emiBinTable) {
+                  logger("saveToDB", "ebt")
+              }
+          }*/
         spliter[2] == "107" -> {
             val cardDataTable = CardDataTable()
             parseData(cardDataTable, spliter)
@@ -490,9 +499,9 @@ object ConnectionTimeStamps {
     }
 
     fun getStamp(): String {
-        val stamp=  if (stamp.isNotEmpty()) stamp else "~~~~"
-        val otherInfo= getOtherInfo()
-        return stamp+otherInfo
+        val stamp = if (stamp.isNotEmpty()) stamp else "~~~~"
+        val otherInfo = getOtherInfo()
+        return stamp + otherInfo
 
     }
 
@@ -578,6 +587,7 @@ object ROCProviderV2 {
     private val mGson = Gson()
     private val TAG = ROCProviderV2::class.java.simpleName
 
+
     init {
         mRocHash = try {
             val str = AppPreference.getString(AppPreference.ROC_V2)
@@ -592,63 +602,91 @@ object ROCProviderV2 {
         }
     }
 
-    fun getRoc(bankCode: String): Int = mRocHash[bankCode] ?: 1
+    //OLD METHOD  (Don't delete OLD METHOD of this file ....)
+    /*   fun getRoc(bankCode: String): Int = mRocHash[bankCode] ?: 1
+   */
 
-    fun resetRoc(bankCode: String) {
-        mRocHash[bankCode] = 1
-        AppPreference.saveString(AppPreference.ROC_V2, mGson.toJson(mRocHash, mType))
-        TerminalParameterTable.updateTerminalDataROCNumber(
-            ROCProviderV2.getRoc(AppPreference.getBankCode()).toString()
-        )
+    fun getRoc(bankCode: String): Int {
+        return try {
+            TerminalParameterTable.selectFromSchemeTable()?.roc?.toInt() ?: 1
+        } catch (ex: Exception) {
+            1
+        }
     }
 
+    //OLD METHOD
+    /*  fun resetRoc(bankCode: String) {
+          mRocHash[bankCode] = 1
+          AppPreference.saveString(AppPreference.ROC_V2, mGson.toJson(mRocHash, mType))
+          TerminalParameterTable.updateTerminalDataROCNumber(getRoc(AppPreference.getBankCode()))
+      }*/
+
+    fun resetRoc(bankCode: String) {
+        TerminalParameterTable.updateTerminalDataROCNumber(1)
+    }
+
+    //OLD METHOD
+    /* fun increment(bankCode: String) {
+         mRocHash[bankCode] = mRocHash[bankCode] ?: 0 + 1
+         check(bankCode)
+         AppPreference.saveString(AppPreference.ROC_V2, mGson.toJson(mRocHash, mType))
+         TerminalParameterTable.updateTerminalDataROCNumber(getRoc(AppPreference.getBankCode()))
+     }*/
+
     fun increment(bankCode: String) {
-        mRocHash[bankCode] = mRocHash[bankCode] ?: 0 + 1
-        check(bankCode)
-        AppPreference.saveString(AppPreference.ROC_V2, mGson.toJson(mRocHash, mType))
-        TerminalParameterTable.updateTerminalDataROCNumber(
-            ROCProviderV2.getRoc(AppPreference.getBankCode()).toString()
-        )
+        checkRocLimit(bankCode)
+        TerminalParameterTable.updateTerminalDataROCNumber(getRoc(AppPreference.getBankCode()) + 1)
     }
 
     /**
      * checking if roc is greater than 999999 or not found
      * then roc is setted with value 1.
      * */
-    private fun check(bankCode: String) {
-        if (mRocHash[bankCode] ?: 1 > 999999) {
-            mRocHash[bankCode] = 1
-        }
-
-        /*  if (mRocHash[bankCode] ?: 1000000 > 999999) {
+    //OLD METHOD
+    /*  private fun check(bankCode: String) {
+          if (mRocHash[bankCode] ?: 1 >= 999999) {
               mRocHash[bankCode] = 1
-          }*/
+          }
+          *//*  if (mRocHash[bankCode] ?: 1000000 > 999999) {
+              mRocHash[bankCode] = 1
+          }*//*
+    }*/
+
+    /**
+     * checking if roc is greater than 999999 or not found
+     * then roc is setted with value 1.
+     * */
+    private fun checkRocLimit(bankCode: String) {
+        if (getRoc(AppPreference.getBankCode()) > 999999) {
+            // setting zero because after it the ROC is incremented by 1
+            TerminalParameterTable.updateTerminalDataROCNumber(0)
+        }
     }
+
+    //OLD METHOD
+    /*  fun incrementFromResponse(num: String, bankCode: String) {
+          try {
+              mRocHash[bankCode] = num.toInt() + 1
+              check(bankCode)
+              AppPreference.saveString(AppPreference.ROC_V2, mGson.toJson(mRocHash, mType))
+              TerminalParameterTable.updateTerminalDataROCNumber(getRoc(AppPreference.getBankCode()))
+          } catch (ex: Exception) {
+              logger(TAG, ex.message ?: "", "e")
+              increment(bankCode)
+          }
+
+      }*/
+
 
     fun incrementFromResponse(num: String, bankCode: String) {
         try {
-            mRocHash[bankCode] = num.toInt() + 1
-            check(bankCode)
-            AppPreference.saveString(AppPreference.ROC_V2, mGson.toJson(mRocHash, mType))
-            TerminalParameterTable.updateTerminalDataROCNumber(
-                ROCProviderV2.getRoc(AppPreference.getBankCode()).toString()
-            )
+            checkRocLimit(bankCode)
+            TerminalParameterTable.updateTerminalDataROCNumber(getRoc(AppPreference.getBankCode()) + 1)
         } catch (ex: Exception) {
             logger(TAG, ex.message ?: "", "e")
             increment(bankCode)
         }
 
-    }
-
-
-    fun setRocAsPerTpt(bankCode: String) {
-        val tpt = TerminalParameterTable.selectFromSchemeTable()
-        try {
-            mRocHash[bankCode] = tpt?.roc?.toInt() ?: 1
-        } catch (ex: java.lang.Exception) {
-            mRocHash[bankCode] = 1
-        }
-        AppPreference.saveString(AppPreference.ROC_V2, mGson.toJson(mRocHash, mType))
     }
 
     //Below code to check Bank Code and on basis of that it will inflate Both bank & bonushub logo or only bank logo on basis of condition:-
@@ -809,19 +847,24 @@ object ROCProviderV2 {
     }
 
     //Below method is used to encrypt track2 data:-
-    fun getEncryptedTrackData(track2Data: String?,cardProcessedData: CardProcessedDataModal?): String? {
+    fun getEncryptedTrackData(
+        track2Data: String?,
+        cardProcessedData: CardProcessedDataModal?
+    ): String? {
         var encryptedbyteArrrays: ByteArray? = null
         if (null != track2Data) {
-          //  var track21 = "35|" + track2Data.replace("D", "=").replace("F", "")
+            //  var track21 = "35|" + track2Data.replace("D", "=").replace("F", "")
 
-            var track21  = "35,36|${track2Data.replace("D", "=").replace("F", "")}" + "|" + cardProcessedData?.getCardHolderName() + "~~~" +
+            var track21 = "35,36|${
+                track2Data.replace("D", "=").replace("F", "")
+            }" + "|" + cardProcessedData?.getCardHolderName() + "~~~" +
                     cardProcessedData?.getTypeOfTxnFlag() + "~" + cardProcessedData?.getPinEntryFlag()
 
             //println("Track 2 data is$track21")
             val DIGIT_8 = 8
 
             val mod = track21.length % DIGIT_8
-            if (mod!=0) {
+            if (mod != 0) {
                 track21 = getEncryptedField57DataForVisa(track21.length, track21)
             }
 
@@ -886,7 +929,10 @@ object ROCProviderV2 {
     )
 
     //Below method is used to make and return Field55 Data:-
-    fun getField55(isAmex: Boolean = false, cardProcessedDataModal: CardProcessedDataModal): String {
+    fun getField55(
+        isAmex: Boolean = false,
+        cardProcessedDataModal: CardProcessedDataModal
+    ): String {
         val sb = StringBuilder()
         for (f in commonTagListemv) {
             val v = VFService.vfIEMV?.getCardData(Integer.toHexString(f).toUpperCase(Locale.ROOT))
@@ -1146,9 +1192,9 @@ fun getEncryptedField57DataForManualSale(panNumber: String, expDate: String): St
     val DIGIT_8 = 8
     if (dataLength > DIGIT_8) {
         val mod = dataLength % DIGIT_8
-        if (mod!=0) {
-          val padding = DIGIT_8 - mod
-          val totalLength = dataLength + padding
+        if (mod != 0) {
+            val padding = DIGIT_8 - mod
+            val totalLength = dataLength + padding
             dataDescription = addPad(dataDescription, " ", totalLength, false)
         }
         logger("Field57_Manual", " -->$dataDescription", "e")
@@ -1214,6 +1260,7 @@ fun isNullOrEmpty(str: String?): Boolean {
         return false
     return true
 }
+
 fun isNullOrEmptyByteArray(str: ByteArray?): Boolean {
     if (str != null && !str.isEmpty())
         return false
@@ -1260,20 +1307,18 @@ fun failureImpl(
                 }
             val alert: AlertDialog = builder.create()
             try {
-                if(null !=alert && !alert.isShowing) {
+                if (null != alert && !alert.isShowing) {
                     alert.show()
                     Looper.loop()
                 }
-            }
-            catch (ex: WindowManager.BadTokenException) {
+            } catch (ex: WindowManager.BadTokenException) {
                 ex.printStackTrace()
                 Handler(Looper.getMainLooper()).postDelayed(Runnable {
                     GlobalScope.launch {
                         VFService.connectToVFService(VerifoneApp.appContext)
                     }
                 }, 200)
-            }
-            catch (ex: Exception) {
+            } catch (ex: Exception) {
                 ex.printStackTrace()
                 Handler(Looper.getMainLooper()).postDelayed(Runnable {
                     GlobalScope.launch {
@@ -1284,7 +1329,7 @@ fun failureImpl(
 
         }
     }.start()
- }
+}
 
 fun initializeFontFiles() = PrinterFonts.initialize(VerifoneApp.appContext.assets)
 
@@ -1294,123 +1339,141 @@ fun showMobileBillDialog(
     transactionType: Int,
     dialogCB: (Pair<String, String>) -> Unit
 ) {
-    val dialog = context?.let { Dialog(it) }
-    val inflate = LayoutInflater.from(context).inflate(R.layout.mobile_bill_dialog_view, null)
-    dialog?.setContentView(inflate)
-    dialog?.setCancelable(false)
-    dialog?.window?.attributes?.windowAnimations = R.style.DialogAnimation
-    val window = dialog?.window
-    window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT)
-    val mobileNumberET: BHTextInputEditText? = dialog?.findViewById(R.id.mobileNumberET)
-    val billNumberET: BHTextInputEditText? = dialog?.findViewById(R.id.billNumberET)
-    val billNumberTil: BHTextInputLayout? = dialog?.findViewById(R.id.bill_number_til)
-    val cancelButton: Button? = dialog?.findViewById(R.id.cancel_btn)
-    val okButton: Button? = dialog?.findViewById(R.id.ok_btn)
+    runBlocking(Dispatchers.Main) {
+        val dialog = context?.let { Dialog(it) }
+        val inflate = LayoutInflater.from(context).inflate(R.layout.mobile_bill_dialog_view, null)
+        dialog?.setContentView(inflate)
+        dialog?.setCancelable(false)
+        dialog?.window?.attributes?.windowAnimations = R.style.DialogAnimation
+        val window = dialog?.window
+        window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.WRAP_CONTENT
+        )
+        val mobileNumberET: BHTextInputEditText? = dialog?.findViewById(R.id.mobileNumberET)
+        val billNumberET: BHTextInputEditText? = dialog?.findViewById(R.id.billNumberET)
+        val billNumberTil: BHTextInputLayout? = dialog?.findViewById(R.id.bill_number_til)
+        val cancelButton: Button? = dialog?.findViewById(R.id.cancel_btn)
+        val okButton: Button? = dialog?.findViewById(R.id.ok_btn)
 
-    val tpt = TerminalParameterTable.selectFromSchemeTable()
-    if (tpt?.reservedValues?.substring(
-            2,
-            3
-        ) == "1" && transactionType == TransactionType.EMI_SALE.type
-    )
-        billNumberTil?.visibility = View.VISIBLE
-    else
-        billNumberTil?.visibility = View.GONE
-
-    //Cancel Button OnClick:-
-    cancelButton?.setOnClickListener {
-        dialog.dismiss()
-        dialogCB(Pair("", ""))
-    }
-
-    //Ok Button OnClick:-
-    okButton?.setOnClickListener {
-        if (transactionType == TransactionType.SALE.type && tpt?.reservedValues?.substring(
-                0,
-                1
-            ) == "1"
-        ) {
-            when {
-                !TextUtils.isEmpty(mobileNumberET?.text.toString()) -> if (mobileNumberET?.text.toString().length in 10..13) {
-                    dialog.dismiss()
-                    dialogCB(Pair(mobileNumberET?.text.toString(), ""))
-                } else
-                    VFService.showToast(context.getString(R.string.enter_valid_mobile_number))
-                TextUtils.isEmpty(mobileNumberET?.text.toString()) -> {
-                    dialog.dismiss()
-                    dialogCB(Pair("", ""))
-                }
-            }
-        } else if (transactionType == TransactionType.EMI_SALE.type && tpt?.reservedValues?.substring(
-                1,
-                2
-            ) == "1"
-            && tpt.reservedValues.substring(2, 3) == "1"
-        ) {
-            when {
-                !TextUtils.isEmpty(mobileNumberET?.text.toString())
-                        && !TextUtils.isEmpty(billNumberET?.text.toString()) -> if (mobileNumberET?.text.toString().length in 10..13) {
-                    dialog.dismiss()
-                    dialogCB(Pair(mobileNumberET?.text.toString(), billNumberET?.text.toString()))
-                } else
-                    VFService.showToast(context.getString(R.string.enter_valid_mobile_number))
-
-                !TextUtils.isEmpty(mobileNumberET?.text.toString()) -> if (mobileNumberET?.text.toString().length in 10..13) {
-                    dialog.dismiss()
-                    dialogCB(Pair(mobileNumberET?.text.toString(), ""))
-                } else
-                    VFService.showToast(context.getString(R.string.enter_valid_mobile_number))
-
-                !TextUtils.isEmpty(billNumberET?.text.toString()) -> {
-                    dialog.dismiss()
-                    dialogCB(Pair("", billNumberET?.text.toString()))
-                }
-
-                TextUtils.isEmpty(mobileNumberET?.text.toString()) &&
-                        TextUtils.isEmpty(mobileNumberET?.text.toString()) -> {
-                    dialog.dismiss()
-                    dialogCB(Pair("", ""))
-                }
-            }
-
-        } else if (transactionType == TransactionType.EMI_SALE.type && tpt?.reservedValues?.substring(
-                1,
-                2
-            ) == "1"
-        ) {
-            when {
-                !TextUtils.isEmpty(mobileNumberET?.text.toString()) -> if (mobileNumberET?.text.toString().length in 10..13) {
-                    dialog.dismiss()
-                    dialogCB(Pair(mobileNumberET?.text.toString(), ""))
-                } else
-                    VFService.showToast(context.getString(R.string.enter_valid_mobile_number))
-                TextUtils.isEmpty(mobileNumberET?.text.toString()) -> {
-                    dialog.dismiss()
-                    dialogCB(Pair("", ""))
-                }
-            }
-
-        } else if (transactionType == TransactionType.EMI_SALE.type && tpt?.reservedValues?.substring(
+        val tpt = TerminalParameterTable.selectFromSchemeTable()
+        if ((tpt?.reservedValues?.substring(
                 2,
                 3
-            ) == "1"
-        ) {
-            when {
-                !TextUtils.isEmpty(billNumberET?.text.toString()) -> {
-                    dialog.dismiss()
-                    dialogCB(Pair("", billNumberET?.text.toString()))
-                }
-                TextUtils.isEmpty(billNumberET?.text.toString()) -> {
-                    dialog.dismiss()
-                    dialogCB(Pair("", ""))
-                }
-            }
-        } else {
+            ) == "1" && transactionType == TransactionType.EMI_SALE.type)
+        )
+            billNumberTil?.visibility = View.VISIBLE
+        else
+            billNumberTil?.visibility = View.GONE
+
+        //Cancel Button OnClick:-
+        cancelButton?.setOnClickListener {
             dialog.dismiss()
             dialogCB(Pair("", ""))
         }
+
+        //Ok Button OnClick:-
+        okButton?.setOnClickListener {
+            if (transactionType == TransactionType.SALE.type && tpt?.reservedValues?.substring(
+                    0,
+                    1
+                ) == "1"
+            ) {
+                when {
+                    !TextUtils.isEmpty(mobileNumberET?.text.toString()) -> if (mobileNumberET?.text.toString().length in 10..13) {
+                        dialog.dismiss()
+                        dialogCB(Pair(mobileNumberET?.text.toString(), ""))
+                    } else
+                        VFService.showToast(context.getString(R.string.enter_valid_mobile_number))
+                    TextUtils.isEmpty(mobileNumberET?.text.toString()) -> {
+                        dialog.dismiss()
+                        dialogCB(Pair("", ""))
+                    }
+                }
+            } else if (transactionType == TransactionType.EMI_SALE.type && tpt?.reservedValues?.substring(
+                    1,
+                    2
+                ) == "1" && tpt.reservedValues.substring(2, 3) == "1"
+            ) {
+                when {
+                    !TextUtils.isEmpty(mobileNumberET?.text.toString())
+                            && !TextUtils.isEmpty(billNumberET?.text.toString()) -> if (mobileNumberET?.text.toString().length in 10..13) {
+                        dialog.dismiss()
+                        dialogCB(
+                            Pair(
+                                mobileNumberET?.text.toString(),
+                                billNumberET?.text.toString()
+                            )
+                        )
+                    } else
+                        VFService.showToast(context.getString(R.string.enter_valid_mobile_number))
+
+                    !TextUtils.isEmpty(mobileNumberET?.text.toString()) -> if (mobileNumberET?.text.toString().length in 10..13) {
+                        dialog.dismiss()
+                        dialogCB(Pair(mobileNumberET?.text.toString(), ""))
+                    } else
+                        VFService.showToast(context.getString(R.string.enter_valid_mobile_number))
+
+                    !TextUtils.isEmpty(billNumberET?.text.toString()) -> {
+                        dialog.dismiss()
+                        dialogCB(Pair("", billNumberET?.text.toString()))
+                    }
+
+                    TextUtils.isEmpty(mobileNumberET?.text.toString()) &&
+                            TextUtils.isEmpty(mobileNumberET?.text.toString()) -> {
+                        dialog.dismiss()
+                        dialogCB(Pair("", ""))
+                    }
+                }
+
+            } else if (transactionType == TransactionType.EMI_SALE.type && tpt?.reservedValues?.substring(
+                    1,
+                    2
+                ) == "1"
+            ) {
+                when {
+                    !TextUtils.isEmpty(mobileNumberET?.text.toString()) -> if (mobileNumberET?.text.toString().length in 10..13) {
+                        dialog.dismiss()
+                        dialogCB(Pair(mobileNumberET?.text.toString(), ""))
+                    } else
+                        VFService.showToast(context.getString(R.string.enter_valid_mobile_number))
+                    TextUtils.isEmpty(mobileNumberET?.text.toString()) -> {
+                        dialog.dismiss()
+                        dialogCB(Pair("", ""))
+                    }
+                }
+            } else if (transactionType == TransactionType.EMI_SALE.type && tpt?.reservedValues?.substring(
+                    2,
+                    3
+                ) == "1"
+            ) {
+                when {
+                    !TextUtils.isEmpty(billNumberET?.text.toString()) -> {
+                        dialog.dismiss()
+                        dialogCB(Pair("", billNumberET?.text.toString()))
+                    }
+                    TextUtils.isEmpty(billNumberET?.text.toString()) -> {
+                        dialog.dismiss()
+                        dialogCB(Pair("", ""))
+                    }
+                }
+            } else if (transactionType == TransactionType.EMI_ENQUIRY.type) {
+                when {
+                    !TextUtils.isEmpty(mobileNumberET?.text.toString()) -> if (mobileNumberET?.text.toString().length in 10..13) {
+                        dialog.dismiss()
+                        dialogCB(Pair(mobileNumberET?.text.toString(), ""))
+                    } else
+                        VFService.showToast(context.getString(R.string.enter_valid_mobile_number))
+                }
+
+            } else {
+                dialog.dismiss()
+                dialogCB(Pair("", ""))
+            }
+        }
+        dialog?.show()
+
     }
-    dialog?.show()
 }
 
 fun checkInternetConnection(): Boolean {
@@ -1438,14 +1501,15 @@ fun convertStr2Nibble2Str(data: String): String {
     return tempData
 }
 
-fun getCurrentDate(): String{
+fun getCurrentDate(): String {
     val sdf = SimpleDateFormat("yyyyMMdd")
     val d = Date()
     val currDt = sdf.format(d)
 
     return currDt
 }
-fun getCurrentDateforMag(): String{
+
+fun getCurrentDateforMag(): String {
     val sdf = SimpleDateFormat("yyMM")
     val d = Date()
     val currDt = sdf.format(d)
@@ -1869,5 +1933,7 @@ after that auto Download Signed apk build from FTP Server.
 6.After App Update Successfully , when app open again for the first time send server app update confirmation packet by checking
 condition - stored file app version name < updated app version name.
  */
+
+
 
 

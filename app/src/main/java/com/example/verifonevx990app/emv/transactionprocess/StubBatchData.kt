@@ -5,7 +5,6 @@ import com.example.verifonevx990app.R
 import com.example.verifonevx990app.bankemi.BankEMIDataModal
 import com.example.verifonevx990app.bankemi.BankEMIIssuerTAndCDataModal
 import com.example.verifonevx990app.main.DetectCardType
-import com.example.verifonevx990app.main.PrefConstant
 import com.example.verifonevx990app.realmtables.BatchFileDataTable
 import com.example.verifonevx990app.realmtables.CardDataTable
 import com.example.verifonevx990app.realmtables.IssuerParameterTable
@@ -40,25 +39,19 @@ class StubBatchData(
             cardProcessedDataModal.getPanNumberData().toString()
         )
         val batchFileData = BatchFileDataTable()
-        //Auto Increment Invoice Number in BatchFileData Table:-
+       /* //Auto Increment Invoice Number in BatchFileData Table:-
         var invoiceIncrementValue = 0
         if (AppPreference.getIntData(PrefConstant.SALE_INVOICE_INCREMENT.keyName.toString()) == 0) {
             invoiceIncrementValue = terminalData?.invoiceNumber?.toInt() ?: 0
-            AppPreference.setIntData(
-                PrefConstant.SALE_INVOICE_INCREMENT.keyName.toString(),
-                invoiceIncrementValue
-            )
+            AppPreference.setIntData(PrefConstant.SALE_INVOICE_INCREMENT.keyName.toString(), invoiceIncrementValue)
 
         } else {
-
                 invoiceIncrementValue =
                     AppPreference.getIntData(PrefConstant.SALE_INVOICE_INCREMENT.keyName.toString()) + 1
-                AppPreference.setIntData(
-                    PrefConstant.SALE_INVOICE_INCREMENT.keyName.toString(),
-                    invoiceIncrementValue
+                AppPreference.setIntData(PrefConstant.SALE_INVOICE_INCREMENT.keyName.toString(), invoiceIncrementValue
                 )
 
-        }
+        }*/
 
         //Below we are saving Transaction related CardProcessedDataModal Data in BatchFileDataTable object to save in DB:-
         batchFileData.serialNumber = AppPreference.getString("serialNumber")
@@ -91,7 +84,7 @@ class StubBatchData(
         val roc = ROCProviderV2.getRoc(AppPreference.getBankCode()) - 1
         batchFileData.roc =
             roc.toString()//ROCProviderV2.getRoc(AppPreference.getBankCode()).toString()
-        batchFileData.invoiceNumber = invoiceIncrementValue.toString()
+        //      batchFileData.invoiceNumber = invoiceIncrementValue.toString()
 
         batchFileData.track2Data =
             if (transactionType != TransactionTypeValues.PRE_AUTH_COMPLETE) {
@@ -192,7 +185,7 @@ class StubBatchData(
           */
 
         batchFileData.authCode = cardProcessedDataModal.getAuthCode() ?: ""
-        batchFileData.invoiceNumber = invoiceIncrementValue.toString()
+        //   batchFileData.invoiceNumber = invoiceIncrementValue.toString()
         batchFileData.tid = terminalData?.terminalId ?: ""
         batchFileData.discaimerMessage = issuerParameterTable?.volletIssuerDisclammer ?: ""
         batchFileData.isTimeOut = false
@@ -261,10 +254,13 @@ class StubBatchData(
 
         batchFileData.invoiceNumber = terminalData?.invoiceNumber.toString()
 
-        terminalData?.invoiceNumber = innvoice?.let { addPad(it, "0", 6, true) }.toString()
-        TerminalParameterTable.performOperation(terminalData!!) {
-            logger("Invoice", terminalData.invoiceNumber + "  update")
-        }
+        /*  terminalData?.invoiceNumber = innvoice?.let { addPad(it, "0", 6, true) }.toString()
+
+          TerminalParameterTable.performOperation(terminalData!!) {
+              logger("Invoice", terminalData.invoiceNumber + "  update")
+          }
+          */
+        TerminalParameterTable.updateTerminalDataInvoiceNumber(terminalData?.invoiceNumber.toString())
 
         //Here we are putting Refund Transaction Status in Batch Table:-
         if (cardProcessedDataModal.getProcessingCode() == ProcessingCode.REFUND.code) {

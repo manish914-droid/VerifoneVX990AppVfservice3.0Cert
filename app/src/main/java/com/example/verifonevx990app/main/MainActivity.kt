@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.appupdate.*
+import com.example.verifonevx990app.bankEmiEnquiry.IssuerListFragment
 import com.example.verifonevx990app.bankemi.GenericEMIIssuerTAndC
 import com.example.verifonevx990app.crosssell.HDFCCrossSellFragment
 import com.example.verifonevx990app.databinding.ActivityMainBinding
@@ -771,6 +772,21 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                 }
             }
 
+            UiAction.EMI_ENQUIRY -> {
+                //todo issuer list Fragment here......
+                transactFragment(IssuerListFragment().apply {
+                    arguments = Bundle().apply {
+                        putSerializable("type", action)
+                        putString(
+                            INPUT_SUB_HEADING,
+                            SubHeaderTitle.REFUND_SUBHEADER_VALUE.title
+                        )
+                    }
+                })
+
+
+            }
+
 
             else -> {
             }
@@ -1217,7 +1233,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                 if (checkInternetConnection()) {
                     val tpt = TerminalParameterTable.selectFromSchemeTable()
                     if (tpt != null) {
-                        tpt.reservedValues = "00000000000001111000"
+                        // tpt.reservedValues = "00000000000001111000"
                         transactFragment(HDFCCrossSellFragment().apply {
                             arguments = Bundle().apply {
                                 putSerializable("type", action)
@@ -1236,11 +1252,19 @@ class MainActivity : BaseActivity(), IFragmentRequest,
             }
 
             EDashboardItem.EMI_ENQUIRY -> {
-                val tpt = TerminalParameterTable.selectFromSchemeTable()
-                VFService.setAidRid(
-                    addPad(tpt?.minCtlsTransAmt ?: "", "0", 12, true),
-                    addPad(tpt?.maxCtlsTransAmt ?: "", "0", 12, true)
-                )
+                if (checkInternetConnection()) {
+                    transactFragment(NewInputAmountFragment().apply {
+                        arguments = Bundle().apply {
+                            putSerializable("type", action)
+                            putString(
+                                INPUT_SUB_HEADING,
+                                SubHeaderTitle.REFUND_SUBHEADER_VALUE.title
+                            )
+                        }
+                    })
+                } else {
+                    VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                }
             }
 
             EDashboardItem.VOID_REFUND -> {
@@ -1612,7 +1636,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                                 )
 
                                 //Added by Ajay Thakur
-                                TerminalParameterTable.updateTerminalDataInvoiceNumber("0")
+                                //      TerminalParameterTable.updateTerminalDataInvoiceNumber("0")
 
                                 //Here we are incrementing sale batch number also for next sale:-
                                 val updatedBatchNumber =
@@ -1751,7 +1775,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
 
                                     //Added by Ajay Thakur
-                                    TerminalParameterTable.updateTerminalDataInvoiceNumber("0")
+                                    //       TerminalParameterTable.updateTerminalDataInvoiceNumber("0")
 
                                     //Here we are incrementing sale batch number also for next sale:-
                                     val updatedBatchNumber =
@@ -2148,6 +2172,11 @@ enum class EMIRequestType(var requestType: String) {
 //endregion
 
 interface IFragmentRequest {
-    fun onFragmentRequest(action: UiAction, data: Any, extraPairData: Pair<String, String>? = null)
+    fun onFragmentRequest(
+        action: UiAction,
+        data: Any,
+        extraPair: Pair<String, String>? = Pair("", "")
+    )
+
     fun onDashBoardItemClick(action: EDashboardItem)
 }

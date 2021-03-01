@@ -1286,8 +1286,13 @@ SubMenuFragment : Fragment(), IOnSubMenuItemSelectListener {
 
                         pcEt.setText(AppPreference.getString(AppPreference.PC_NUMBER_KEY))
                         bankEt.setText(AppPreference.getBankCode())
-                        issuerEt.setText(AppPreference.getString(AppPreference.CRDB_ISSUER_ID_KEY))
-                      //  issuerEt.setText(AppPreference.getString(AppPreference.WALLET_ISSUER_ID))
+                        if (AppPreference.getString(AppPreference.CRDB_ISSUER_ID_KEY).isEmpty()) {
+                            val issuerId = addPad(AppPreference.WALLET_ISSUER_ID, "0", 2)
+                            issuerEt.setText(issuerId)
+                        } else {
+                            issuerEt.setText(AppPreference.getString(AppPreference.CRDB_ISSUER_ID_KEY))
+                            //  issuerEt.setText(AppPreference.getString(AppPreference.WALLET_ISSUER_ID))
+                        }
                         accEt.setText(AppPreference.getString(AppPreference.ACC_SEL_KEY))
 
                         val rg = findViewById<RadioGroup>(R.id.emv_radio_grp_btn)
