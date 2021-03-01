@@ -1,5 +1,6 @@
 package com.example.verifonevx990app.vxUtils
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
@@ -52,6 +53,7 @@ object VFService {
     val NEWAMEXHDFCPort = 4124
     var savedPan = ""
     var PORT = 8101//4124
+    lateinit var strnum: String
 
 
     fun getIpPort():InetSocketAddress?{
@@ -65,6 +67,7 @@ object VFService {
 
     fun connectToVFService(context: Context){
         val conn: ServiceConnection = object : ServiceConnection {
+            @SuppressLint("LongLogTag")
             override fun onServiceConnected(name: ComponentName, service: IBinder) {
                 //IDeviceService is used to get Each Interface Object from Interface:-
                 vfDeviceService = IDeviceService.Stub.asInterface(service)
@@ -73,14 +76,42 @@ object VFService {
                 vfBeeper = IBeeper.Stub.asInterface(service)
                 vfPrinter=IPrinter.Stub.asInterface(service)
 
+
                 try {
                     vfIEMV = vfDeviceService?.emv
                     vfDeviceInfo = vfDeviceService?.deviceInfo
                     vfBeeper = vfDeviceService?.beeper
                     vfPinPad = vfDeviceService?.getPinpad(1)
                     vfPrinter= vfDeviceService?.printer
-                    Log.d("Device Serial No:- " , vfDeviceInfo?.serialNo?:"")
-                    AppPreference.saveString("serialNumber" , vfDeviceInfo?.serialNo?:"")
+
+                    var bundle: Bundle? = vfDeviceInfo?.deviceInfo
+                    var numericSerialnum: String? = bundle?.get("VRKSn") as String
+
+                    if (numericSerialnum != null) {
+                        Log.d("Device Numeric  No:- " ,    numericSerialnum)
+                    }
+
+                    if(isNullOrEmpty(numericSerialnum)){
+                        Log.d("Device  Serial No:- " , vfDeviceInfo?.serialNo?:"")
+                        AppPreference.saveString("serialNumber" , vfDeviceInfo?.serialNo?:"")
+                    }
+                    else{
+                        strnum = String()
+                        var number: String? = bundle?.get("VRKSn") as String
+
+                        var numericSerialnum = number?.split("-")
+
+                        numericSerialnum?.forEach {str->
+                            strnum += str
+                        }
+
+
+                        Log.d("Device Numeric Serial No:- " , strnum)
+                        AppPreference.saveString("serialNumber" , strnum)
+
+                    }
+
+
                     Log.d("Device IMEI No:- " , vfDeviceInfo?.imei?:"")
                     AppPreference.saveString("imeiNumber" , vfDeviceInfo?.imei?:"")
                     Log.d("Android Version:- " , vfDeviceInfo?.androidOSVersion?:"")
