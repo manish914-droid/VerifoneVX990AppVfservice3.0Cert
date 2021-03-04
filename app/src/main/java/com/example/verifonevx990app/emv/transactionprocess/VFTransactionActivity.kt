@@ -351,12 +351,12 @@ class VFTransactionActivity : BaseActivity() {
         binding?.paymentGif?.setOnTouchListener { _, event -> event.action == MotionEvent.ACTION_MOVE }
         val amountValue = "${getString(R.string.rupees_symbol)} $transactionAmountValue"
         findViewById<BHTextView>(R.id.base_amt_tv).text = amountValue
-        transactionalAmount = ((transactionAmountValue.toDouble()) * 100).toLong()
-        otherTransAmount = ((transactionOtherAmountValue.toDouble()) * 100).toLong()
+        transactionalAmount = ((transactionAmountValue.toFloat()) * 100).toLong()
+        otherTransAmount = ((transactionOtherAmountValue.toFloat()) * 100).toLong()
         globalCardProcessedModel.setOtherAmount(otherTransAmount)
         globalCardProcessedModel.setTransactionAmount(transactionalAmount)
-        globalCardProcessedModel.setSaleAmount(((saleAmt.toDouble()) * 100).toLong())
-        globalCardProcessedModel.setTipAmount(((saleWithTipAmt.toDouble()) * 100).toLong())
+        globalCardProcessedModel.setSaleAmount(((saleAmt.toFloat()) * 100).toLong())
+        globalCardProcessedModel.setTipAmount(((saleWithTipAmt.toFloat()) * 100).toLong())
 
         if (isManualEntryAllowed) binding?.manualEntryButton?.visibility =
             View.VISIBLE else binding?.manualEntryButton?.visibility = View.GONE
@@ -1082,7 +1082,7 @@ class VFTransactionActivity : BaseActivity() {
             })
         }
         try {
-            if(null !=dialog && !dialog.isShowing && !(this as Activity).isFinishing) {
+            if (!dialog.isShowing && !(this as Activity).isFinishing) {
                 dialog.show()
             }
 
@@ -1101,7 +1101,7 @@ class VFTransactionActivity : BaseActivity() {
             EIntentRequest.TRANSACTION.code -> {
                 if (resultCode == Activity.RESULT_OK && data != null) {
                     emiCustomerDetails = data.getParcelableExtra<EmiCustomerDetails>("emi")
-                    var cardProcessedData: CardProcessedDataModal =
+                    val cardProcessedData: CardProcessedDataModal =
                         data.getSerializableExtra("cardprocess") as CardProcessedDataModal
                     globalCardProcessedModel = cardProcessedData
                     when (globalCardProcessedModel.getReadCardType()) {
@@ -1359,8 +1359,10 @@ class VFTransactionActivity : BaseActivity() {
                 emiSelectedData = data.getParcelableExtra("emiSchemeDataList")
                 emiTAndCData = data.getParcelableExtra("emiTAndCDataList")
                 Log.d("SelectedEMI Data:- ", emiSelectedData.toString())
-                val emiSelectedTransactionAmount =
-                    ((emiSelectedData?.transactionAmount?.toDouble())?.times(100))?.toLong()
+
+                // Change By lucky  (No need to convert in paisa ie  multiply by 100 it already in paisa i.e multiplied by 100)
+                val emiSelectedTransactionAmount = (emiSelectedData?.transactionAmount)?.toLong()
+                // ((emiSelectedData?.transactionAmount?.toDouble())?.times(100))?.toLong()
                 cardProcessedData.setTransactionAmount(emiSelectedTransactionAmount ?: 0L)
                 DoEmv(
                     this, pinHandler, cardProcessedData,

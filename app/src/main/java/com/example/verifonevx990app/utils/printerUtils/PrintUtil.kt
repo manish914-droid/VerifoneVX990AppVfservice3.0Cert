@@ -2,7 +2,7 @@ package com.example.verifonevx990app.utils.printerUtils
 
 /**
  * Created by Lucky Singh.
- * Modifications needed...
+ * Modifications needed as per requirements...
  */
 
 import android.app.Activity
@@ -13,6 +13,7 @@ import android.text.TextUtils
 import android.util.Log
 import com.example.verifonevx990app.BuildConfig
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.bankemi.BankEMIDataModal
 import com.example.verifonevx990app.crosssell.CrossSellReportWithType
 import com.example.verifonevx990app.crosssell.ReportDownloadedModel
 import com.example.verifonevx990app.crosssell.TotalCrossellRep
@@ -40,7 +41,6 @@ import java.io.InputStream
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
-
 
 const val HDFC_LOGO = "hdfc_print_logo.bmp"
 const val AMEX_LOGO = "amex_print.bmp"
@@ -74,7 +74,6 @@ class PrintUtil(context: Context?) {
             ex.printStackTrace()
             logger("PrintUtil", "DEAD OBJECT EXCEPTION", "e")
             //  VFService.showToast(".... TRY AGAIN ....")
-
 
             failureImpl(
                 contexT as Activity,
@@ -2412,6 +2411,171 @@ class PrintUtil(context: Context?) {
 
     }
 
+
+    fun printEMIEnquiry(
+        context: Context?,
+        issuerDataModelList: ArrayList<BankEMIDataModal>,
+        amt: String, bankName: String, printerCallback: (Boolean, String) -> Unit
+    ) {
+        try {
+            //    var tenure= arrayListOf<TenureDataModel>()
+            setLogoAndHeader()
+            val terminalData = TerminalParameterTable.selectFromSchemeTable()
+            val dateTime: Long = Calendar.getInstance().timeInMillis
+            val time: String = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(dateTime)
+            val date: String = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(dateTime)
+            val year: String = SimpleDateFormat("yy", Locale.getDefault()).format(dateTime)
+            logger("AUTH YEAR->", year, "e")
+            alignLeftRightText(textInLineFormatBundle, "DATE : $date", "TIME : $time")
+            alignLeftRightText(
+                textInLineFormatBundle,
+                "MID : ${terminalData?.merchantId}",
+                "TID : ${terminalData?.terminalId}"
+            )
+            alignLeftRightText(
+                textInLineFormatBundle,
+                "BATCH NO : ${terminalData?.batchNumber}",
+                ""
+            )
+            textFormatBundle.putInt(
+                PrinterConfig.addText.FontSize.BundleName,
+                PrinterConfig.addText.FontSize.LARGE_DH_32_64_IN_BOLD
+            )
+            textFormatBundle.putInt(
+                PrinterConfig.addText.Alignment.BundleName,
+                PrinterConfig.addText.Alignment.CENTER
+            )
+            printer?.addText(textFormatBundle, "EMI CATALOGUE")
+            printer?.addText(textFormatBundle, "BANK NAME   :  $bankName")
+            //  centerText(textFormatBundle, "EMI CATALOGUE", true)
+            fun printt(modelData: BankEMIDataModal) {
+
+                alignLeftRightText(
+                    textInLineFormatBundle,
+                    "AMOUNT",
+                    amt,
+                    " :  "
+                )
+                //    holder.transactionAmount.text =enquiryAmt
+                val tenureDuration = "${modelData.tenure} Months"
+                val tenureHeadingDuration = "${modelData.tenure} Months Scheme"
+                var roi = divideAmountBy100(modelData.tenureInterestRate.toInt()).toString()
+                var loanamt = divideAmountBy100(modelData.loanAmount.toInt()).toString()
+                roi = "%.2f".format(roi.toDouble()) + " %"
+                loanamt = "%.2f".format(loanamt.toDouble())
+                alignLeftRightText(
+                    textInLineFormatBundle,
+                    "ROI (p.a.)",
+                    roi,
+                    " :  "
+                )
+                alignLeftRightText(
+                    textInLineFormatBundle,
+                    "TENURE",
+                    tenureDuration,
+                    " :  "
+                )
+                alignLeftRightText(
+                    textInLineFormatBundle,
+                    "LOAN AMOUNT",
+                    loanamt,
+                    " :  INR"
+                )
+                alignLeftRightText(
+                    textInLineFormatBundle,
+                    "MONTHLY EMI",
+                    divideAmountBy100(modelData.emiAmount.toInt()).toString(),
+                    " :  INR"
+                )
+                alignLeftRightText(
+                    textInLineFormatBundle,
+                    "TOTAL INTEREST",
+                    divideAmountBy100(modelData.totalInterestPay.toInt()).toString(),
+                    " :  INR"
+                )
+                alignLeftRightText(
+                    textInLineFormatBundle,
+                    "TOTAL Amt(with Int)",
+                    divideAmountBy100(modelData.totalEmiPay.toInt()).toString(),
+                    " :  INR"
+                )
+
+                /*
+                   //If Discount Amount Available show this else if CashBack Amount show that:-
+                   if (modelData.discountAmount.toInt() != 0) {
+                       holder.discountAmount.text =
+                           divideAmountBy100(modelData.discountAmount.toInt()).toString()
+                       holder.discountLinearLayout.visibility = View.VISIBLE
+                       holder.cashBackLinearLayout.visibility = View.GONE
+                   }
+                   if (modelData.cashBackAmount.toInt() != 0) {
+                       holder.cashBackAmount.text =
+                           divideAmountBy100(modelData.cashBackAmount.toInt()).toString()
+                       holder.cashBackLinearLayout.visibility = View.VISIBLE
+                       holder.discountLinearLayout.visibility = View.GONE
+                   }*/
+
+            }
+
+            for (data in issuerDataModelList) {
+                printSeperator(textFormatBundle)
+                printt(data)
+            }
+
+            printSeperator(textFormatBundle)
+            printer?.feedLine(1)
+
+            printer?.addText(textFormatBundle, footerText[1])
+
+            printLogo("BH.bmp")
+            printer?.addText(textFormatBundle, "App Version : ${BuildConfig.VERSION_NAME}")
+            printer?.addText(textFormatBundle, "---------X-----------X----------")
+            printer?.feedLine(4)
+
+            //  if (schemesToPrint.size > 0) {
+            printer?.startPrint(object : PrinterListener.Stub() {
+                override fun onFinish() {
+                    logger("Print", "Success")
+                    printerCallback(true, "SUCCESS")
+                }
+
+                override fun onError(error: Int) {
+                    logger("Print", "Fail")
+                    printerCallback(false, "Printing Error")
+                }
+            })
+            //      } else {
+            //    VFService.showToast("Select tenure")
+            //    printer?.cleanCache()
+            //    return
+
+            //    }
+
+        } catch (ex: DeadObjectException) {
+            ex.printStackTrace()
+            failureImpl(
+                context as Activity,
+                "Printer Service stopped.",
+                "Please take chargeslip from the Report menu."
+            )
+        } catch (e: RemoteException) {
+            e.printStackTrace()
+            failureImpl(
+                context as Activity,
+                "Printer Service stopped.",
+                "Please take chargeslip from the Report menu."
+            )
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            failureImpl(
+                context as Activity,
+                "Printer Service stopped.",
+                "Please take chargeslip from the Report menu."
+            )
+        }
+
+    }
+
     private fun totalPaymentforTenure(amount: Float, tenure: TenureDataModel): Float {
         /*return amount + tenure.proccesingFee.toFloat() - (tenure.emiAmount?.cashBack
             ?: 0f) - (tenure.emiAmount?.discount ?: 0f) + (tenure.emiAmount?.totalInterest ?: 0f)*/
@@ -3252,26 +3416,6 @@ internal open class IPrintListener(
         when (copyType) {
             EPrintCopyType.MERCHANT -> {
                 GlobalScope.launch(Dispatchers.Main) {
-                    /*  var toastMsg = ""
-                      toastMsg = when (batch.operationType) {
-                          DetectCardType.MAG_CARD_TYPE.cardTypeName -> {
-                              context?.getString(R.string.transaction_approved_successfully_Mag)
-                                  .toString()
-                          }
-                          else -> {
-                              context?.getString(R.string.transaction_approved_successfully)
-                                  .toString()
-                          }
-                      }
-                      val toast = Toast.makeText(
-                          context,
-                          toastMsg,
-                          Toast.LENGTH_LONG
-                      )
-                      toast.setGravity(Gravity.CENTER_VERTICAL or Gravity.CENTER_HORIZONTAL, 0, 0)
-                      toast.show()*/
-                    /*   context?.let { txnSuccessToast(it) }
-                       delay(4000)*/
                     if (batch.transactionType == TransactionType.TIP_SALE.type || batch.transactionType == TransactionType.VOID.type) {
                         (context as BaseActivity).showMerchantAlertBoxForTipSale(
                             printerUtil,

@@ -609,17 +609,18 @@ class KeyExchanger(
         addFieldByHex(48, ConnectionTimeStamps.getStamp())
 
         //region=========adding field 61=============
-        val f61 = "3VX675 BonusHub  01.01.32.200626000000000000000000"//getF61()
+        val f61 = "3VX675 BonusHub  01.01.32.200626000000000000000000"//
+        getF61()
         addFieldByHex(61, f61)
         //endregion
 
         //region=====adding field 63============
-      //  val bankCode: String = "01"
+        //  val bankCode: String = "01"
 
-        val bankCode =  AppPreference.getBankCode()
+        val bankCode = AppPreference.getBankCode()
 
         //Serial Number from VF Service AIDL:-
-        val deviceSerial = addPad(AppPreference.getString("serialNumber") , " " , 15 , false)
+        val deviceSerial = addPad(AppPreference.getString("serialNumber"), " ", 15, false)
         val f63 = "$deviceSerial$bankCode"
         addFieldByHex(63, f63)
         //endregion

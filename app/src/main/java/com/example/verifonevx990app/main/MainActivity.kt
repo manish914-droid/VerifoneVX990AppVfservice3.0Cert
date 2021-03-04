@@ -773,14 +773,16 @@ class MainActivity : BaseActivity(), IFragmentRequest,
             }
 
             UiAction.EMI_ENQUIRY -> {
-                //todo issuer list Fragment here......
+                val amt = (data as Pair<*, *>).first.toString()
+
                 transactFragment(IssuerListFragment().apply {
                     arguments = Bundle().apply {
                         putSerializable("type", action)
-                        putString(
-                            INPUT_SUB_HEADING,
-                            SubHeaderTitle.REFUND_SUBHEADER_VALUE.title
-                        )
+                        putString("proc_code", ProcessingCode.PRE_AUTH.code)
+                        putString(INPUT_SUB_HEADING, SubHeaderTitle.REFUND_SUBHEADER_VALUE.title)
+                        putString("mobileNumber", extraPairData?.first)
+                        putString("enquiryAmt", amt)
+
                     }
                 })
 
@@ -1445,6 +1447,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                 is TipAdjustFragment -> {
                 }
                 is PendingPreAuthFragment -> supportFragmentManager.popBackStackImmediate()
+                is IssuerListFragment -> supportFragmentManager.popBackStackImmediate()
             }
         }
     }
@@ -1476,10 +1479,13 @@ class MainActivity : BaseActivity(), IFragmentRequest,
             this
         ) { detailPrintStatus ->
             if (detailPrintStatus) {
+
                 val settlementPacket = CreateSettlementPacket(
                     processingCode,
                     settlementBatchData
                 ).createSettlementISOPacket()
+
+
                 val isoByteArray = settlementPacket.generateIsoByteRequest()
                 GlobalScope.launch(Dispatchers.IO) {
                     settleBatch(isoByteArray)

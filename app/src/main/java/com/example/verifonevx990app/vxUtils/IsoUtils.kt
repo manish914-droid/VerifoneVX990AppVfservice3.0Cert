@@ -135,8 +135,6 @@ enum class ProcessingCode(val code: String) {
     SETTLEMENT("970001"),
     FORCE_SETTLEMENT("970002"),
     ZERO_SETTLEMENT("970003"),
-
-    EMI_ENQUIRY("920098"),
     VOID_REFUND("942001"),
     PENDING_PREAUTH("931000"),
     VOID_PREAUTH("940000"),
@@ -153,7 +151,8 @@ enum class ProcessingCode(val code: String) {
     SALE_WITH_CASH("922001"),
     PRE_AUTH("920000"),
     CROSS_SELL("982001"),
-    BANK_EMI("982002")
+    BANK_EMI("982002"),
+    EMI_ENQUIRY("982002"),
 }
 
 enum class Nii(val nii: String) {

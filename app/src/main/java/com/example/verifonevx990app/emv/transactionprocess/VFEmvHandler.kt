@@ -74,9 +74,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
         //   VFService.showToast("onRequestOnlineProcess result=$result signal=$signature")
         when (result) {
             ConstPBOCHandler.onRequestOnlineProcess.aaResult.VALUE_RESULT_AARESULT_ARQC, ConstPBOCHandler.onRequestOnlineProcess.aaResult.VALUE_RESULT_QPBOC_ARQC ->
-                aaResult.getString(
-                    ConstPBOCHandler.onRequestOnlineProcess.aaResult.KEY_ARQC_DATA_String
-                )
+                aaResult.getString(ConstPBOCHandler.onRequestOnlineProcess.aaResult.KEY_ARQC_DATA_String)
                     ?.let {
                         //VFService.showToast(it)
                         //println("ARQC data is -> " + it)

@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.bankEmiEnquiry.CreateEMIEnquiryTransactionPacket
 import com.example.verifonevx990app.databinding.FragmentEmiBinding
 import com.example.verifonevx990app.databinding.FragmentEmiDetailBinding
 import com.example.verifonevx990app.emv.transactionprocess.CardProcessedDataModal
@@ -320,7 +321,7 @@ class EmiActivity : BaseActivity(), IBenefitTable, View.OnClickListener {
 
                 cardProcessedData?.setEmiType(EIntentRequest.EMI_ENQUIRY.code)
                 val transactionEMIISO =
-                    CreateEMIEnquiryTransactionPacket(data).createTransactionPacket()
+                    CreateEMIEnquiryTransactionPacket(data.toString()).createTransactionPacket()
                 logger("SEND SMS REQUEST PACKET --->>", transactionEMIISO.isoMap, "e")
               //  runOnUiThread { showProgress(getString(R.string.sale_data_sync)) }
                 GlobalScope.launch(Dispatchers.IO) {

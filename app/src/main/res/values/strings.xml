@@ -370,6 +370,8 @@
     <string name="download_tmk">Download TMK</string>
     <string name="do_you_want_to_download_tmk">Do You Want To Download TMK?</string>
     <string name="do_enquiry">Do Enquiry</string>
+    <string name="sms_sent_to_mob">SMS Sent On Your Mobile Number \n Kindly Check</string>
+    <string name="select_ssuer">Select Issuer For EMI Enquiry</string>
 
 
 </resources>

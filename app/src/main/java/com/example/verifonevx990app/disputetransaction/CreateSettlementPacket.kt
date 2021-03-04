@@ -100,7 +100,7 @@ class CreateSettlementPacket(
                         }
                         TransactionType.EMI_SALE.type -> {
                             saleCount = saleCount.plus(1)
-                            saleAmount = saleAmount.plus(batchList[i].transactionalAmmount.toLong())
+                            saleAmount = saleAmount.plus(batchList[i].emiTransactionAmount.toLong())
                         }
                         TransactionType.SALE_WITH_CASH.type -> {
                             saleCount = saleCount.plus(1)
@@ -147,6 +147,10 @@ class CreateSettlementPacket(
             } else {
                 addFieldByHex(63, addPad(0, "0", 90, toLeft = false))
             }
+
+
         }
+        logger("SETTLEMENT REQ PACKET -->", this.isoMap, "e")
+
     }
 }
