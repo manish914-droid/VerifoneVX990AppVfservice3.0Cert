@@ -290,6 +290,12 @@ suspend fun saveToDB(spliter: List<String>) {
                 terminalParameterTable.bankEnquiryMobNumberEntry =
                     terminalParameterTable.reservedValues[7].toString().toInt() == 1
             }
+            // CheckPromo....
+            if (terminalParameterTable.reservedValues[4].toString().toInt() == 1) {
+                terminalParameterTable.hasPromo = "1"
+                //Check for Enabling Phone number at the time of EMI Enquiry on terminal by reservedValues check)
+                //  terminalParameterTable.bankEnquiryMobNumberEntry = terminalParameterTable.reservedValues[7].toString().toInt() == 1
+            }
 
             TerminalParameterTable.performOperation(terminalParameterTable) {
                 logger("saveToDB", "mTpt")

@@ -1918,6 +1918,9 @@ open class TerminalParameterTable() : RealmObject(), Parcelable {
     @field:BHDashboardItem(EDashboardItem.EMI_ENQUIRY)
     var bankEnquiry: String = ""
 
+    @field:BHDashboardItem(EDashboardItem.MERCHANT_PROMO)
+    var hasPromo: String = ""
+
     var bankEnquiryMobNumberEntry: Boolean = false
 
 
@@ -4038,8 +4041,9 @@ enum class EDashboardItem(
     CASH_ADVANCE("Cash Advance", R.drawable.ic_cash_advance),
     BRAND_EMI("Brand EMI", R.drawable.ic_brand_emi),
     PENDING_OFFLINE_SALE("View Offline Sale", R.drawable.ic_pending_preauth),
-    PREAUTHCATAGORY("Pre-Auth", R.drawable.ic_preauth, 9),
+    PRE_AUTH_CATAGORY("Pre-Auth", R.drawable.ic_preauth, 9),
     MORE("View More", R.drawable.ic_arrow_down, 999),
+    MERCHANT_PROMO("Merchant Promo", R.drawable.ic_cash_advance, 15),
     LESS("View Less", R.drawable.ic_arrow_up, 888);
 
 }

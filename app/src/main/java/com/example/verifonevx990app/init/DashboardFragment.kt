@@ -256,7 +256,7 @@ class DashboardFragment : Fragment() {
                     item == EDashboardItem.PREAUTH || item == EDashboardItem.PREAUTH_COMPLETE
                             || item == EDashboardItem.VOID_PREAUTH || item == EDashboardItem.PENDING_PREAUTH
                 }
-                val preAuth = EDashboardItem.PREAUTHCATAGORY
+                val preAuth = EDashboardItem.PRE_AUTH_CATAGORY
                 preAuth.childList = totalPreAuthItem
                 itemList.add(preAuth)
             }

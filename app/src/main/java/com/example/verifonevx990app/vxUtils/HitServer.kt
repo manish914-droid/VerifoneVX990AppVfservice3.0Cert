@@ -64,8 +64,8 @@ object HitServer {
                     logger(TAG, "len=$len, data = $responseStr")
 
                     socket.close()
-                    irh?.clearReversal()
-            //    }
+
+                //    }
         //        catch (ex: Exception) {
            //         ex.printStackTrace()
              //       callback(responseStr ?: "", true)

@@ -153,6 +153,17 @@ enum class ProcessingCode(val code: String) {
     CROSS_SELL("982001"),
     BANK_EMI("982002"),
     EMI_ENQUIRY("982002"),
+
+    // Merchant Promo......
+    INITIALIZE_PROMOTION("980100"),
+    ADD_CUSTOMER("980200"),
+    REDEEM_PROMO_INITIATE_OTP("980300"),
+    REDEEM_PROMO_WITH_OTP("980400"),
+    REDEEM_PROMO_WITHOUT_OTP("980500"),
+    SEND_PROMO("980600"),
+    ON_PAYMENT_PROMO("980600"),
+    PROMO_REPORT("980700"),
+
 }
 
 enum class Nii(val nii: String) {

@@ -549,7 +549,7 @@ class KeyExchanger(
                 if (success) {
                     GlobalScope.launch {
                         //setAutoSettlement()  // Setting auto settlement.
-                        downloadPromo()  // Setting
+                        // downloadPromo()  // Setting
                     }
                     (context as MainActivity).hideProgress()
                     GlobalScope.launch(Dispatchers.Main) {
@@ -707,11 +707,8 @@ suspend fun downloadPromo() {
     val fileArray = mutableListOf<Byte>()
 
     if (tpt != null && sc.open()) {
-
         //======First Get header and footer, then proceed for image downloading =========
-
         val isoW = IsoDataWriter().apply {
-
             mti = Mti.MTI_INIT.mti
             addField(3, ProcessingCode.CHARGE_SLIP_HEADER_FOOTER.code)
             addField(11, ROCProvider.getRoc().toString())
@@ -765,7 +762,6 @@ suspend fun downloadPromo() {
         var pCode = ""
         var packetRecd: Int = 0
         do {
-
             val data = isoW.generateIsoByteRequest()
 
             val resp = sc.sendData(data)
@@ -802,4 +798,104 @@ suspend fun downloadPromo() {
         unzipZipedBytes(fileArray.toByteArray())
     }
 
+}
+
+suspend fun getPromo(
+    field57RequestData: String,
+    processingCode: String,
+    cb: (Boolean, String, String) -> Unit
+) {
+    val tpt = TerminalParameterTable.selectFromSchemeTable()
+    // Promo Available or not at TID
+    if ((tpt?.reservedValues?.get(4)).toString().toInt() == 1) {
+        val idw = IsoDataWriter().apply {
+            val terminalData = TerminalParameterTable.selectFromSchemeTable()
+            if (terminalData != null) {
+                mti = Mti.EIGHT_HUNDRED_MTI.mti
+
+                //Processing Code Field 3
+                addField(3, processingCode)
+
+                //STAN(ROC) Field 11
+                addField(11, ROCProviderV2.getRoc(AppPreference.getBankCode()).toString())
+
+                //NII Field 24
+                addField(24, Nii.HDFC_DEFAULT.nii)
+
+                //TID Field 41
+                addFieldByHex(41, terminalData.terminalId)
+
+                //Connection Time Stamps Field 48
+                //    addFieldByHex(48, ConnectionTimeStamps.getStamp())
+
+                //adding Field 57
+                addFieldByHex(57, field57RequestData)
+
+                //adding Field 61
+                val version = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)
+                val pcNumber = addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY), "0", 9)
+                val pcNumber2 =
+                    addPad(AppPreference.getString(AppPreference.PC_NUMBER_KEY_2), "0", 9)
+                val f61 = ConnectionType.GPRS.code + addPad(
+                    AppPreference.getString("deviceModel"),
+                    " ",
+                    6,
+                    false
+                ) + addPad(
+                    VerifoneApp.appContext.getString(R.string.app_name),
+                    " ",
+                    10,
+                    false
+                ) + version + pcNumber + pcNumber2
+                //adding Field 61
+                addFieldByHex(61, f61)
+
+                //adding Field 63
+                val deviceSerial = addPad(AppPreference.getString("serialNumber"), " ", 15, false)
+                val bankCode = AppPreference.getBankCode()
+                val f63 = "$deviceSerial$bankCode"
+                addFieldByHex(63, f63)
+            }
+        }
+
+        logger("Transaction RESPONSE --->>", idw.isoMap, "e")
+
+        val idwByteArray = idw.generateIsoByteRequest()
+
+        var responseField57 = ""
+        var responseMsg = ""
+        var isBool = false
+        HitServer.hitServer(idwByteArray, { result, success ->
+            if (success) {
+                ROCProviderV2.incrementFromResponse(
+                    ROCProviderV2.getRoc(AppPreference.getBankCode()).toString(),
+                    AppPreference.getBankCode()
+                )
+                val responseIsoData: IsoDataReader = readIso(result, false)
+                logger("Transaction RESPONSE ", "---", "e")
+                logger("Transaction RESPONSE --->>", responseIsoData.isoMap, "e")
+                Log.e(
+                    "Success 39-->  ",
+                    responseIsoData.isoMap[39]?.parseRaw2String().toString() + "---->" +
+                            responseIsoData.isoMap[58]?.parseRaw2String().toString()
+                )
+                val successResponseCode = responseIsoData.isoMap[39]?.parseRaw2String().toString()
+                if (responseIsoData.isoMap[57] != null) {
+                    responseField57 = responseIsoData.isoMap[57]?.parseRaw2String().toString()
+                }
+                if (responseIsoData.isoMap[58] != null) {
+                    responseMsg = responseIsoData.isoMap[58]?.parseRaw2String().toString()
+                }
+                isBool = successResponseCode == "00"
+                cb(isBool, responseMsg, responseField57)
+            } else {
+                ROCProviderV2.incrementFromResponse(
+                    ROCProviderV2.getRoc(AppPreference.getBankCode()).toString(),
+                    AppPreference.getBankCode()
+                )
+                isBool = false
+                cb(isBool, responseMsg, responseField57)
+            }
+        }, {})
+    }
 }

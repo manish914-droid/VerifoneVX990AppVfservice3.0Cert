@@ -1205,7 +1205,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                 }
             }
 
-            EDashboardItem.PREAUTHCATAGORY -> {
+            EDashboardItem.PRE_AUTH_CATAGORY -> {
                 if (!action.childList.isNullOrEmpty()) {
                     dashBoardCatagoryDialog(action.childList!!)
 
@@ -1291,6 +1291,26 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                     }
                 } else {
                     checkAndPerformOperation()
+                }
+            }
+
+            EDashboardItem.MERCHANT_PROMO -> {
+                if (checkInternetConnection()) {
+                    val tpt = TerminalParameterTable.selectFromSchemeTable()
+                    if (tpt != null) {
+                        GlobalScope.launch(Dispatchers.IO) {
+                            getPromo(
+                                "000000000000",
+                                ProcessingCode.INITIALIZE_PROMOTION.code
+                            ) { bool, str, str2 ->
+
+                            }
+                        }
+
+                    } else
+                        VFService.showToast(getString(R.string.something_went_wrong))
+                } else {
+                    VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
                 }
             }
 
