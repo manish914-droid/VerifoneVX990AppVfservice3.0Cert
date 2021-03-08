@@ -9,6 +9,7 @@ import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.text.InputFilter
 import android.text.InputType
@@ -31,6 +32,7 @@ import com.example.verifonevx990app.R
 import com.example.verifonevx990app.appupdate.*
 import com.example.verifonevx990app.bankEmiEnquiry.IssuerListFragment
 import com.example.verifonevx990app.bankemi.GenericEMIIssuerTAndC
+import com.example.verifonevx990app.brandemi.BrandEMIMasterCategoryFragment
 import com.example.verifonevx990app.crosssell.HDFCCrossSellFragment
 import com.example.verifonevx990app.databinding.ActivityMainBinding
 import com.example.verifonevx990app.databinding.AuthCatogoryDialogBinding
@@ -639,7 +641,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                 val amt = (data as Pair<*, *>).first.toString()
                 if (checkInternetConnection()) {
                     Log.d("Bank EMI Clicked:- ", "Clicked")
-                    GenericEMIIssuerTAndC { issuerTermsAndConditionData ->
+                    GenericEMIIssuerTAndC { issuerTermsAndConditionData, issuerHostResponseCodeAndMsg ->
                         val issuerTAndCData = issuerTermsAndConditionData.first
                         val responseBool = issuerTermsAndConditionData.second
                         if (issuerTAndCData.isNotEmpty() && responseBool) {
@@ -785,15 +787,10 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
                     }
                 })
-
-
             }
-
-
             else -> {
             }
         }
-
     }
 
     /* //Old Amex
@@ -1269,23 +1266,40 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                 }
             }
 
+            EDashboardItem.BRAND_EMI -> {
+                if (checkInternetConnection()) {
+                    transactFragment(BrandEMIMasterCategoryFragment().apply {
+                        arguments = Bundle().apply {
+                            putSerializable("type", action)
+                            putString(
+                                INPUT_SUB_HEADING,
+                                SubHeaderTitle.Brand_EMI_Master_Category.title
+                            )
+                        }
+                    })
+                } else {
+                    VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                }
+            }
+
             EDashboardItem.VOID_REFUND -> {
                 if (!AppPreference.getBoolean(PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString()) &&
                     !AppPreference.getBoolean(PrefConstant.INSERT_PPK_DPK.keyName.toString()) &&
                     !AppPreference.getBoolean(PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString())
                 ) {
                     if (checkInternetConnection()) {
-                        transactFragment(VoidOfRefund()
-                            .apply {
-                                arguments = Bundle().apply {
-                                    putSerializable("trans_type", TransactionType.VOID_REFUND)
-                                    putSerializable("type", action)
-                                    putString(
-                                        INPUT_SUB_HEADING,
-                                        SubHeaderTitle.VOID_REFUND_SUBHEADER_VALUE.title
-                                    )
-                                }
-                            })
+                        transactFragment(
+                            VoidOfRefund()
+                                .apply {
+                                    arguments = Bundle().apply {
+                                        putSerializable("trans_type", TransactionType.VOID_REFUND)
+                                        putSerializable("type", action)
+                                        putString(
+                                            INPUT_SUB_HEADING,
+                                            SubHeaderTitle.VOID_REFUND_SUBHEADER_VALUE.title
+                                        )
+                                    }
+                                })
                     } else {
                         VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
                     }
@@ -1478,7 +1492,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
             super.finishAffinity()
         } else {
             isToExit = true
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 isToExit = false
                 showToast("Double click back button to exit.")
             }, 500)
@@ -2030,7 +2044,8 @@ enum class SubHeaderTitle(val title: String) {
     REFUND_SUBHEADER_VALUE("Refund"),
     EMI_CATALOG("EMI Enquiry"),
     BANK_EMI("Bank EMI"),
-    CROSS_SELL_SUBHEADER_VALUE("Cross Sell")
+    CROSS_SELL_SUBHEADER_VALUE("Cross Sell"),
+    Brand_EMI_Master_Category("Brand EMI Master Category")
 
 }
 

@@ -115,7 +115,7 @@ enum class Mti(val mti: String) {
     CROSS_SELL_MTI("0800"),
     BANK_EMI("0800"),
     EIGHT_HUNDRED_MTI("0800"),
-    BANKI_EMI("0800")
+    BANKI_EMI("0800"),
 }
 
 enum class ProcessingCode(val code: String) {
@@ -153,6 +153,7 @@ enum class ProcessingCode(val code: String) {
     CROSS_SELL("982001"),
     BANK_EMI("982002"),
     EMI_ENQUIRY("982002"),
+    BRAND_EMI("982002"),
 
     // Merchant Promo......
     INITIALIZE_PROMOTION("980100"),
@@ -171,7 +172,8 @@ enum class Nii(val nii: String) {
     SOURCE("0001"),
     SMS_PAY("0411"),
     HDFC_DEFAULT("0002"),
-    BANK_EMI("0028")
+    BANK_EMI("0028"),
+    BRAND_EMI_MASTER("0028")
 }
 
 enum class ConnectionType(val code: String) {

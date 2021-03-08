@@ -9,7 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class GenericEMIIssuerTAndC(var issuerTAndCCallBack: (Pair<MutableList<String>, Boolean>) -> Unit) {
+class GenericEMIIssuerTAndC(var issuerTAndCCallBack: (Pair<MutableList<String>, Boolean>, Pair<String, String>) -> Unit) {
 
     //region====================Issuer Terms And Conditions Variables:-
     private var issuerField57Data = "${EMIRequestType.ISSUER_T_AND_C.requestType}^0"
@@ -52,14 +52,17 @@ class GenericEMIIssuerTAndC(var issuerTAndCCallBack: (Pair<MutableList<String>, 
                         if (responseCode == "00") {
                             GlobalScope.launch(Dispatchers.Main) {
                                 //Processing BrandEMIMasterData:-
-                                stubbingIssuerTAndCData(issuerTAndCData, hostMsg)
+                                stubbingIssuerTAndCData(issuerTAndCData, responseCode, hostMsg)
                             }
                         } else {
                             ROCProviderV2.incrementFromResponse(
                                 ROCProviderV2.getRoc(AppPreference.getBankCode()).toString(),
                                 AppPreference.getBankCode()
                             )
-                            issuerTAndCCallBack(Pair(issuerTermsAndConditionsDataList, false))
+                            issuerTAndCCallBack(
+                                Pair(issuerTermsAndConditionsDataList, false),
+                                Pair(responseCode, hostMsg)
+                            )
 
                         }
                     } else {
@@ -67,7 +70,10 @@ class GenericEMIIssuerTAndC(var issuerTAndCCallBack: (Pair<MutableList<String>, 
                             ROCProviderV2.getRoc(AppPreference.getBankCode()).toString(),
                             AppPreference.getBankCode()
                         )
-                        issuerTAndCCallBack(Pair(issuerTermsAndConditionsDataList, false))
+                        issuerTAndCCallBack(
+                            Pair(issuerTermsAndConditionsDataList, false),
+                            Pair("", result)
+                        )
                     }
                 }, {})
             }
@@ -111,7 +117,11 @@ class GenericEMIIssuerTAndC(var issuerTAndCCallBack: (Pair<MutableList<String>, 
     //endregion
 
     //region===========================Below method is used to Stubbing issuer terms and conditions data:-
-    private fun stubbingIssuerTAndCData(issuerTAndC: String, hostMsg: String) {
+    private fun stubbingIssuerTAndCData(
+        issuerTAndC: String,
+        responseCode: String,
+        hostMsg: String
+    ) {
         GlobalScope.launch(Dispatchers.Main) {
             if (!TextUtils.isEmpty(issuerTAndC)) {
                 val dataList = parseDataListWithSplitter("|", issuerTAndC)
@@ -134,7 +144,10 @@ class GenericEMIIssuerTAndC(var issuerTAndCCallBack: (Pair<MutableList<String>, 
                             "${EMIRequestType.ISSUER_T_AND_C.requestType}^$issuerTAndCTotalRecord"
                         fetchIssuerTAndC()
                     } else {
-                        issuerTAndCCallBack(Pair(issuerTermsAndConditionsDataList, true))
+                        issuerTAndCCallBack(
+                            Pair(issuerTermsAndConditionsDataList, true),
+                            Pair(responseCode, hostMsg)
+                        )
                         //TODO Here we need to Save Data in DB and Callback======================
                     }
                 }

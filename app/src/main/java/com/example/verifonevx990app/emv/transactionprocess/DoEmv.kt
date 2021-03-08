@@ -187,8 +187,8 @@ class DoEmv(
 
     //region========================================Below Method is a Handler for EMV CardType:-
     private fun emvHandler(): VFEmvHandler {
-        println("DoEmv VfemvHandler is calling")
-        println("iemv value is" + iemv.toString())
+        println("DoEmv VfEmvHandler is calling")
+        println("IEmv value is" + iemv.toString())
         return VFEmvHandler(activity, handler, iemv, cardProcessedDataModal) { cardProcessedData ->
             transactionCallback(cardProcessedData)
             Log.d("Track2Data:- ", cardProcessedData.getTrack2Data() ?: "")
