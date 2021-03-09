@@ -17,6 +17,7 @@ import com.example.verifonevx990app.databinding.BrandEmiMasterCategoryFragmentBi
 import com.example.verifonevx990app.databinding.ItemBrandEmiFooterBinding
 import com.example.verifonevx990app.databinding.ItemBrandEmiMasterBinding
 import com.example.verifonevx990app.main.EMIRequestType
+import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.main.SplitterTypes
 import com.example.verifonevx990app.vxUtils.*
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +25,11 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
+/**
+This is a Brand EMI Master Category Data Fragment
+Here we are Fetching Master Category Data From Host and Displaying on UI:-
+================Written By Ajay Thakur on 8th March 2021====================
+ */
 class BrandEMIMasterCategoryFragment : Fragment() {
     private var binding: BrandEmiMasterCategoryFragmentBinding? = null
     private var iDialog: IDialog? = null
@@ -128,7 +134,7 @@ class BrandEMIMasterCategoryFragment : Fragment() {
                                 iDialog?.alertBoxWithAction(null, null,
                                     getString(R.string.error), hostMsg,
                                     false, getString(R.string.positive_button_ok),
-                                    {}, {})
+                                    { parentFragmentManager.popBackStackImmediate() }, {})
                             }
                         }
                     } else {
@@ -141,7 +147,7 @@ class BrandEMIMasterCategoryFragment : Fragment() {
                             iDialog?.alertBoxWithAction(null, null,
                                 getString(R.string.error), result,
                                 false, getString(R.string.positive_button_ok),
-                                {}, {})
+                                { parentFragmentManager.popBackStackImmediate() }, {})
                         }
                     }
                 }, {})
@@ -214,16 +220,17 @@ class BrandEMIMasterCategoryFragment : Fragment() {
                 fetchBrandEMIMasterDataFromHost()
             } else {
                 Log.d("Navigate To Category:- ", position.toString())
-                if (true/*matchHostAndDBData()*/) {
-                    /* navController?.navigate(R.id.brandEMIMasterSubCategoryFragment, Bundle().apply {
+                navigateToBrandEMISubCategoryFragment(position)
+                /*if (true*//*matchHostAndDBData()*//*) {
+                    *//* navController?.navigate(R.id.brandEMIMasterSubCategoryFragment, Bundle().apply {
                          putString("brandData", brandEmiMasterDataList[position].recordData)
                          putString("categoryUpdatedTimeStamp", brandCategoryUpdatedTimeStamp)
                          putString("brandTimeStamp", brandTimeStamp)
                          putSerializable("type", action)
-                     })*/
+                     })*//*
                 } else {
                     iDialog?.showProgress()
-                    /*FetchIssuerAndBrandTAndCData(
+                    *//*FetchIssuerAndBrandTAndCData(
                         requireContext(), BrandEMIRequestType.ISSUER_T_AND_C.requestType,
                         BrandEMIRequestType.BRAND_T_AND_C.requestType
                     ) { termsAndConditionsData ->
@@ -314,11 +321,28 @@ class BrandEMIMasterCategoryFragment : Fragment() {
                                 ) {}
                             }
                         }
-                    }*/
-                }
+                    }*//*
+                }*/
             }
         } catch (ex: IndexOutOfBoundsException) {
             ex.printStackTrace()
+        }
+    }
+    //endregion
+
+    //region===================================Navigate Fragment to BrandEMISubCategory Fragment:-
+    private fun navigateToBrandEMISubCategoryFragment(position: Int) {
+        if (checkInternetConnection()) {
+            (activity as MainActivity).transactFragment(BrandEMISubCategoryFragment().apply {
+                arguments = Bundle().apply {
+                    putString("brandData", brandEmiMasterDataList[position].recordData)
+                    putString("categoryUpdatedTimeStamp", brandCategoryUpdatedTimeStamp)
+                    putString("brandTimeStamp", brandTimeStamp)
+                    putSerializable("type", action)
+                }
+            })
+        } else {
+            VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
         }
     }
     //endregion

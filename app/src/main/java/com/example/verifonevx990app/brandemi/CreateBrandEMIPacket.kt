@@ -11,7 +11,7 @@ class CreateBrandEMIPacket(
         cb(createBrandEMIMasterDataPacket())
     }
 
-    //region ==================Creating Pending Preauth  Transaction ISO packet
+    //region ==================Creating Brand EMI Related ISO packet
     private fun createBrandEMIMasterDataPacket(): IsoDataWriter =
         IsoDataWriter().apply {
             val terminalData = TerminalParameterTable.selectFromSchemeTable()

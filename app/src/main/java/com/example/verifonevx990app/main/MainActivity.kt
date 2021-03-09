@@ -2045,8 +2045,8 @@ enum class SubHeaderTitle(val title: String) {
     EMI_CATALOG("EMI Enquiry"),
     BANK_EMI("Bank EMI"),
     CROSS_SELL_SUBHEADER_VALUE("Cross Sell"),
-    Brand_EMI_Master_Category("Brand EMI Master Category")
-
+    Brand_EMI_Master_Category("Brand EMI Master Category"),
+    Brand_EMI_SUB_Category("Brand EMI Sub Category")
 }
 
 //Below Enum Class is used for Preference Save [String , Int and Boolean] Keys Constant:-
