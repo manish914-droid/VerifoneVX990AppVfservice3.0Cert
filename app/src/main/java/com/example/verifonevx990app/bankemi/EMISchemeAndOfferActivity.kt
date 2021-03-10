@@ -8,18 +8,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.databinding.EmiSchemeOfferViewBinding
+import com.example.verifonevx990app.databinding.ItemEmiSchemeOfferBinding
 import com.example.verifonevx990app.emv.transactionprocess.CardProcessedDataModal
 import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.vxUtils.*
-import com.google.android.material.card.MaterialCardView
 
 class EMISchemeAndOfferActivity : BaseActivity() {
     private var binding: EmiSchemeOfferViewBinding? = null
@@ -125,8 +122,8 @@ internal class EMISchemeAndOfferAdapter(
     private var index = -1
 
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): EMISchemeOfferHolder {
-        val inflater =
-            LayoutInflater.from(p0.context).inflate(R.layout.item_emi_scheme_offer, p0, false)
+        val inflater: ItemEmiSchemeOfferBinding =
+            ItemEmiSchemeOfferBinding.inflate(LayoutInflater.from(p0.context), p0, false)
         return EMISchemeOfferHolder(inflater)
     }
 
@@ -137,66 +134,55 @@ internal class EMISchemeAndOfferAdapter(
     override fun onBindViewHolder(holder: EMISchemeOfferHolder, position: Int) {
         val modelData = emiSchemeDataList?.get(position)
         if (modelData != null) {
-            holder.transactionAmount.text =
+            holder.binding.tvTransactionAmount.text =
                 divideAmountBy100(modelData.transactionAmount.toInt()).toString()
             val tenureDuration = "${modelData.tenure} Months"
             val tenureHeadingDuration = "${modelData.tenure} Months Scheme"
-            holder.tenure.text = tenureDuration
-            holder.tenureHeadingTV.text = tenureHeadingDuration
-            holder.loanAmount.text = divideAmountBy100(modelData.loanAmount.toInt()).toString()
-            holder.emiAmount.text = divideAmountBy100(modelData.emiAmount.toInt()).toString()
+            holder.binding.tvTenure.text = tenureDuration
+            holder.binding.tenureHeadingTv.text = tenureHeadingDuration
+            holder.binding.tvLoanAmount.text =
+                divideAmountBy100(modelData.loanAmount.toInt()).toString()
+            holder.binding.tvEmiAmount.text =
+                divideAmountBy100(modelData.emiAmount.toInt()).toString()
 
             //If Discount Amount Available show this else if CashBack Amount show that:-
             if (modelData.discountAmount.toInt() != 0) {
-                holder.discountAmount.text =
+                holder.binding.tvDiscountAmount.text =
                     divideAmountBy100(modelData.discountAmount.toInt()).toString()
-                holder.discountLinearLayout.visibility = View.VISIBLE
-                holder.cashBackLinearLayout.visibility = View.GONE
+                holder.binding.discountLL.visibility = View.VISIBLE
+                holder.binding.cashBackLL.visibility = View.GONE
             }
             if (modelData.cashBackAmount.toInt() != 0) {
-                holder.cashBackAmount.text =
+                holder.binding.tvCashbackAmount.text =
                     divideAmountBy100(modelData.cashBackAmount.toInt()).toString()
-                holder.cashBackLinearLayout.visibility = View.VISIBLE
-                holder.discountLinearLayout.visibility = View.GONE
+                holder.binding.cashBackLL.visibility = View.VISIBLE
+                holder.binding.discountLL.visibility = View.GONE
             }
-            holder.totalInterestPay.text =
+            holder.binding.tvTotalInterestPay.text =
                 divideAmountBy100(modelData.tenureInterestRate.toInt()).toString()
-            holder.totalEmiPay.text = divideAmountBy100(modelData.totalEmiPay.toInt()).toString()
+            holder.binding.tvTotalEmiPay.text =
+                divideAmountBy100(modelData.totalEmiPay.toInt()).toString()
         }
 
-        holder.parentEmiLayout.setOnClickListener {
+        holder.binding.parentEmiViewLl.setOnClickListener {
             index = position
             notifyDataSetChanged()
         }
 
         //region==========================Checked Particular Row of RecyclerView Logic:-
         if (index === position) {
-            holder.cardView.strokeColor = Color.parseColor("#13E113")
-            holder.schemeCheckIV.visibility = View.VISIBLE
+            holder.binding.cardView.strokeColor = Color.parseColor("#13E113")
+            holder.binding.schemeCheckIv.visibility = View.VISIBLE
             schemeSelectCB(position)
         } else {
-            holder.cardView.strokeColor = Color.parseColor("#FFFFFF")
-            holder.schemeCheckIV.visibility = View.GONE
+            holder.binding.cardView.strokeColor = Color.parseColor("#FFFFFF")
+            holder.binding.schemeCheckIv.visibility = View.GONE
         }
         //endregion
     }
 
 
-    inner class EMISchemeOfferHolder(val view: View) : RecyclerView.ViewHolder(view) {
-        val transactionAmount = view.findViewById<TextView>(R.id.tv_transaction_amount)
-        val tenure = view.findViewById<TextView>(R.id.tv_tenure)
-        val emiAmount = view.findViewById<TextView>(R.id.tv_emi_amount)
-        val loanAmount = view.findViewById<TextView>(R.id.tv_loan_amount)
-        val discountAmount = view.findViewById<TextView>(R.id.tv_discount_amount)
-        val cashBackAmount = view.findViewById<TextView>(R.id.tv_cashback_amount)
-        val totalInterestPay = view.findViewById<TextView>(R.id.tv_total_interest_pay)
-        val totalEmiPay = view.findViewById<TextView>(R.id.tv_total_emi_pay)
-        val tenureHeadingTV = view.findViewById<TextView>(R.id.tenure_heading_tv)
-        val parentEmiLayout = view.findViewById<LinearLayout>(R.id.parent_emi_view_ll)
-        val discountLinearLayout = view.findViewById<LinearLayout>(R.id.discountLL)
-        val cashBackLinearLayout = view.findViewById<LinearLayout>(R.id.cashBackLL)
-        val cardView = view.findViewById<MaterialCardView>(R.id.cardView)
-        val schemeCheckIV = view.findViewById<ImageView>(R.id.scheme_check_iv)
-    }
+    inner class EMISchemeOfferHolder(val binding: ItemEmiSchemeOfferBinding) :
+        RecyclerView.ViewHolder(binding.root)
 }
 

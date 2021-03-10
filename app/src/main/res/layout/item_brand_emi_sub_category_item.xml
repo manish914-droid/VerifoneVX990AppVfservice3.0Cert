@@ -21,7 +21,6 @@
             android:layout_weight="1"
             android:background="?attr/selectableItemBackground"
             android:gravity="start"
-            android:hint="@string/brand_name"
             android:padding="@dimen/pad_16"
             android:textColor="@color/text_active"
             android:textSize="@dimen/text_size_regular"

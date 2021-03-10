@@ -380,6 +380,12 @@
     <string name="product_page_implemented_soon">Product Page implemented Soon</string>
     <string name="info">Info</string>
     <string name="select_product">Select Product</string>
+    <string name="product_id">Product ID</string>
+    <string name="product_name">Product Name</string>
+    <string name="sku_code">SKU Code</string>
+    <string name="product_min_amount">Product Min Amount</string>
+    <string name="product_max_amount">Product Max Amount</string>
+    <string name="issuer_brand_tandc_loading_error">Issuer/Brand TAndC Loading Error</string>
 
 
 </resources>

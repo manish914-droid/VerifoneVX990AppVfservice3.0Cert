@@ -75,13 +75,9 @@ class BrandEMISubCategoryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding?.subHeaderView?.subHeaderText?.text = getString(R.string.brand_emi_sub_category)
         binding?.subHeaderView?.backImageButton?.setOnClickListener { parentFragmentManager.popBackStackImmediate() }
+        (activity as MainActivity).showBottomNavigationBar(isShow = false)
         Log.d("BrandData:- ", brandData)
         brandID = parseDataListWithSplitter(SplitterTypes.CARET.splitter, brandData)
-
-        /* val issuerTAndC = runBlocking(Dispatchers.IO) { appDatabase?.dao()?.getAllIssuerTAndCData() }
-         val brandTAndC = runBlocking(Dispatchers.IO) { appDatabase?.dao()?.getAllBrandTAndCData() }
-         Log.d("IssuerTC:- ", issuerTAndC.toString())
-         Log.d("BrandTC:- ", brandTAndC.toString())*/
 
         //Below we are assigning initial request value of Field57 in BrandEMIMaster Data Host Hit:-
         field57RequestData = "${EMIRequestType.BRAND_SUB_CATEGORY.requestType}^0^${brandID?.get(0)}"
@@ -89,40 +85,8 @@ class BrandEMISubCategoryFragment : Fragment() {
         //Initial SetUp of RecyclerView List with Empty Data , After Fetching Data from Host we will notify List:-
         setUpRecyclerView()
         brandEmiMasterSubCategoryDataList.clear()
-        /*val data = getBrandEMIMasterSubCategoryUpdatedTimeStamps()
-
-        //Method to Fetch BrandEMIMasterSubCategoryData:-
-        if (!TextUtils.isEmpty(data) && data == categoryUpdatedTimeStamp)
-            fetchBrandEMIMasterSubCategoryDataFromDB()
-        else*/
         fetchBrandEMIMasterSubCategoryDataFromHost()
     }
-
-    /*//region==============================Fetch BrandEMIMasterSubCategory Data from DB:-
-    private fun fetchBrandEMIMasterSubCategoryDataFromDB() {
-        iDialog?.showProgress()
-        val dataList = runBlocking { appDatabase?.dao()?.getAllBrandEMIMasterSubCategoryData() }
-        if (dataList != null) {
-            //Notify RecyclerView DataList on UI with Category Data that has ParentCategoryID == 0 :-
-            brandEmiMasterSubCategoryDataList.clear()
-            for (i in 0 until dataList.size) {
-                brandEmiMasterSubCategoryDataList.add(
-                    BrandEMIMasterSubCategoryDataModal(
-                        dataList[i]?.brandID ?: "",
-                        dataList[i]?.categoryID ?: "",
-                        dataList[i]?.parentCategoryID ?: "",
-                        dataList[i]?.categoryName ?: ""
-                    )
-                )
-            }
-            brandEMIMasterSubCategoryAdapter.refreshAdapterList(
-                brandEmiMasterSubCategoryDataList.filter { it.parentCategoryID == "0" }
-                        as MutableList<BrandEMIMasterSubCategoryDataModal>)
-            iDialog?.hideProgress()
-        } else
-            fetchBrandEMIMasterSubCategoryDataFromHost()
-    }
-    //endregion*/
 
     //region===============================Hit Host to Fetch BrandEMIMasterSubCategory Data:-
     private fun fetchBrandEMIMasterSubCategoryDataFromHost() {
@@ -245,24 +209,9 @@ class BrandEMISubCategoryFragment : Fragment() {
                         fetchBrandEMIMasterSubCategoryDataFromHost()
                         Log.d("FullDataList:- ", brandEmiMasterSubCategoryDataList.toString())
                     } else {
-                        /*for (i in 0 until brandEmiMasterSubCategoryDataList.size) {
-                            val model = BrandEMIMasterSubCategoryTable()
-                            model.brandID = brandEmiMasterSubCategoryDataList[i].brandID
-                            model.categoryID = brandEmiMasterSubCategoryDataList[i].categoryID
-                            model.categoryName = brandEmiMasterSubCategoryDataList[i].categoryName
-                            model.parentCategoryID =
-                                brandEmiMasterSubCategoryDataList[i].parentCategoryID
-                            val insertStatus =
-                                appDatabase?.dao()?.insertBrandEMIMasterSubCategoryDataInDB(model)
-                            Log.d("InsertStatus:- ", insertStatus.toString())
-                            appDatabase?.dao()?.updateCategoryTimeStampInBrandEMICategoryTable(
-                                categoryUpdatedTimeStamp,
-                                brandTimeStamp
-                            )
-                        }*/
                         iDialog?.hideProgress()
                         if (data.isEmpty()) {
-                            navigateToProductPage()
+                            navigateToProductPage("", isSubCategoryItem = false)
                         }
                     }
                 }
@@ -298,9 +247,12 @@ class BrandEMISubCategoryFragment : Fragment() {
                         as MutableList<BrandEMIMasterSubCategoryDataModal>?
             Log.d("Data:- ", Gson().toJson(brandEmiMasterSubCategoryDataList))
             if (position > -1 && childFilteredList?.isNotEmpty() == true) {
-                navigateToBrandEMIDataByCategoryIDPage(position)
+                navigateToBrandEMIDataByCategoryIDPage(position, true)
             } else
-                navigateToProductPage(brandEmiMasterSubCategoryDataList[position].categoryID)
+                navigateToProductPage(
+                    brandEmiMasterSubCategoryDataList[position].categoryID,
+                    isSubCategoryItem = true
+                )
         } catch (ex: IndexOutOfBoundsException) {
             ex.printStackTrace()
         }
@@ -308,11 +260,15 @@ class BrandEMISubCategoryFragment : Fragment() {
     //endregion
 
     //region==============================Navigate to BrandEMIDataByCategoryID Page:-
-    private fun navigateToBrandEMIDataByCategoryIDPage(position: Int) {
+    private fun navigateToBrandEMIDataByCategoryIDPage(
+        position: Int,
+        isSubCategoryItem: Boolean = false
+    ) {
         if (checkInternetConnection()) {
             (activity as MainActivity).transactFragment(BrandEMIDataByCategoryID().apply {
                 arguments = Bundle().apply {
                     putString("brandData", brandData)
+                    putBoolean("isSubCategoryItemPresent", isSubCategoryItem)
                     putParcelable("selectCategoryData", brandEmiMasterSubCategoryDataList[position])
                     putParcelableArrayList(
                         "subCategoryData",
@@ -328,15 +284,13 @@ class BrandEMISubCategoryFragment : Fragment() {
     //endregion
 
     //region===================================Navigate Controller To Product Page:-
-    private fun navigateToProductPage(categoryID: String = "0") {
+    private fun navigateToProductPage(categoryID: String = "", isSubCategoryItem: Boolean = false) {
         if (checkInternetConnection()) {
             (activity as MainActivity).transactFragment(BrandEMIProductFragment().apply {
                 arguments = Bundle().apply {
-                    putBoolean("isSubCategoryItemPresent", false)
-                    /* putString("brandData", brandData)
-                     putParcelable("selectCategoryData", brandEmiMasterSubCategoryDataList[position])
-                     putParcelableArrayList("subCategoryData", brandEmiMasterSubCategoryDataList as ArrayList<out Parcelable>)
-                     putSerializable("type", action)*/
+                    putBoolean("isSubCategoryItemPresent", isSubCategoryItem)
+                    putString("brandData", brandID?.get(0))
+                    putString("categoryID", categoryID)
                 }
             })
         } else {

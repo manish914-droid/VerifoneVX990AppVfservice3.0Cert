@@ -30,6 +30,7 @@ class BrandEMIDataByCategoryID : Fragment() {
     private var displayFilteredList: MutableList<BrandEMIMasterSubCategoryDataModal>? =
         mutableListOf()
     private val action by lazy { arguments?.getSerializable("type") ?: "" }
+    private val isSubCategoryItem by lazy { arguments?.getBoolean("isSubCategoryItemPresent") }
     private var binding: FragmentBrandEmiDataByCategoryIdBinding? = null
     private val brandData by lazy { arguments?.getString("brandData") ?: "" }
     private val brandEMISubCategoryByIDAdapter by lazy {
@@ -58,6 +59,7 @@ class BrandEMIDataByCategoryID : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding?.subHeaderView?.subHeaderText?.text = getString(R.string.brand_emi_sub_category)
         binding?.subHeaderView?.backImageButton?.setOnClickListener { parentFragmentManager.popBackStackImmediate() }
+        (activity as MainActivity).showBottomNavigationBar(isShow = false)
         selectCategoryData = arguments?.getParcelable("selectCategoryData")
         subCategoryData = arguments?.getParcelableArrayList("subCategoryData")
         Log.d("SelectedCategoryData: ", selectCategoryData.toString())
@@ -127,21 +129,14 @@ class BrandEMIDataByCategoryID : Fragment() {
         if (checkInternetConnection()) {
             (activity as MainActivity).transactFragment(BrandEMIProductFragment().apply {
                 arguments = Bundle().apply {
-                    putBoolean("isSubCategoryItemPresent", true)
-                    /* putString("brandData", brandData)
-                     putParcelable("selectCategoryData", brandEmiMasterSubCategoryDataList[position])
-                     putParcelableArrayList("subCategoryData", brandEmiMasterSubCategoryDataList as ArrayList<out Parcelable>)
-                     putSerializable("type", action)*/
+                    putBoolean("isSubCategoryItemPresent", isSubCategoryItem ?: false)
+                    putString("brandData", brandData)
+                    putString("categoryID", categoryID)
                 }
             })
         } else {
             VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
         }
-        /*navController?.navigate(R.id.brandEMIProduct, Bundle().apply {
-            putString("brandData", brandData)
-            putString("categoryID", categoryID)
-            putSerializable("type", action)
-        })*/
     }
     //endregion
 

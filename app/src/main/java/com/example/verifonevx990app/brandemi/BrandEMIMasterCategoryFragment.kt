@@ -13,17 +13,18 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.bankemi.GenericEMIIssuerTAndC
 import com.example.verifonevx990app.databinding.BrandEmiMasterCategoryFragmentBinding
 import com.example.verifonevx990app.databinding.ItemBrandEmiFooterBinding
 import com.example.verifonevx990app.databinding.ItemBrandEmiMasterBinding
 import com.example.verifonevx990app.main.EMIRequestType
 import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.main.SplitterTypes
+import com.example.verifonevx990app.realmtables.BrandEMIMasterTimeStamps
+import com.example.verifonevx990app.realmtables.BrandTAndCTable
+import com.example.verifonevx990app.realmtables.IssuerTAndCTable
 import com.example.verifonevx990app.vxUtils.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 
 /**
 This is a Brand EMI Master Category Data Fragment
@@ -69,6 +70,7 @@ class BrandEMIMasterCategoryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding?.subHeaderView?.subHeaderText?.text = getString(R.string.brand_emi_master)
         binding?.subHeaderView?.backImageButton?.setOnClickListener { parentFragmentManager.popBackStackImmediate() }
+        (activity as MainActivity).showBottomNavigationBar(isShow = false)
         empty_view_placeholder = view.findViewById(R.id.empty_view_placeholder)
 
         //Below we are assigning initial request value of Field57 in BrandEMIMaster Data Host Hit:-
@@ -185,8 +187,21 @@ class BrandEMIMasterCategoryFragment : Fragment() {
                     )
 
                     //Refresh Field57 request value for Pagination if More Record Flag is True:-
-                    if (moreDataFlag == "1")
+                    if (moreDataFlag == "1") {
                         field57RequestData = "${EMIRequestType.BRAND_DATA.requestType}^$totalRecord"
+                    }
+
+                    //region============Save Brand EMI Master Category Data TimeStamps in DB:-
+                    val model = BrandEMIMasterTimeStamps()
+                    model.brandTimeStamp = brandTimeStamp ?: ""
+                    model.issuerTAndCTimeStamp = issuerTAndCTimeStamp ?: ""
+                    model.brandTAndCTimeStamp = brandTAndCTimeStamp ?: ""
+                    val insert = withContext(Dispatchers.IO) {
+                        BrandEMIMasterTimeStamps.performOperation(model)
+                    }
+                    Log.d("InsertStatus: ", insert.toString())
+                    //endregion
+
                 }
             } else {
                 GlobalScope.launch(Dispatchers.Main) {
@@ -220,115 +235,125 @@ class BrandEMIMasterCategoryFragment : Fragment() {
                 fetchBrandEMIMasterDataFromHost()
             } else {
                 Log.d("Navigate To Category:- ", position.toString())
-                navigateToBrandEMISubCategoryFragment(position)
-                /*if (true*//*matchHostAndDBData()*//*) {
-                    *//* navController?.navigate(R.id.brandEMIMasterSubCategoryFragment, Bundle().apply {
-                         putString("brandData", brandEmiMasterDataList[position].recordData)
-                         putString("categoryUpdatedTimeStamp", brandCategoryUpdatedTimeStamp)
-                         putString("brandTimeStamp", brandTimeStamp)
-                         putSerializable("type", action)
-                     })*//*
-                } else {
-                    iDialog?.showProgress()
-                    *//*FetchIssuerAndBrandTAndCData(
-                        requireContext(), BrandEMIRequestType.ISSUER_T_AND_C.requestType,
-                        BrandEMIRequestType.BRAND_T_AND_C.requestType
-                    ) { termsAndConditionsData ->
-                        Log.d("IssuerTC:- ", termsAndConditionsData.first.toString())
-                        Log.d("BrandTC:- ", termsAndConditionsData.second.toString())
-                        Log.d("HostMsg:- ", termsAndConditionsData.third.first)
-                        Log.d("HostResponseCode:- ", termsAndConditionsData.third.second)
-                        if (termsAndConditionsData.third.second == "00") {
-                            //Deleting Brand EMIMasterCategory Table , Issuer TAndC Table and Brand TAndC Table , Brand EMIMasterSubCategory Table:-
-                            runBlocking(Dispatchers.IO) {
-                                val bmc = appDatabase?.dao()?.deleteBrandEMIMasterCategoryData()
-                                val itc = appDatabase?.dao()?.deleteIssuerTAndCData()
-                                val btc = appDatabase?.dao()?.deleteBrandTAndCData()
-                                val bmsc = appDatabase?.dao()?.deleteBrandEMIMasterSubCategoryData()
-                                Log.d("bmc:- ", bmc.toString())
-                                Log.d("itc:- ", itc.toString())
-                                Log.d("btc:- ", btc.toString())
-                                Log.d("bmsc:- ", bmsc.toString())
-                            }
-
-                            //BrandEMIMAsterCategoryData TimeStamps Insert in DB:-
-                            val model = BrandEMIMasterCategoryTable()
-                            model.brandTimeStamp = brandTimeStamp ?: ""
-                            model.issuerTAndCTimeStamp = issuerTAndCTimeStamp
-                            model.brandTAndCTimeStamp = brandTAndCTimeStamp
-                            val insert =
-                                appDatabase?.dao()?.insertBrandEMIMasterCategoryDataInDB(model)
-                            Log.d("InsertStatus: ", insert.toString())
-
-                            //region================Insert IssuerTAndC and Brand TAndC in DB:-
-                            //Issuer TAndC Inserting:-
-                            for (i in 0 until termsAndConditionsData.first.size) {
-                                val issuerModel = IssuerTAndCTable()
-                                if (!TextUtils.isEmpty(termsAndConditionsData.first[i])) {
-                                    val splitData = parseDataListWithSplitter(
-                                        SplitterTypes.CARET.splitter,
-                                        termsAndConditionsData.first[i]
-                                    )
-                                    issuerModel.issuerId = splitData[0]
-                                    issuerModel.headerTAndC = splitData[1]
-                                    //issuerModel.footerTAndC = splitData[2]
-                                    runBlocking(Dispatchers.IO) {
-                                        appDatabase?.dao()?.insertIssuerTAndCData(issuerModel)
+                val issuerTAndCData =
+                    runBlocking(Dispatchers.IO) { IssuerTAndCTable.getAllIssuerTAndCData() }
+                val brandTAndCData =
+                    runBlocking(Dispatchers.IO) { BrandTAndCTable.getAllBrandTAndCData() }
+                iDialog?.showProgress()
+                if (issuerTAndCData.isEmpty() || brandTAndCData.isEmpty() || !matchHostAndDBData()) {
+                    getIssuerTAndCData { issuerTCDataSaved ->
+                        if (issuerTCDataSaved) {
+                            getBrandTAndCData { brandTCDataSaved ->
+                                if (brandTCDataSaved) {
+                                    GlobalScope.launch(Dispatchers.Main) {
+                                        iDialog?.hideProgress()
+                                        navigateToBrandEMISubCategoryFragment(position)
+                                    }
+                                } else {
+                                    GlobalScope.launch(Dispatchers.Main) {
+                                        iDialog?.hideProgress()
+                                        showSomethingWrongPopUp()
                                     }
                                 }
-                            }
-
-                            //Brand TAndC Inserting:-
-                            for (i in 0 until termsAndConditionsData.second.size) {
-                                val brandModel = BrandTAndCTable()
-                                if (!TextUtils.isEmpty(termsAndConditionsData.second[i])) {
-                                    val splitData = parseDataListWithSplitter(
-                                        SplitterTypes.CARET.splitter,
-                                        termsAndConditionsData.second[i]
-                                    )
-                                    brandModel.brandId = splitData[0]
-                                    brandModel.brandTAndC = splitData[1]
-                                    runBlocking(Dispatchers.IO) {
-                                        appDatabase?.dao()?.insertBrandTAndCData(brandModel)
-                                    }
-                                }
-                            }
-                            //endregion
-                            GlobalScope.launch(Dispatchers.Main) {
-                                iDialog?.hideProgress()
-                                navController?.navigate(
-                                    R.id.brandEMIMasterSubCategoryFragment,
-                                    Bundle().apply {
-                                        putString(
-                                            "brandData",
-                                            brandEmiMasterDataList[position].recordData
-                                        )
-                                        putString(
-                                            "categoryUpdatedTimeStamp",
-                                            brandCategoryUpdatedTimeStamp
-                                        )
-                                        putString("brandTimeStamp", brandTimeStamp)
-                                        putSerializable("type", action)
-                                    })
                             }
                         } else {
                             GlobalScope.launch(Dispatchers.Main) {
                                 iDialog?.hideProgress()
-                                iDialog?.timeOutAlertBoxWithAction(
-                                    requireActivity(),
-                                    termsAndConditionsData.third.first,
-                                    true
-                                ) {}
+                                showSomethingWrongPopUp()
                             }
                         }
-                    }*//*
-                }*/
+                    }
+                } else {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        iDialog?.hideProgress()
+                        navigateToBrandEMISubCategoryFragment(position)
+                    }
+                }
             }
         } catch (ex: IndexOutOfBoundsException) {
             ex.printStackTrace()
         }
     }
     //endregion
+
+    //region=====================TAndC not Loaded Properly Pop-Up:-
+    private fun showSomethingWrongPopUp() {
+        (activity as MainActivity).alertBoxWithAction(null,
+            null,
+            getString(R.string.error),
+            getString(R.string.issuer_brand_tandc_loading_error),
+            false,
+            getString(R.string.positive_button_ok),
+            {},
+            {})
+    }
+    //endregion
+
+    //region==================Get Issuer TAndC Data:-
+    private fun getIssuerTAndCData(cb: (Boolean) -> Unit) {
+        if (checkInternetConnection()) {
+            Log.d("Bank EMI Clicked:- ", "Clicked")
+            GenericEMIIssuerTAndC { issuerTermsAndConditionData, issuerHostResponseCodeAndMsg ->
+                val issuerTAndCData = issuerTermsAndConditionData.first
+                val responseBool = issuerTermsAndConditionData.second
+                if (issuerTAndCData.isNotEmpty() && responseBool) {
+                    //region================Insert IssuerTAndC and Brand TAndC in DB:-
+                    //Issuer TAndC Inserting:-
+                    for (i in 0 until issuerTAndCData.size) {
+                        val issuerModel = IssuerTAndCTable()
+                        if (!TextUtils.isEmpty(issuerTAndCData[i])) {
+                            val splitData = parseDataListWithSplitter(
+                                SplitterTypes.CARET.splitter,
+                                issuerTAndCData[i]
+                            )
+
+                            if (splitData.size > 2) {
+                                issuerModel.issuerId = splitData[0]
+                                issuerModel.headerTAndC = splitData[1]
+                                issuerModel.footerTAndC = splitData[2]
+                            } else {
+                                issuerModel.issuerId = splitData[0]
+                                issuerModel.headerTAndC = splitData[1]
+                            }
+
+                            runBlocking(Dispatchers.IO) {
+                                IssuerTAndCTable.performOperation(issuerModel)
+                            }
+                        }
+                    }
+                    cb(true)
+                } else
+                    cb(false)
+            }
+        } else {
+            VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+        }
+    }
+    //endregion
+
+    //region==========================Get Brand TAndC Data:-
+    private fun getBrandTAndCData(cb: (Boolean) -> Unit) {
+        GenericBrandTAndC(EMIRequestType.BRAND_T_AND_C.requestType) { brandTAndCData, hostResponseData ->
+            if (brandTAndCData.first.isNotEmpty()) {
+                for (i in 0 until brandTAndCData.first.size) {
+                    val brandModel = BrandTAndCTable()
+                    if (!TextUtils.isEmpty(brandTAndCData.first[i])) {
+                        val splitData = parseDataListWithSplitter(
+                            SplitterTypes.CARET.splitter,
+                            brandTAndCData.first[i]
+                        )
+                        brandModel.brandId = splitData[0]
+                        brandModel.brandTAndC = splitData[1]
+                        runBlocking(Dispatchers.IO) {
+                            BrandTAndCTable.performOperation(brandModel)
+                        }
+                    }
+                }
+                cb(true)
+            } else
+                cb(false)
+        }
+    }
 
     //region===================================Navigate Fragment to BrandEMISubCategory Fragment:-
     private fun navigateToBrandEMISubCategoryFragment(position: Int) {
@@ -348,22 +373,19 @@ class BrandEMIMasterCategoryFragment : Fragment() {
     //endregion
 
     //region=======================Check Whether we got Updated Data from Host or to use Previous BrandEMIMaster Store Data:-
-    /*private fun matchHostAndDBData(): Boolean {
-        val timeStampsData = getBrandEMIMasterCategoryTimeStampsData()
+    private fun matchHostAndDBData(): Boolean {
+        val timeStampsData =
+            runBlocking(Dispatchers.IO) { BrandEMIMasterTimeStamps.getAllBrandEMIMasterDataTimeStamps() }
         var isDataMatch = false
-        *//*
-        timeStampsData.first = brandCategoryUpdatedTimeStamp
-        timeStampsData.second = issuerTAndCTimeStamp
-        timeStampsData.third = brandTAndCTimeStamp
-         *//*
-        if (!TextUtils.isEmpty(timeStampsData.first) &&
-            !TextUtils.isEmpty(timeStampsData.second)
+
+        if (!TextUtils.isEmpty(timeStampsData[0].brandTAndCTimeStamp) &&
+            !TextUtils.isEmpty(timeStampsData[0].issuerTAndCTimeStamp)
         ) {
-            isDataMatch =
-                issuerTAndCTimeStamp == timeStampsData.first && brandTAndCTimeStamp == timeStampsData.second
+            isDataMatch = issuerTAndCTimeStamp == timeStampsData[0].issuerTAndCTimeStamp &&
+                    brandTAndCTimeStamp == timeStampsData[0].brandTAndCTimeStamp
         }
         return isDataMatch
-    }*/
+    }
     //endregion
 
     override fun onDetach() {

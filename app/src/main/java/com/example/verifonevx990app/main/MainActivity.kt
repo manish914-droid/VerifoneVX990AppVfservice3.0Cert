@@ -142,6 +142,16 @@ class MainActivity : BaseActivity(), IFragmentRequest,
         }
     }
 
+    //region=================Show Bottom Navigation Bar====================
+    fun showBottomNavigationBar(isShow: Boolean = true) {
+        if (isShow)
+            bottomNavigationView?.visibility = View.VISIBLE
+        else
+            bottomNavigationView?.visibility = View.GONE
+    }
+    //endregion
+
+
     //Below Alert Dialog is to show Correct Time pop-up:-
     private fun showCorrectTimePopUp() {
         builder.setTitle(getString(R.string.alert))
@@ -639,71 +649,90 @@ class MainActivity : BaseActivity(), IFragmentRequest,
 
             UiAction.BANK_EMI -> {
                 val amt = (data as Pair<*, *>).first.toString()
-                if (checkInternetConnection()) {
-                    Log.d("Bank EMI Clicked:- ", "Clicked")
-                    GenericEMIIssuerTAndC { issuerTermsAndConditionData, issuerHostResponseCodeAndMsg ->
-                        val issuerTAndCData = issuerTermsAndConditionData.first
-                        val responseBool = issuerTermsAndConditionData.second
-                        if (issuerTAndCData.isNotEmpty() && responseBool) {
-                            //region================Insert IssuerTAndC and Brand TAndC in DB:-
-                            //Issuer TAndC Inserting:-
-                            for (i in 0 until issuerTAndCData.size) {
-                                val issuerModel = IssuerTAndCTable()
-                                if (!TextUtils.isEmpty(issuerTAndCData[i])) {
-                                    val splitData = parseDataListWithSplitter(
-                                        SplitterTypes.CARET.splitter,
-                                        issuerTAndCData[i]
-                                    )
+                val data = runBlocking(Dispatchers.IO) { IssuerTAndCTable.getAllIssuerTAndCData() }
+                if (data.isEmpty()) {
+                    if (checkInternetConnection()) {
+                        Log.d("Bank EMI Clicked:- ", "Clicked")
+                        GenericEMIIssuerTAndC { issuerTermsAndConditionData, issuerHostResponseCodeAndMsg ->
+                            val issuerTAndCData = issuerTermsAndConditionData.first
+                            val responseBool = issuerTermsAndConditionData.second
+                            if (issuerTAndCData.isNotEmpty() && responseBool) {
+                                //region================Insert IssuerTAndC and Brand TAndC in DB:-
+                                //Issuer TAndC Inserting:-
+                                for (i in 0 until issuerTAndCData.size) {
+                                    val issuerModel = IssuerTAndCTable()
+                                    if (!TextUtils.isEmpty(issuerTAndCData[i])) {
+                                        val splitData = parseDataListWithSplitter(
+                                            SplitterTypes.CARET.splitter,
+                                            issuerTAndCData[i]
+                                        )
 
-                                    if (splitData.size > 2) {
-                                        issuerModel.issuerId = splitData[0]
-                                        issuerModel.headerTAndC = splitData[1]
-                                        issuerModel.footerTAndC = splitData[2]
-                                    } else {
-                                        issuerModel.issuerId = splitData[0]
-                                        issuerModel.headerTAndC = splitData[1]
-                                    }
+                                        if (splitData.size > 2) {
+                                            issuerModel.issuerId = splitData[0]
+                                            issuerModel.headerTAndC = splitData[1]
+                                            issuerModel.footerTAndC = splitData[2]
+                                        } else {
+                                            issuerModel.issuerId = splitData[0]
+                                            issuerModel.headerTAndC = splitData[1]
+                                        }
 
-                                    runBlocking(Dispatchers.IO) {
-                                        IssuerTAndCTable.performOperation(issuerModel)
+                                        runBlocking(Dispatchers.IO) {
+                                            IssuerTAndCTable.performOperation(issuerModel)
+                                        }
                                     }
                                 }
+                                startActivityForResult(
+                                    Intent(
+                                        this,
+                                        VFTransactionActivity::class.java
+                                    ).apply {
+                                        putExtra("amt", amt)
+                                        putExtra(
+                                            "type",
+                                            TransactionType.EMI_SALE.type
+                                        ) //EMI //UiAction.BANK_EMI
+                                        putExtra("proc_code", ProcessingCode.SALE.code)
+                                        putExtra("mobileNumber", extraPairData?.first)
+                                        putExtra("billNumber", extraPairData?.second)
+                                    }, EIntentRequest.TRANSACTION.code
+                                )
+                            } else {
+                                startActivityForResult(
+                                    Intent(
+                                        this,
+                                        VFTransactionActivity::class.java
+                                    ).apply {
+                                        putExtra("amt", amt)
+                                        putExtra(
+                                            "type",
+                                            TransactionType.EMI_SALE.type
+                                        ) //EMI //UiAction.BANK_EMI
+                                        putExtra("proc_code", ProcessingCode.SALE.code)
+                                        putExtra("mobileNumber", extraPairData?.first)
+                                        putExtra("billNumber", extraPairData?.second)
+                                    }, EIntentRequest.TRANSACTION.code
+                                )
                             }
-                            startActivityForResult(
-                                Intent(
-                                    this,
-                                    VFTransactionActivity::class.java
-                                ).apply {
-                                    putExtra("amt", amt)
-                                    putExtra(
-                                        "type",
-                                        TransactionType.EMI_SALE.type
-                                    ) //EMI //UiAction.BANK_EMI
-                                    putExtra("proc_code", ProcessingCode.SALE.code)
-                                    putExtra("mobileNumber", extraPairData?.first)
-                                    putExtra("billNumber", extraPairData?.second)
-                                }, EIntentRequest.TRANSACTION.code
-                            )
-                        } else {
-                            startActivityForResult(
-                                Intent(
-                                    this,
-                                    VFTransactionActivity::class.java
-                                ).apply {
-                                    putExtra("amt", amt)
-                                    putExtra(
-                                        "type",
-                                        TransactionType.EMI_SALE.type
-                                    ) //EMI //UiAction.BANK_EMI
-                                    putExtra("proc_code", ProcessingCode.SALE.code)
-                                    putExtra("mobileNumber", extraPairData?.first)
-                                    putExtra("billNumber", extraPairData?.second)
-                                }, EIntentRequest.TRANSACTION.code
-                            )
                         }
+                    } else {
+                        VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
                     }
                 } else {
-                    VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                    startActivityForResult(
+                        Intent(
+                            this,
+                            VFTransactionActivity::class.java
+                        ).apply {
+                            putExtra("amt", amt)
+                            putExtra(
+                                "type",
+                                TransactionType.EMI_SALE.type
+                            ) //EMI //UiAction.BANK_EMI
+                            putExtra("proc_code", ProcessingCode.SALE.code)
+                            putExtra("mobileNumber", extraPairData?.first)
+                            putExtra("billNumber", extraPairData?.second)
+                        }, EIntentRequest.TRANSACTION.code
+                    )
                 }
             }
 

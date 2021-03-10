@@ -3848,6 +3848,120 @@ open class IssuerTAndCTable() : RealmObject(), Parcelable {
 }
 //endregion
 
+// region===============Brand Terms and Condition Table for EMI:-
+@RealmClass
+open class BrandTAndCTable() : RealmObject(), Parcelable {
+    @PrimaryKey
+    var brandId: String = ""
+    var brandTAndC: String? = ""
+
+    private constructor(parcel: Parcel) : this() {
+        brandId = parcel.readString().toString()
+        brandTAndC = parcel.readString().toString()
+    }
+
+    override fun writeToParcel(p0: Parcel?, p1: Int) {
+        p0?.writeString(brandId)
+        p0?.writeString(brandTAndC)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object {
+        private val TAG = BrandTAndCTable::class.java.simpleName
+
+        @JvmField
+        val CREATOR = object : Parcelable.Creator<BrandTAndCTable> {
+            override fun createFromParcel(parcel: Parcel): BrandTAndCTable {
+                return BrandTAndCTable(parcel)
+            }
+
+            override fun newArray(size: Int): Array<BrandTAndCTable> {
+                return Array(size) { BrandTAndCTable() }
+            }
+        }
+
+        fun performOperation(param: BrandTAndCTable) =
+            withRealm { it.executeTransaction { i -> i.insertOrUpdate(param) } }
+
+        //region====================Method to Get All BrandTAndC Data================
+        fun getAllBrandTAndCData(): MutableList<BrandTAndCTable> = runBlocking {
+            var result = mutableListOf<BrandTAndCTable>()
+            getRealm {
+                val re = it.copyFromRealm(it.where(BrandTAndCTable::class.java).findAll())
+                if (re != null) result = re
+
+            }.await()
+            result
+        }
+        //endregion
+    }
+}
+//endregion
+
+// region===============Brand EMI Master Category TimeStamps Table:-
+@RealmClass
+open class BrandEMIMasterTimeStamps() : RealmObject(), Parcelable {
+    @PrimaryKey
+    var brandTimeStamp: String = ""
+    var brandCategoryUpdatedTimeStamp: String = ""
+    var issuerTAndCTimeStamp: String = ""
+    var brandTAndCTimeStamp: String = ""
+
+    private constructor(parcel: Parcel) : this() {
+        brandTimeStamp = parcel.readString().toString()
+        brandCategoryUpdatedTimeStamp = parcel.readString().toString()
+        issuerTAndCTimeStamp = parcel.readString().toString()
+        brandTAndCTimeStamp = parcel.readString().toString()
+    }
+
+    override fun writeToParcel(p0: Parcel?, p1: Int) {
+        p0?.writeString(brandTimeStamp)
+        p0?.writeString(brandCategoryUpdatedTimeStamp)
+        p0?.writeString(issuerTAndCTimeStamp)
+        p0?.writeString(brandTAndCTimeStamp)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object {
+        private val TAG = BrandEMIMasterTimeStamps::class.java.simpleName
+
+        @JvmField
+        val CREATOR = object : Parcelable.Creator<BrandEMIMasterTimeStamps> {
+            override fun createFromParcel(parcel: Parcel): BrandEMIMasterTimeStamps {
+                return BrandEMIMasterTimeStamps(parcel)
+            }
+
+            override fun newArray(size: Int): Array<BrandEMIMasterTimeStamps> {
+                return Array(size) { BrandEMIMasterTimeStamps() }
+            }
+        }
+
+        fun performOperation(param: BrandEMIMasterTimeStamps) =
+            withRealm { it.executeTransaction { i -> i.insertOrUpdate(param) } }
+
+        //region====================Method to Get All BrandTAndC Data================
+        fun getAllBrandEMIMasterDataTimeStamps(): MutableList<BrandEMIMasterTimeStamps> =
+            runBlocking {
+                var result = mutableListOf<BrandEMIMasterTimeStamps>()
+                getRealm {
+                    val re =
+                        it.copyFromRealm(it.where(BrandEMIMasterTimeStamps::class.java).findAll())
+                    if (re != null) result = re
+
+                }.await()
+                result
+            }
+        //endregion
+    }
+}
+//endregion
+
 
 @RealmClass
 open class OfflineSaleTable() : RealmObject(), Parcelable {
