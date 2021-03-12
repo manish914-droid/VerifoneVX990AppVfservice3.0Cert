@@ -3958,6 +3958,15 @@ open class BrandEMIMasterTimeStamps() : RealmObject(), Parcelable {
                 result
             }
         //endregion
+
+        fun clear() =
+            withRealm {
+                it.executeTransaction { i ->
+                    i.delete(
+                        BrandEMIMasterTimeStamps::class.java
+                    )
+                }
+            }
     }
 }
 //endregion

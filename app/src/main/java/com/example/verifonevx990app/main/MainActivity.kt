@@ -736,6 +736,29 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                 }
             }
 
+            UiAction.BRAND_EMI -> {
+                if (checkInternetConnection()) {
+                    val amt = (data as Pair<*, *>).first.toString()
+                    startActivityForResult(
+                        Intent(
+                            this,
+                            VFTransactionActivity::class.java
+                        ).apply {
+                            putExtra("amt", amt)
+                            putExtra(
+                                "type",
+                                TransactionType.EMI_SALE.type
+                            ) //EMI //UiAction.BANK_EMI
+                            putExtra("proc_code", ProcessingCode.BRAND_EMI.code)
+                            putExtra("mobileNumber", extraPairData?.first)
+                            putExtra("billNumber", extraPairData?.second)
+                        }, EIntentRequest.TRANSACTION.code
+                    )
+                } else {
+                    VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+                }
+            }
+
             UiAction.CASH_AT_POS -> {
                 if (checkInternetConnection()) {
                     val amt = (data as Pair<*, *>).first.toString()
@@ -2075,7 +2098,8 @@ enum class SubHeaderTitle(val title: String) {
     BANK_EMI("Bank EMI"),
     CROSS_SELL_SUBHEADER_VALUE("Cross Sell"),
     Brand_EMI_Master_Category("Brand EMI Master Category"),
-    Brand_EMI_SUB_Category("Brand EMI Sub Category")
+    Brand_EMI_SUB_Category("Brand EMI Sub Category"),
+    Brand_EMI("Brand EMI Sale"),
 }
 
 //Below Enum Class is used for Preference Save [String , Int and Boolean] Keys Constant:-

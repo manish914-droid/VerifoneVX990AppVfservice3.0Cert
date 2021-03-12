@@ -55,7 +55,10 @@ class ProcessCard(
                 //This Override Function will only execute in case of Mag stripe card type:-
                 override fun onCardSwiped(track: Bundle) {
                     // Process Swipe card with or without PIN .
-                    fun processSwipeCardWithPINorWithoutPIN(ispin: Boolean, cardProcessedDataModal: CardProcessedDataModal) {
+                    fun processSwipeCardWithPINorWithoutPIN(
+                        ispin: Boolean,
+                        cardProcessedDataModal: CardProcessedDataModal
+                    ) {
                         if (ispin) {
 
                             val param = Bundle()
@@ -85,7 +88,11 @@ class ProcessCard(
                             )
 
 
-                            VFService.vfPinPad?.startPinInput(2, param, globleparam, object : PinInputListener.Stub() {
+                            VFService.vfPinPad?.startPinInput(
+                                2,
+                                param,
+                                globleparam,
+                                object : PinInputListener.Stub() {
                                     override fun onInput(len: Int, key: Int) {
                                         Log.d("Data", "PinPad onInput, len:$len, key:$key")
                                     }
@@ -207,7 +214,10 @@ class ProcessCard(
                                 cardProcessedDataModal.setReadCardType(DetectCardType.MAG_CARD_TYPE)
                                 if (track2 != null) {
                                     cardProcessedDataModal.setTrack2Data(
-                                        getEncryptedTrackData(track2,cardProcessedDataModal).toString()
+                                        getEncryptedTrackData(
+                                            track2,
+                                            cardProcessedDataModal
+                                        ).toString()
                                     )
                                 }
                                 if (track1 != null) {
@@ -405,11 +415,12 @@ class ProcessCard(
                         VFService.vfBeeper?.startBeep(200)
                         println("TransactionAmount is calling" + transactionalAmt.toString() + "Handler is" + handler)
                         when (cardProcessedDataModal.getTransType()) {
-                            TransactionType.EMI_SALE.type -> {
+                            TransactionType.EMI_SALE.type, TransactionType.BRAND_EMI.type -> {
                                 //region=========This Field is use only in case of BankEMI Field58 Transaction Amount:-
                                 cardProcessedDataModal.setEmiTransactionAmount(transactionalAmt)
                                 //endregion
-                                iemv?.startEMV(ConstIPBOC.startEMV.processType.full_process,
+                                iemv?.startEMV(
+                                    ConstIPBOC.startEMV.processType.full_process,
                                     Bundle(),
                                     GenericReadCardData(activity, iemv) { cardBinValue ->
                                         if (!TextUtils.isEmpty(cardBinValue)) {

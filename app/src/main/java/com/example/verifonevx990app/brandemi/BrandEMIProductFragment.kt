@@ -19,6 +19,8 @@ import com.example.verifonevx990app.databinding.ItemBrandEmiProductBinding
 import com.example.verifonevx990app.main.EMIRequestType
 import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.main.SplitterTypes
+import com.example.verifonevx990app.main.SubHeaderTitle
+import com.example.verifonevx990app.transactions.NewInputAmountFragment
 import com.example.verifonevx990app.vxUtils.*
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
@@ -31,18 +33,16 @@ class BrandEMIProductFragment : Fragment() {
     private var binding: FragmentBrandEmiProductBinding? = null
     private var iDialog: IDialog? = null
     private var isSubCategoryItemPresent: Boolean = false
-    private val brandID by lazy { arguments?.getString("brandData") ?: "" }
-    private val categoryID by lazy { arguments?.getString("categoryID") ?: "" }
     private val brandEmiProductDataList by lazy { mutableListOf<BrandEMIProductDataModal>() }
+    private val action by lazy { arguments?.getSerializable("type") ?: "" }
+    private var brandEMIDataModal: BrandEMIDataModal? = null
+    private var selectedProductUpdatedPosition = -1
     private var field57RequestData: String? = null
     private var moreDataFlag = "0"
     private var totalRecord: String? = "0"
     private var perPageRecord: String? = "0"
     private val brandEMIMasterSubCategoryAdapter by lazy {
-        BrandEMIProductAdapter(
-            brandEmiProductDataList,
-            ::onProductSelected
-        )
+        BrandEMIProductAdapter(brandEmiProductDataList, ::onProductSelected)
     }
 
     override fun onAttach(context: Context) {
@@ -69,6 +69,7 @@ class BrandEMIProductFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         isSubCategoryItemPresent = arguments?.getBoolean("isSubCategoryItemPresent") ?: false
         (activity as MainActivity).showBottomNavigationBar(isShow = false)
+        brandEMIDataModal = arguments?.getSerializable("modal") as BrandEMIDataModal
         binding?.subHeaderView?.subHeaderText?.text = getString(R.string.select_product)
         binding?.subHeaderView?.backImageButton?.setOnClickListener {
             if (isSubCategoryItemPresent) parentFragmentManager.popBackStackImmediate()
@@ -80,13 +81,36 @@ class BrandEMIProductFragment : Fragment() {
 
         //Below we are assigning initial request value of Field57 in BrandEMIMaster Data Host Hit:-
         field57RequestData =
-            "${EMIRequestType.BRAND_EMI_Product.requestType}^0^$brandID^$categoryID"
+            "${EMIRequestType.BRAND_EMI_Product.requestType}^0^${brandEMIDataModal?.getBrandID()}^${brandEMIDataModal?.getCategoryID()}"
 
         //Initial SetUp of RecyclerView List with Empty Data , After Fetching Data from Host we will notify List:-
         setUpRecyclerView()
         brandEmiProductDataList.clear()
         fetchBrandEMIProductDataFromHost()
+
+        //OnClick Event of Floating Action Button:-
+        binding?.brandEmiProductFloatingButton?.setOnClickListener {
+            navigateToInputAmountFragment()
+        }
+
+        Log.d("BrandDataModal:- ", Gson().toJson(brandEMIDataModal))
     }
+
+    //region========================Navigate Product Page To Input Amount Fragment:-
+    private fun navigateToInputAmountFragment() {
+        if (checkInternetConnection()) {
+            (activity as MainActivity).transactFragment(NewInputAmountFragment().apply {
+                arguments = Bundle().apply {
+                    putSerializable("type", action)
+                    putSerializable("modal", brandEMIDataModal)
+                    putString(MainActivity.INPUT_SUB_HEADING, SubHeaderTitle.Brand_EMI.title)
+                }
+            })
+        } else {
+            VFService.showToast(getString(R.string.no_internet_available_please_check_your_internet))
+        }
+    }
+    //endregion
 
     //region===========================SetUp RecyclerView :-
     private fun setUpRecyclerView() {
@@ -151,7 +175,7 @@ class BrandEMIProductFragment : Fragment() {
                                         getString(R.string.info), "No Record Found",
                                         false, getString(R.string.positive_button_ok),
                                         {
-                                            if (!TextUtils.isEmpty(categoryID))
+                                            if (!TextUtils.isEmpty(brandEMIDataModal?.getCategoryID()))
                                                 parentFragmentManager.popBackStack()
                                             else {
                                                 parentFragmentManager.popBackStack()
@@ -228,17 +252,19 @@ class BrandEMIProductFragment : Fragment() {
                     //Refresh Field57 request value for Pagination if More Record Flag is True:-
                     if (moreDataFlag == "1") {
                         field57RequestData =
-                            "${EMIRequestType.BRAND_SUB_CATEGORY.requestType}^$totalRecord^${brandID}"
+                            "${EMIRequestType.BRAND_EMI_Product.requestType}^$totalRecord^${brandEMIDataModal?.getBrandID()}^${brandEMIDataModal?.getCategoryID()}"
                         fetchBrandEMIProductDataFromHost()
                         Log.d("FullDataList:- ", brandEmiProductDataList.toString())
                     } else {
                         iDialog?.hideProgress()
+                        binding?.brandEmiProductFloatingButton?.visibility = View.VISIBLE
                         Log.d("Full Product Data:- ", Gson().toJson(brandEmiProductDataList))
                     }
                 }
             } else {
                 GlobalScope.launch(Dispatchers.Main) {
                     iDialog?.hideProgress()
+                    binding?.brandEmiProductFloatingButton?.visibility = View.VISIBLE
                     /* iDialog?.alertBoxWithAction(null, null,
                          getString(R.string.error), hostMsg,
                          false, getString(R.string.positive_button_ok),
@@ -253,6 +279,7 @@ class BrandEMIProductFragment : Fragment() {
     private fun onProductSelected(position: Int) {
         try {
             Log.d("Product Position:- ", position.toString())
+            selectedProductUpdatedPosition = position
         } catch (ex: IndexOutOfBoundsException) {
             ex.printStackTrace()
         }

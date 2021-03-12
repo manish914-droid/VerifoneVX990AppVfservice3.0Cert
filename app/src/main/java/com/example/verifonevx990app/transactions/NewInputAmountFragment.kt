@@ -15,6 +15,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.brandemi.BrandEMIDataModal
 import com.example.verifonevx990app.databinding.FragmentNewInputAmountBinding
 import com.example.verifonevx990app.main.IFragmentRequest
 import com.example.verifonevx990app.realmtables.EDashboardItem
@@ -22,6 +23,7 @@ import com.example.verifonevx990app.realmtables.HdfcCdt
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
 import com.example.verifonevx990app.utils.KeyboardModel
 import com.example.verifonevx990app.vxUtils.*
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -45,6 +47,7 @@ class NewInputAmountFragment : Fragment() {
     private var cashAmount: EditText? = null
     private var iDialog: IDialog? = null
     private var binding: FragmentNewInputAmountBinding? = null
+    private var brandEMIDataModal: BrandEMIDataModal? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -73,6 +76,9 @@ class NewInputAmountFragment : Fragment() {
         Log.d("HDFCTPTData:- ", hdfcTPTData.toString())
         Log.d("HDFCCDTData:- ", hdfcCDTData.toString())
         initAnimation()
+
+        brandEMIDataModal = arguments?.getSerializable("modal") as? BrandEMIDataModal
+        Log.d("Brand EMI Trans Data:- ", Gson().toJson(brandEMIDataModal))
 
         binding?.mainKeyBoard?.root?.visibility = View.VISIBLE
         binding?.mainKeyBoard?.root?.startAnimation(animShow)
@@ -379,9 +385,10 @@ class NewInputAmountFragment : Fragment() {
                             )
                         }
                     }
-
-
                 }
+
+                EDashboardItem.BRAND_EMI -> enableDisableMobileAndInvoiceField()
+
                 EDashboardItem.CASH_ADVANCE -> {
                     iFrReq?.onFragmentRequest(
                         UiAction.CASH_AT_POS,
@@ -434,6 +441,36 @@ class NewInputAmountFragment : Fragment() {
             }
         }
     }
+
+    //region===================Enable/Disable Mobile And Invoice Field For Brand EMI:-
+    private fun enableDisableMobileAndInvoiceField() {
+        if (brandEMIDataModal != null) {
+            if (brandEMIDataModal?.getBrandReservedValue()?.substring(0, 1) == "1" ||
+                brandEMIDataModal?.getBrandReservedValue()?.substring(0, 1) == "2" ||
+                brandEMIDataModal?.getBrandReservedValue()?.substring(2, 3) == "1" ||
+                brandEMIDataModal?.getBrandReservedValue()?.substring(2, 3) == "2"
+            ) {
+                showMobileBillDialog(
+                    activity,
+                    TransactionType.BRAND_EMI.type,
+                    brandEMIDataModal
+                ) { extraPairData ->
+                    iFrReq?.onFragmentRequest(
+                        UiAction.BRAND_EMI,
+                        Pair(binding?.saleAmount?.text.toString().trim(), "0"),
+                        extraPairData
+                    )
+                }
+            } else {
+                iFrReq?.onFragmentRequest(
+                    UiAction.BRAND_EMI,
+                    Pair(binding?.saleAmount?.text.toString().trim(), "0"),
+                    Pair("", "")
+                )
+            }
+        }
+    }
+    //endregion
 
     private fun validateTIP(totalTransAmount: Float, saleAmt: Float) {
         val tpt = TerminalParameterTable.selectFromSchemeTable()

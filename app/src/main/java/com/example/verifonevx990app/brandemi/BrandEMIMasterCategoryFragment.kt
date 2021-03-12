@@ -24,7 +24,10 @@ import com.example.verifonevx990app.realmtables.BrandEMIMasterTimeStamps
 import com.example.verifonevx990app.realmtables.BrandTAndCTable
 import com.example.verifonevx990app.realmtables.IssuerTAndCTable
 import com.example.verifonevx990app.vxUtils.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /**
 This is a Brand EMI Master Category Data Fragment
@@ -44,6 +47,7 @@ class BrandEMIMasterCategoryFragment : Fragment() {
     private var issuerTAndCTimeStamp: String? = null
     private var brandTAndCTimeStamp: String? = null
     private var empty_view_placeholder: ImageView? = null
+    private val brandEMIDataModel by lazy { BrandEMIDataModal() }
     private val brandEMIMasterCategoryAdapter by lazy {
         BrandEMIMasterCategoryAdapter(
             brandEmiMasterDataList,
@@ -190,18 +194,6 @@ class BrandEMIMasterCategoryFragment : Fragment() {
                     if (moreDataFlag == "1") {
                         field57RequestData = "${EMIRequestType.BRAND_DATA.requestType}^$totalRecord"
                     }
-
-                    //region============Save Brand EMI Master Category Data TimeStamps in DB:-
-                    val model = BrandEMIMasterTimeStamps()
-                    model.brandTimeStamp = brandTimeStamp ?: ""
-                    model.issuerTAndCTimeStamp = issuerTAndCTimeStamp ?: ""
-                    model.brandTAndCTimeStamp = brandTAndCTimeStamp ?: ""
-                    val insert = withContext(Dispatchers.IO) {
-                        BrandEMIMasterTimeStamps.performOperation(model)
-                    }
-                    Log.d("InsertStatus: ", insert.toString())
-                    //endregion
-
                 }
             } else {
                 GlobalScope.launch(Dispatchers.Main) {
@@ -245,9 +237,11 @@ class BrandEMIMasterCategoryFragment : Fragment() {
                         if (issuerTCDataSaved) {
                             getBrandTAndCData { brandTCDataSaved ->
                                 if (brandTCDataSaved) {
-                                    GlobalScope.launch(Dispatchers.Main) {
-                                        iDialog?.hideProgress()
-                                        navigateToBrandEMISubCategoryFragment(position)
+                                    saveBrandMasterTimeStampsData { brandMasterDataTimeStampsSaved ->
+                                        GlobalScope.launch(Dispatchers.Main) {
+                                            iDialog?.hideProgress()
+                                            navigateToBrandEMISubCategoryFragment(position)
+                                        }
                                     }
                                 } else {
                                     GlobalScope.launch(Dispatchers.Main) {
@@ -354,16 +348,39 @@ class BrandEMIMasterCategoryFragment : Fragment() {
                 cb(false)
         }
     }
+    //endregion
+
+    //region==============Save Brand Master Data TimeStamps:-
+    private fun saveBrandMasterTimeStampsData(cb: (Boolean) -> Unit) {
+        runBlocking(Dispatchers.IO) { BrandEMIMasterTimeStamps.clear() }
+        val model = BrandEMIMasterTimeStamps()
+        model.brandTimeStamp = brandTimeStamp ?: ""
+        model.brandCategoryUpdatedTimeStamp = brandCategoryUpdatedTimeStamp ?: ""
+        model.issuerTAndCTimeStamp = issuerTAndCTimeStamp ?: ""
+        model.brandTAndCTimeStamp = brandTAndCTimeStamp ?: ""
+        runBlocking(Dispatchers.IO) { BrandEMIMasterTimeStamps.performOperation(model) }
+        cb(true)
+    }
+    //endregion
 
     //region===================================Navigate Fragment to BrandEMISubCategory Fragment:-
     private fun navigateToBrandEMISubCategoryFragment(position: Int) {
         if (checkInternetConnection()) {
+            val brandData = parseDataListWithSplitter(
+                SplitterTypes.CARET.splitter,
+                brandEmiMasterDataList[position].recordData
+            )
+            //region=========Adding BrandID , BrandName and Brand ReservedValues in BrandEMIDataModal:-
+            brandEMIDataModel.setBrandID(brandData[0])
+            brandEMIDataModel.setBrandName(brandData[1])
+            brandEMIDataModel.setBrandReservedValue(brandData[2])
+            //endregion
             (activity as MainActivity).transactFragment(BrandEMISubCategoryFragment().apply {
                 arguments = Bundle().apply {
-                    putString("brandData", brandEmiMasterDataList[position].recordData)
                     putString("categoryUpdatedTimeStamp", brandCategoryUpdatedTimeStamp)
                     putString("brandTimeStamp", brandTimeStamp)
                     putSerializable("type", action)
+                    putSerializable("modal", brandEMIDataModel)
                 }
             })
         } else {

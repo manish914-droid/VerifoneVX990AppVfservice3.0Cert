@@ -98,7 +98,8 @@ enum class TransactionType(
     OFFLINE_SALE(29, ProcessingCode.OFFLINE_SALE, "OFFLINE SALE"),
     VOID_OFFLINE_SALE(30, ProcessingCode.VOID_OFFLINE_SALE, "VOID OFFLINE SALE"),
     EMI_MASTER_DATA(31, ProcessingCode.BANK_EMI, "BRAND EMI"),
-    EMI_ENQUIRY(32, ProcessingCode.BANK_EMI, "EMI ENQUIRY")
+    EMI_ENQUIRY(32, ProcessingCode.BANK_EMI, "EMI ENQUIRY"),
+    BRAND_EMI(33, ProcessingCode.BRAND_EMI, "BRAND EMI"),
 }
 
 

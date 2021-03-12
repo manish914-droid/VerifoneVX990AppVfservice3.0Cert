@@ -38,12 +38,7 @@ class BrandEMISubCategoryFragment : Fragment() {
     private var iDialog: IDialog? = null
     private val brandEmiMasterSubCategoryDataList by lazy { mutableListOf<BrandEMIMasterSubCategoryDataModal>() }
     private val action by lazy { arguments?.getSerializable("type") ?: "" }
-    private val brandData by lazy { arguments?.getString("brandData") ?: "" }
-    private val brandTimeStamp by lazy { arguments?.getString("brandTimeStamp") ?: "" }
-    private val categoryUpdatedTimeStamp by lazy {
-        arguments?.getString("categoryUpdatedTimeStamp") ?: ""
-    }
-    private var brandID: MutableList<String>? = null
+    private var brandEMIDataModal: BrandEMIDataModal? = null
     private var field57RequestData: String? = null
     private var moreDataFlag = "0"
     private var totalRecord: String? = "0"
@@ -76,11 +71,12 @@ class BrandEMISubCategoryFragment : Fragment() {
         binding?.subHeaderView?.subHeaderText?.text = getString(R.string.brand_emi_sub_category)
         binding?.subHeaderView?.backImageButton?.setOnClickListener { parentFragmentManager.popBackStackImmediate() }
         (activity as MainActivity).showBottomNavigationBar(isShow = false)
-        Log.d("BrandData:- ", brandData)
-        brandID = parseDataListWithSplitter(SplitterTypes.CARET.splitter, brandData)
+        brandEMIDataModal = arguments?.getSerializable("modal") as BrandEMIDataModal
+        Log.d("BrandID:- ", brandEMIDataModal?.getBrandID() ?: "")
 
         //Below we are assigning initial request value of Field57 in BrandEMIMaster Data Host Hit:-
-        field57RequestData = "${EMIRequestType.BRAND_SUB_CATEGORY.requestType}^0^${brandID?.get(0)}"
+        field57RequestData =
+            "${EMIRequestType.BRAND_SUB_CATEGORY.requestType}^0^${brandEMIDataModal?.getBrandID()}"
 
         //Initial SetUp of RecyclerView List with Empty Data , After Fetching Data from Host we will notify List:-
         setUpRecyclerView()
@@ -193,7 +189,7 @@ class BrandEMISubCategoryFragment : Fragment() {
 
                     //Notify RecyclerView DataList on UI with Category Data that has ParentCategoryID == 0 && BrandID = selected brandID :-
                     val data = brandEmiMasterSubCategoryDataList.filter {
-                        it.parentCategoryID == "0" && it.brandID == brandID?.get(0)
+                        it.parentCategoryID == "0" && it.brandID == brandEMIDataModal?.getBrandID()
                     }
                             as MutableList<BrandEMIMasterSubCategoryDataModal>
                     if (data.isNotEmpty()) {
@@ -204,14 +200,14 @@ class BrandEMISubCategoryFragment : Fragment() {
                     if (moreDataFlag == "1") {
                         field57RequestData =
                             "${EMIRequestType.BRAND_SUB_CATEGORY.requestType}^$totalRecord^${
-                                brandID?.get(0)
+                                brandEMIDataModal?.getBrandID()
                             }"
                         fetchBrandEMIMasterSubCategoryDataFromHost()
                         Log.d("FullDataList:- ", brandEmiMasterSubCategoryDataList.toString())
                     } else {
                         iDialog?.hideProgress()
                         if (data.isEmpty()) {
-                            navigateToProductPage("", isSubCategoryItem = false)
+                            navigateToProductPage(isSubCategoryItem = false, -1)
                         }
                     }
                 }
@@ -249,10 +245,7 @@ class BrandEMISubCategoryFragment : Fragment() {
             if (position > -1 && childFilteredList?.isNotEmpty() == true) {
                 navigateToBrandEMIDataByCategoryIDPage(position, true)
             } else
-                navigateToProductPage(
-                    brandEmiMasterSubCategoryDataList[position].categoryID,
-                    isSubCategoryItem = true
-                )
+                navigateToProductPage(isSubCategoryItem = true, position)
         } catch (ex: IndexOutOfBoundsException) {
             ex.printStackTrace()
         }
@@ -265,11 +258,17 @@ class BrandEMISubCategoryFragment : Fragment() {
         isSubCategoryItem: Boolean = false
     ) {
         if (checkInternetConnection()) {
+            //region==========Adding BrandEMISubCategoryID , CategoryName in brandEMIDataModal:-
+            if (isSubCategoryItem) {
+                brandEMIDataModal?.setCategoryID(brandEmiMasterSubCategoryDataList[position].categoryID)
+                brandEMIDataModal?.setCategoryName(brandEmiMasterSubCategoryDataList[position].categoryName)
+            }
+            //endregion
+
             (activity as MainActivity).transactFragment(BrandEMIDataByCategoryID().apply {
                 arguments = Bundle().apply {
-                    putString("brandData", brandData)
+                    putSerializable("modal", brandEMIDataModal)
                     putBoolean("isSubCategoryItemPresent", isSubCategoryItem)
-                    putParcelable("selectCategoryData", brandEmiMasterSubCategoryDataList[position])
                     putParcelableArrayList(
                         "subCategoryData",
                         brandEmiMasterSubCategoryDataList as ArrayList<out Parcelable>
@@ -284,13 +283,22 @@ class BrandEMISubCategoryFragment : Fragment() {
     //endregion
 
     //region===================================Navigate Controller To Product Page:-
-    private fun navigateToProductPage(categoryID: String = "", isSubCategoryItem: Boolean = false) {
+    private fun navigateToProductPage(isSubCategoryItem: Boolean = false, position: Int) {
         if (checkInternetConnection()) {
+            //region===================Adding CategoryID , CategoryName:-
+            if (isSubCategoryItem && position > -1) {
+                brandEMIDataModal?.setCategoryID(brandEmiMasterSubCategoryDataList[position].categoryID)
+                brandEMIDataModal?.setCategoryName(brandEmiMasterSubCategoryDataList[position].categoryName)
+            } else {
+                brandEMIDataModal?.setCategoryID("")
+                brandEMIDataModal?.setCategoryName("")
+            }
+            //endregion
             (activity as MainActivity).transactFragment(BrandEMIProductFragment().apply {
                 arguments = Bundle().apply {
                     putBoolean("isSubCategoryItemPresent", isSubCategoryItem)
-                    putString("brandData", brandID?.get(0))
-                    putString("categoryID", categoryID)
+                    putSerializable("modal", brandEMIDataModal)
+                    putSerializable("type", action)
                 }
             })
         } else {

@@ -25,19 +25,15 @@ Here we are Fetching Brand EMI Sub-Category ID based Data From Previous Sub-Cate
  */
 class BrandEMIDataByCategoryID : Fragment() {
     private var iDialog: IDialog? = null
-    private var selectCategoryData: BrandEMIMasterSubCategoryDataModal? = null
     private var subCategoryData: MutableList<BrandEMIMasterSubCategoryDataModal>? = null
     private var displayFilteredList: MutableList<BrandEMIMasterSubCategoryDataModal>? =
         mutableListOf()
     private val action by lazy { arguments?.getSerializable("type") ?: "" }
     private val isSubCategoryItem by lazy { arguments?.getBoolean("isSubCategoryItemPresent") }
     private var binding: FragmentBrandEmiDataByCategoryIdBinding? = null
-    private val brandData by lazy { arguments?.getString("brandData") ?: "" }
+    private var brandEMIDataModal: BrandEMIDataModal? = null
     private val brandEMISubCategoryByIDAdapter by lazy {
-        BrandEMISubCategoryByIDAdapter(
-            displayFilteredList,
-            ::onItemClick
-        )
+        BrandEMISubCategoryByIDAdapter(displayFilteredList, ::onItemClick)
     }
 
     override fun onAttach(context: Context) {
@@ -60,9 +56,8 @@ class BrandEMIDataByCategoryID : Fragment() {
         binding?.subHeaderView?.subHeaderText?.text = getString(R.string.brand_emi_sub_category)
         binding?.subHeaderView?.backImageButton?.setOnClickListener { parentFragmentManager.popBackStackImmediate() }
         (activity as MainActivity).showBottomNavigationBar(isShow = false)
-        selectCategoryData = arguments?.getParcelable("selectCategoryData")
+        brandEMIDataModal = arguments?.getSerializable("modal") as BrandEMIDataModal
         subCategoryData = arguments?.getParcelableArrayList("subCategoryData")
-        Log.d("SelectedCategoryData: ", selectCategoryData.toString())
 
         //Method to Filter child category data from SubCategory Data According to Selected Category and display on UI:-
         fetchChildCategoryAndDisplay()
@@ -72,9 +67,8 @@ class BrandEMIDataByCategoryID : Fragment() {
     private fun fetchChildCategoryAndDisplay() {
         if (subCategoryData != null) {
             displayFilteredList =
-                subCategoryData?.filter { selectCategoryData?.categoryID == it.parentCategoryID }
+                subCategoryData?.filter { brandEMIDataModal?.getCategoryID() == it.parentCategoryID }
                         as MutableList<BrandEMIMasterSubCategoryDataModal>?
-            Log.d("CategoryData:- ", selectCategoryData.toString())
             Log.d("ChildCategoryData:- ", subCategoryData.toString())
             if (displayFilteredList?.isNotEmpty() == true)
                 setUpRecyclerView()
@@ -115,7 +109,7 @@ class BrandEMIDataByCategoryID : Fragment() {
                     Log.d("NewFilteredList:- ", displayFilteredList.toString())
                     brandEMISubCategoryByIDAdapter.refreshAdapterList(displayFilteredList!!)
                 } else {
-                    navigateToProductPage(displayFilteredList?.get(position)?.categoryID ?: "")
+                    navigateToProductPage(position)
                 }
             }
         } catch (ex: IndexOutOfBoundsException) {
@@ -125,13 +119,21 @@ class BrandEMIDataByCategoryID : Fragment() {
 //endregion
 
     //region===================================Navigate Controller To Product Page:-
-    private fun navigateToProductPage(categoryID: String) {
+    private fun navigateToProductPage(position: Int) {
         if (checkInternetConnection()) {
+            //region Adding ChildSubCategoryID and Name:-
+            brandEMIDataModal?.setChildSubCategoryID(
+                displayFilteredList?.get(position)?.categoryID ?: ""
+            )
+            brandEMIDataModal?.setChildSubCategoryName(
+                displayFilteredList?.get(position)?.categoryName ?: ""
+            )
+            //endregion
             (activity as MainActivity).transactFragment(BrandEMIProductFragment().apply {
                 arguments = Bundle().apply {
                     putBoolean("isSubCategoryItemPresent", isSubCategoryItem ?: false)
-                    putString("brandData", brandData)
-                    putString("categoryID", categoryID)
+                    putSerializable("modal", brandEMIDataModal)
+                    putSerializable("type", action)
                 }
             })
         } else {
