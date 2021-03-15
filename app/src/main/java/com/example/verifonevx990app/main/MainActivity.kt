@@ -1368,7 +1368,15 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                             getPromo(
                                 "000000000000",
                                 ProcessingCode.INITIALIZE_PROMOTION.code
-                            ) { bool, str, str2 ->
+                            ) { isSuccess, responseMsg, responsef57 ->
+                                if (isSuccess) {
+                                    val spliter = responsef57.split("|")
+                                    if (spliter[1] == "1") {
+                                        //todo promo enabled
+                                    } else {
+                                        //todo promo not enabled
+                                    }
+                                }
 
                             }
                         }

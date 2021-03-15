@@ -357,8 +357,6 @@ class ProcessCard(
                                 }
                                 // println("Incorrect Date")
                             }
-
-
                         }
                     } catch (ex: NoSuchElementException) {
                         ex.printStackTrace()

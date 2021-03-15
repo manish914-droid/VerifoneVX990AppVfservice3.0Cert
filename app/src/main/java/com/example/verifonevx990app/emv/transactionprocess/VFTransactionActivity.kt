@@ -40,10 +40,8 @@ import com.google.gson.Gson
 import com.vfi.smartpos.deviceservice.aidl.PinInputListener
 import com.vfi.smartpos.deviceservice.constdefine.ConstIPBOC
 import com.vfi.smartpos.deviceservice.constdefine.ConstIPinpad
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import java.lang.Runnable
 
 
 class VFTransactionActivity : BaseActivity() {
@@ -851,81 +849,6 @@ class VFTransactionActivity : BaseActivity() {
             )
         }
     }
-
-    fun checkEmiBankEmi(cardProcessedDataModal: CardProcessedDataModal, transactionCallback: (CardProcessedDataModal) -> Unit) {
-        cardProcessedDataModal.setProcessingCode(transactionProcessingCode)
-        cardProcessedDataModal.setTransactionAmount(transactionalAmount)
-        cardProcessedDataModal.setOtherAmount(otherTransAmount)
-        cardProcessedDataModal.setTransType(transactionType)
-        cardProcessedDataModal.setMobileBillExtraData(Pair(mobileNumber, billNumber))
-        globalCardProcessedModel = cardProcessedDataModal
-        Log.d("CardProcessedData:- ", Gson().toJson(cardProcessedDataModal))
-        val maskedPan = cardProcessedDataModal.getPanNumberData()?.let {
-            getMaskedPan(TerminalParameterTable.selectFromSchemeTable(), it)
-        }
-        runOnUiThread {
-            binding?.atCardNoTv?.text = maskedPan
-            cardView_l.visibility = View.VISIBLE
-            tv_card_number_heading.visibility = View.VISIBLE
-            tv_insert_card.visibility = View.INVISIBLE
-            binding?.paymentGif?.visibility = View.INVISIBLE
-        }
-
-        var iptList = IssuerParameterTable.selectFromIssuerParameterTable()
-        iptList = iptList.filter { it.isActive == "1" }
-
-
-        val temPan = cardProcessedDataModal.getPanNumberData()?.substring(0, 6)
-        var emiBin: EmiBinTable?
-        //  val temPan = track1.pan.substring(0, 6)
-        try {
-            emiBin = EmiBinTable.selectFromEmiBinTable().first { it.binValue == temPan }
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            emiBin = null
-            //println("No such element exception " + ex.message)
-        }
-        try {
-            iptList = iptList.filter { it.issuerId == emiBin?.issuerId }
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            iptList = emptyList()
-            //println("No itp list " + ex.message)
-        }
-
-        if (cardProcessedDataModal.getTransType() == TransactionType.EMI_SALE.type) {
-            if (null == emiBin || iptList.isEmpty()) {
-                GlobalScope.launch(Dispatchers.Main) {
-                    val iDialog = this@VFTransactionActivity as IDialog
-                    iDialog.getMsgDialog("Bank EMI",
-                        "Bank EMI is not available for this card.\nDo you want to continue as Sale?",
-                        "Yes",
-                        "No",
-                        {
-                            cardProcessedDataModal.setTransType(TransactionType.SALE.type)
-                            transactionCallback(cardProcessedDataModal)
-                           // cardProcessedDataModal.setEmiType(0)  //0 for Bank EMI
-                           // emvProcessNext(cardProcessedDataModal)
-                        },
-                        {
-                            declinedTransaction()
-                        })
-                }
-            } else {
-                doEmiEnquiry(cardProcessedDataModal)
-            }
-        }
-
-    /*    startActivityForResult(Intent(this, EmiActivity::class.java).apply {
-            putExtra("amount", transactionAmountValue.toDouble())
-            putExtra("is_bank", true)
-            putExtra("pan", cardProcessedDataModal.getPanNumberData())
-            putExtra("cardprocess", cardProcessedDataModal)
-
-        }, EIntentRequest.TRANSACTION.code)*/
-
-    }
-
     fun checkEmiInstaEmi(cardProcessedDataModal: CardProcessedDataModal, transactionCallback: (CardProcessedDataModal) -> Unit) {
         cardProcessedDataModal.setProcessingCode(transactionProcessingCode)
         cardProcessedDataModal.setTransactionAmount(transactionalAmount)
@@ -1010,28 +933,7 @@ class VFTransactionActivity : BaseActivity() {
             }
 
         }
-        /*else if (cardProcessedDataModal.getTransType() == TransactionType.EMI_SALE.type) {
-            if (null == emiBin || iptList.isEmpty()) {
-                GlobalScope.launch(Dispatchers.Main) {
-                    val iDialog = this@VFTransactionActivity as IDialog
-                    iDialog.getMsgDialog("Bank EMI",
-                        "Bank EMI is not available for this card.\nDo you want to continue as Sale?",
-                        "Yes",
-                        "No",
-                        {
-                            cardProcessedDataModal.setTransType(TransactionType.SALE.type)
-                            transactionCallback(cardProcessedDataModal)
-                          //  cardProcessedDataModal.setEmiType(0)  //0 for Bank EMI
-                          //  emvProcessNext(cardProcessedDataModal)
-                        },
-                        {
-                            declinedTransaction()
-                        })
-                }
-            } else {
-                doEmiEnquiry(cardProcessedDataModal)
-            }
-        }*/
+
     }
 
     fun doEmiEnquiry(cardProcessedDataModal: CardProcessedDataModal) {
@@ -1154,50 +1056,6 @@ class VFTransactionActivity : BaseActivity() {
                                     e.printStackTrace()
                                 }
 
-
-                                /*      if (null != pinHandler) {
-                                    pinHandler.postDelayed(Runnable {
-                                        var dialog = PinpadPopUpWindow(
-                                            this@VFTransactionActivity,
-                                            R.style.popup_dialog,
-                                            pinHandler,
-                                            globalCardProcessedModel,
-                                            this@VFTransactionActivity.getString(R.string.bank_card_password),
-                                            ""
-                                        )
-                                        val pwdListener: PinpadPopUpWindow.OnPwdListener = object :
-                                            PinpadPopUpWindow.OnPwdListener {
-                                            override fun onErr() {
-                                                dialog.dismiss()
-                                                if (null != pinHandler)
-                                                    pinHandler.removeCallbacksAndMessages(null)
-                                                GlobalScope.launch(Dispatchers.Main) {
-                                                    this@VFTransactionActivity.declinedTransaction()
-                                                }
-                                            }
-
-                                            override fun onSucc(data: ByteArray?) {
-                                                dialog.dismiss()
-                                                if (null != pinHandler)
-                                                    pinHandler.removeCallbacksAndMessages(null)
-                                                // transactionCallback(cardProcessedDataModal)
-
-                                                val transactionEMIISO = CreateEMITransactionPacket(globalCardProcessedModel, emiCustomerDetails).createTransactionPacket()
-                                                logger("Transaction REQUEST PACKET --->>", transactionEMIISO.isoMap, "e")
-                                                //runOnUiThread { showProgress(getString(R.string.sale_data_sync)) }
-                                                GlobalScope.launch(Dispatchers.IO) {
-                                                    checkReversal(transactionEMIISO, globalCardProcessedModel)
-                                                }
-                                            }
-
-                                        }
-
-                                        dialog.listener = pwdListener
-                                        dialog.show()
-
-
-                                    }, 100)
-                                }*/
                             } else {
 
                                 val transactionEMIISO = CreateEMITransactionPacket(
@@ -1281,43 +1139,7 @@ class VFTransactionActivity : BaseActivity() {
                                     } catch (e: RemoteException) {
                                         e.printStackTrace()
                                     }
-                                    /*  if (null != pinHandler) {
-                                        pinHandler.postDelayed(Runnable {
-                                            var dialog = PinpadPopUpWindow(this@VFTransactionActivity, R.style.popup_dialog, pinHandler, globalCardProcessedModel, this@VFTransactionActivity.getString(R.string.bank_card_password), "")
-                                            val pwdListener: PinpadPopUpWindow.OnPwdListener = object : PinpadPopUpWindow.OnPwdListener {
-                                                    override fun onErr() {
-                                                        dialog.dismiss()
-                                                        if (null != pinHandler)
-                                                            pinHandler.removeCallbacksAndMessages(null)
-                                                    }
 
-                                                    override fun onSucc(data: ByteArray?) {
-                                                        dialog.dismiss()
-                                                        if (null != pinHandler)
-                                                            pinHandler.removeCallbacksAndMessages(
-                                                                null
-                                                            )
-                                                        GlobalScope.launch(Dispatchers.Main) {
-                                                            this@VFTransactionActivity.finish()
-                                                        }
-
-                                                        val transactionISO =
-                                                            CreateTransactionPacket(globalCardProcessedModel).createTransactionPacket()
-                                                        logger("Transaction REQUEST PACKET --->>", transactionISO.isoMap, "e")
-                                                    //    runOnUiThread { showProgress(getString(R.string.sale_data_sync)) }
-                                                        GlobalScope.launch(Dispatchers.IO) {
-                                                            checkReversal(transactionISO, globalCardProcessedModel)
-                                                        }
-                                                    }
-
-                                                }
-
-                                            dialog.listener = pwdListener
-                                            dialog.show()
-
-
-                                        }, 100)
-                                    }*/
                                 } else {
 
                                     val transactionISO =
@@ -1354,8 +1176,23 @@ class VFTransactionActivity : BaseActivity() {
             }
 
             EIntentRequest.BankEMISchemeOffer.code -> {
+                /*    val dialog = Dialog(this, R.style.generalnotitle)
+                      dialog.setContentView(R.layout.card_process_for_emi)
+                      dialog.show()*/
                 val cardProcessedData =
                     data?.getSerializableExtra("cardProcessedData") as CardProcessedDataModal
+                val maskedPan = cardProcessedData.getPanNumberData()?.let {
+                    getMaskedPan(TerminalParameterTable.selectFromSchemeTable(), it)
+                }
+                runOnUiThread {
+                    binding?.atCardNoTv?.text = maskedPan
+                    cardView_l.visibility = View.VISIBLE
+                    tv_card_number_heading.visibility = View.VISIBLE
+                    Log.e("CHANGED ", "NEW LAUNCH")
+                    binding?.paymentGif?.loadUrl("file:///android_asset/cardprocess.html")
+                    binding?.manualEntryButton?.visibility = View.GONE
+                    binding?.tvInsertCard?.visibility = View.GONE
+                }
                 emiSelectedData = data.getParcelableExtra("emiSchemeDataList")
                 emiTAndCData = data.getParcelableExtra("emiTAndCDataList")
                 Log.d("SelectedEMI Data:- ", emiSelectedData.toString())
@@ -1364,6 +1201,8 @@ class VFTransactionActivity : BaseActivity() {
                 val emiSelectedTransactionAmount = (emiSelectedData?.transactionAmount)?.toLong()
                 // ((emiSelectedData?.transactionAmount?.toDouble())?.times(100))?.toLong()
                 cardProcessedData.setTransactionAmount(emiSelectedTransactionAmount ?: 0L)
+
+
                 DoEmv(
                     this, pinHandler, cardProcessedData,
                     ConstIPBOC.startEMV.intent.VALUE_cardType_smart_card
