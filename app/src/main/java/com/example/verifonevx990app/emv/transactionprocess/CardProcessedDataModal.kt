@@ -54,6 +54,9 @@ class CardProcessedDataModal : Serializable {
     private var pinEntryFlag: String? = null
     //endregion
 
+    // For Insta EMI Available
+    private var hasInstaEmi: Boolean = false
+
     fun getTrack1Data(): String? {
         return track1Data
     }

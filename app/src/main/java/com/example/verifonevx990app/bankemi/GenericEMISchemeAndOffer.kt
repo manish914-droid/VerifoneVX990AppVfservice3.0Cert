@@ -13,11 +13,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
-
+// In triple last Boolean is for checking that card has a emi facility on sale time
 class GenericEMISchemeAndOffer(
     var context: Context, var cardProcessedDataModal: CardProcessedDataModal,
     var cardBinValue: String, var transactionAmount: Long,
-    var callback: (Pair<MutableList<BankEMIDataModal>, MutableList<BankEMIIssuerTAndCDataModal>>, Pair<Boolean, String>) -> Unit
+    var callback: (Pair<MutableList<BankEMIDataModal>, MutableList<BankEMIIssuerTAndCDataModal>>, Triple<Boolean, String, Boolean>) -> Unit
 ) {
     private var field57Request: String? = null
     private var bankEMIRequestCode = "4"
@@ -50,9 +50,11 @@ class GenericEMISchemeAndOffer(
                     logger("Bank EMI Data--->>", responseIsoData.isoMap, "e")
                     Log.e(
                         "Success 39-->  ",
-                        responseIsoData.isoMap[39]?.parseRaw2String().toString() + "---->" +
-                                responseIsoData.isoMap[58]?.parseRaw2String().toString()
+                        responseIsoData.isoMap[39]?.parseRaw2String()
+                            .toString() + "---->" + responseIsoData.isoMap[58]?.parseRaw2String()
+                            .toString()
                     )
+
                     val bankEMIHostResponseData =
                         responseIsoData.isoMap[57]?.parseRaw2String().toString()
                     val hostMsg = responseIsoData.isoMap[58]?.parseRaw2String().toString()
@@ -61,6 +63,11 @@ class GenericEMISchemeAndOffer(
                     isBool = successResponseCode == "00"
                     if (isBool) {
                         parseAndStubbingBankEMIDataToList(bankEMIHostResponseData, hostMsg)
+                    } else {
+                        callback(
+                            Pair(bankEMISchemesDataList, bankEMIIssuerTAndCList),
+                            Triple(isBool, "", false)
+                        )
                     }
                 } else {
                     ROCProviderV2.incrementFromResponse(
@@ -68,7 +75,10 @@ class GenericEMISchemeAndOffer(
                         AppPreference.getBankCode()
                     )
                     isBool = false
-                    callback(Pair(bankEMISchemesDataList, bankEMIIssuerTAndCList), Pair(isBool, ""))
+                    callback(
+                        Pair(bankEMISchemesDataList, bankEMIIssuerTAndCList),
+                        Triple(isBool, "", false)
+                    )
                 }
             }, {})
         }
@@ -195,7 +205,7 @@ class GenericEMISchemeAndOffer(
                         )
                         callback(
                             Pair(bankEMISchemesDataList, bankEMIIssuerTAndCList),
-                            Pair(isBool, "")
+                            Triple(isBool, "", true)
                         )
                     }
                 }

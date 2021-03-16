@@ -653,18 +653,25 @@ class VFTransactionActivity : BaseActivity() {
         }
     }
 
-    fun declinedTransactions() {
-        try {
-          //  vfIEMV?.stopCheckCard()
-            finish()
-            startActivity(Intent(this, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            })
-        } catch (ex: java.lang.Exception) {
-            finish()
-            startActivity(Intent(this, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            })
+    fun declinedTransactionWithMsg(msg: String) {
+        GlobalScope.launch(Dispatchers.Main) {
+            alertBoxWithAction(null,
+                null,
+                getString(R.string.declined),
+                msg,
+                false,
+                getString(R.string.positive_button_ok),
+                {
+                    startActivity(
+                        Intent(
+                            this@VFTransactionActivity,
+                            MainActivity::class.java
+                        ).apply {
+                            flags =
+                                Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        })
+                },
+                {})
         }
     }
 
@@ -917,8 +924,8 @@ class VFTransactionActivity : BaseActivity() {
                 hasInstaEmi = try {
                     tpt?.surcharge.equals("1")
                 } catch (ex: Exception) {
-                    0f
-                } as Boolean
+                    false
+                }
             }
 
             if (hasInstaEmi && transactionAmountValue.toFloat() >= limitAmt && null != emiBin && iptList.isNotEmpty()) {
@@ -948,7 +955,10 @@ class VFTransactionActivity : BaseActivity() {
 
     //Below method is used to show Alert Dialog with EMI and SALE Option also there is cross sign to close dialog and navigate back:-
     //Below method is used to show confirmation pop up for Void Offline Sale:-
-    private fun showEMISaleDialog(cardProcessedDataModal: CardProcessedDataModal, transactionCallback: (CardProcessedDataModal) -> Unit) {
+    fun showEMISaleDialog(
+        cardProcessedDataModal: CardProcessedDataModal,
+        transactionCallback: (CardProcessedDataModal) -> Unit
+    ) {
         val dialog = Dialog(this)
         dialog.setCancelable(false)
         dialog.setContentView(R.layout.show_emi_sale_dialog_view)
@@ -972,8 +982,7 @@ class VFTransactionActivity : BaseActivity() {
             cardProcessedDataModal.setTransType(TransactionType.EMI_SALE.type)
             cardProcessedDataModal.setEmiType(1)  //1 for insta emi
             transactionCallback(cardProcessedDataModal)
-            //EMI Callback
-            doEmiEnquiry(cardProcessedDataModal)
+
         }
 
         dialog.findViewById<ImageView>(R.id.closeDialog).setOnClickListener {
@@ -1201,7 +1210,6 @@ class VFTransactionActivity : BaseActivity() {
                 val emiSelectedTransactionAmount = (emiSelectedData?.transactionAmount)?.toLong()
                 // ((emiSelectedData?.transactionAmount?.toDouble())?.times(100))?.toLong()
                 cardProcessedData.setTransactionAmount(emiSelectedTransactionAmount ?: 0L)
-
 
                 DoEmv(
                     this, pinHandler, cardProcessedData,
