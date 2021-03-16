@@ -99,6 +99,15 @@ class BrandEMIProductFragment : Fragment() {
     //region========================Navigate Product Page To Input Amount Fragment:-
     private fun navigateToInputAmountFragment() {
         if (checkInternetConnection()) {
+            //region===================Saving Selected ProductID and ProductName in BrandEMIDataModal:-
+            if (selectedProductUpdatedPosition > -1) {
+                brandEMIDataModal?.setProductID(brandEmiProductDataList[selectedProductUpdatedPosition].productID)
+                brandEMIDataModal?.setProductName(brandEmiProductDataList[selectedProductUpdatedPosition].productName)
+                brandEMIDataModal?.setValidationTypeName(brandEmiProductDataList[selectedProductUpdatedPosition].validationTypeName)
+                brandEMIDataModal?.setIsRequired(brandEmiProductDataList[selectedProductUpdatedPosition].isRequired)
+                brandEMIDataModal?.setInputDataType(brandEmiProductDataList[selectedProductUpdatedPosition].inputDataType)
+            }
+            //endregion
             (activity as MainActivity).transactFragment(NewInputAmountFragment().apply {
                 arguments = Bundle().apply {
                     putSerializable("type", action)
@@ -279,7 +288,8 @@ class BrandEMIProductFragment : Fragment() {
     private fun onProductSelected(position: Int) {
         try {
             Log.d("Product Position:- ", position.toString())
-            selectedProductUpdatedPosition = position
+            if (position > -1)
+                selectedProductUpdatedPosition = position
         } catch (ex: IndexOutOfBoundsException) {
             ex.printStackTrace()
         }

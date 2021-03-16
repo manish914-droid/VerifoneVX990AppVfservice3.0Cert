@@ -430,27 +430,43 @@ class ProcessCard(
                                                 transactionalAmt
                                             ) { bankEMISchemeAndTAndCData, hostResponseCodeAndMessage ->
                                                 GlobalScope.launch(Dispatchers.Main) {
-                                                    (activity as VFTransactionActivity).startActivityForResult(
-                                                        Intent(
-                                                            activity,
-                                                            EMISchemeAndOfferActivity::class.java
-                                                        ).apply {
-                                                            putParcelableArrayListExtra(
-                                                                "emiSchemeDataList",
-                                                                bankEMISchemeAndTAndCData.first as ArrayList<out Parcelable>
-                                                            )
-                                                            putParcelableArrayListExtra(
-                                                                "emiTAndCDataList",
-                                                                bankEMISchemeAndTAndCData.second as ArrayList<out Parcelable>
-                                                            )
-                                                            putExtra(
-                                                                "cardProcessedData",
-                                                                cardProcessedDataModal
-                                                            )
-                                                        },
-                                                        EIntentRequest.BankEMISchemeOffer.code
-                                                    )
-                                                    (activity as VFTransactionActivity).hideProgress()
+                                                    if (hostResponseCodeAndMessage.first) {
+                                                        (activity as VFTransactionActivity).startActivityForResult(
+                                                            Intent(
+                                                                activity,
+                                                                EMISchemeAndOfferActivity::class.java
+                                                            ).apply {
+                                                                putParcelableArrayListExtra(
+                                                                    "emiSchemeDataList",
+                                                                    bankEMISchemeAndTAndCData.first as ArrayList<out Parcelable>
+                                                                )
+                                                                putParcelableArrayListExtra(
+                                                                    "emiTAndCDataList",
+                                                                    bankEMISchemeAndTAndCData.second as ArrayList<out Parcelable>
+                                                                )
+                                                                putExtra(
+                                                                    "cardProcessedData",
+                                                                    cardProcessedDataModal
+                                                                )
+                                                            },
+                                                            EIntentRequest.BankEMISchemeOffer.code
+                                                        )
+                                                        (activity as VFTransactionActivity).hideProgress()
+                                                    } else {
+                                                        (activity as VFTransactionActivity).hideProgress()
+                                                        (activity as VFTransactionActivity).alertBoxWithAction(
+                                                            null,
+                                                            null,
+                                                            activity.getString(R.string.error),
+                                                            hostResponseCodeAndMessage.second,
+                                                            false,
+                                                            activity.getString(R.string.positive_button_ok),
+                                                            {
+                                                                (activity as VFTransactionActivity).declinedTransaction()
+                                                            },
+                                                            {})
+                                                    }
+
                                                 }
                                             }
                                         }

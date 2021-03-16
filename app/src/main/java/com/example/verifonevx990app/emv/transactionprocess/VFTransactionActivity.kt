@@ -23,10 +23,7 @@ import com.example.verifonevx990app.main.PosEntryModeType
 import com.example.verifonevx990app.nontransaction.CreateEMITransactionPacket
 import com.example.verifonevx990app.nontransaction.EmiActivity
 import com.example.verifonevx990app.offlinemanualsale.SyncOfflineSaleToHost
-import com.example.verifonevx990app.realmtables.BatchFileDataTable
-import com.example.verifonevx990app.realmtables.EmiBinTable
-import com.example.verifonevx990app.realmtables.IssuerParameterTable
-import com.example.verifonevx990app.realmtables.TerminalParameterTable
+import com.example.verifonevx990app.realmtables.*
 import com.example.verifonevx990app.transactions.EmiCustomerDetails
 import com.example.verifonevx990app.transactions.getMaskedPan
 import com.example.verifonevx990app.utils.TransactionTypeValues
@@ -103,7 +100,10 @@ class VFTransactionActivity : BaseActivity() {
         isManualEntryAllowed = tpt?.fManEntry == "1"
         globalCardProcessedModel.setTransType(transactionType)
 
-
+        GlobalScope.launch(Dispatchers.IO) {
+            val d = BrandEMIDataTable.getAllEMIData()
+            Log.d("BrandDataOnTrans:- ", Gson().toJson(d))
+        }
 
         if (!TextUtils.isEmpty(AppPreference.getString(AppPreference.GENERIC_REVERSAL_KEY))) {
             Log.d("Reversal:-", " Reversal Consist Data")

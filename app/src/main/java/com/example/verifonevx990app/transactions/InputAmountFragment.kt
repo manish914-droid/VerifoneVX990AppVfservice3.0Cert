@@ -77,7 +77,7 @@ class InputAmountFragment : Fragment() {
         inputAmountEditText?.requestFocus()
         //Input Amount EditText onKeyboardDone Click Event:-
         inputAmountEditText?.setOnEditorActionListener(getEditorActionListener {
-            sendStartSale(it.text.toString() , Pair("" , ""))
+            sendStartSale(it.text.toString(), Triple("", "", true))
         })
         val tpt = TerminalParameterTable.selectFromSchemeTable()
         proceedToPaybutton?.setOnClickListener {
@@ -87,7 +87,7 @@ class InputAmountFragment : Fragment() {
                         showMobileBillDialog(activity, TransactionType.SALE.type) { extraPairData ->
                             sendStartSale(inputAmountEditText?.text.toString(), extraPairData)
                         } else
-                        sendStartSale(inputAmountEditText?.text.toString(), Pair("", ""))
+                        sendStartSale(inputAmountEditText?.text.toString(), Triple("", "", true))
                 } else if (title == SubHeaderTitle.BANK_EMI.title && tpt?.reservedValues?.substring(
                         1,
                         2
@@ -113,7 +113,7 @@ class InputAmountFragment : Fragment() {
                         sendStartSale(inputAmountEditText?.text.toString(), extraPairData)
                     }
                 } else
-                    sendStartSale(inputAmountEditText?.text.toString(), Pair("", ""))
+                    sendStartSale(inputAmountEditText?.text.toString(), Triple("", "", true))
             } catch (ex: java.lang.Exception) {
                 ex.printStackTrace()
             }
@@ -150,19 +150,28 @@ class InputAmountFragment : Fragment() {
      * First Check for validation and if all validation found ok
      * then proceed
      * */
-    private fun sendStartSale(amt: String , extraPairData : Pair<String , String>) {
+    private fun sendStartSale(amt: String, extraPairData: Triple<String, String, Boolean>) {
         try {
             val am = amt.toDouble()
             if (am >= 1) {
                 activity?.let { hideSoftKeyboard(it) }
                 when (transactionType) {
-                    EDashboardItem.SALE -> iFrReq?.onFragmentRequest(UiAction.START_SALE, amt , extraPairData)
+                    EDashboardItem.SALE -> iFrReq?.onFragmentRequest(
+                        UiAction.START_SALE,
+                        amt,
+                        extraPairData
+                    )
                     EDashboardItem.PREAUTH -> iFrReq?.onFragmentRequest(UiAction.PRE_AUTH, amt)
                     EDashboardItem.REFUND -> iFrReq?.onFragmentRequest(UiAction.REFUND, amt)
-                    EDashboardItem.BANK_EMI -> iFrReq?.onFragmentRequest(UiAction.BANK_EMI, amt , extraPairData)
-                    EDashboardItem.EMI_ENQUIRY-> {
-                       // val formatAmt = "%.2f".format(amt)
-                        iDailog?.onEvents(VxEvent.Emi(amt.toDouble(),transactionType))  }//(activity as MainActivity).showToast("TO BE IMPLEMENTED")
+                    EDashboardItem.BANK_EMI -> iFrReq?.onFragmentRequest(
+                        UiAction.BANK_EMI,
+                        amt,
+                        extraPairData
+                    )
+                    EDashboardItem.EMI_ENQUIRY -> {
+                        // val formatAmt = "%.2f".format(amt)
+                        iDailog?.onEvents(VxEvent.Emi(amt.toDouble(), transactionType))
+                    }//(activity as MainActivity).showToast("TO BE IMPLEMENTED")
                     EDashboardItem.CASH_ADVANCE -> iFrReq?.onFragmentRequest(
                         UiAction.CASH_AT_POS,
                         amt

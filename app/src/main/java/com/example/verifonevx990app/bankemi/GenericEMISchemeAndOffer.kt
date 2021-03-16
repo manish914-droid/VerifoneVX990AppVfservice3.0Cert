@@ -66,7 +66,7 @@ class GenericEMISchemeAndOffer(
                     } else {
                         callback(
                             Pair(bankEMISchemesDataList, bankEMIIssuerTAndCList),
-                            Triple(isBool, "", false)
+                            Triple(isBool, hostMsg, false)
                         )
                     }
                 } else {

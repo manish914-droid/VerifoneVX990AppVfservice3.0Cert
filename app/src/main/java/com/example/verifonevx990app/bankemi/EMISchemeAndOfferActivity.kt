@@ -16,7 +16,10 @@ import com.example.verifonevx990app.databinding.EmiSchemeOfferViewBinding
 import com.example.verifonevx990app.databinding.ItemEmiSchemeOfferBinding
 import com.example.verifonevx990app.emv.transactionprocess.CardProcessedDataModal
 import com.example.verifonevx990app.main.MainActivity
+import com.example.verifonevx990app.realmtables.BrandEMIDataTable
 import com.example.verifonevx990app.vxUtils.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 
 class EMISchemeAndOfferActivity : BaseActivity() {
     private var binding: EmiSchemeOfferViewBinding? = null
@@ -24,6 +27,7 @@ class EMISchemeAndOfferActivity : BaseActivity() {
     private var emiTAndCDataList: MutableList<BankEMIIssuerTAndCDataModal>? = null
     private var cardProcessedDataModal: CardProcessedDataModal? = null
     private var selectedSchemeUpdatedPosition = -1
+    private var brandEMIData: BrandEMIDataTable? = null
     private val emiSchemeAndOfferAdapter: EMISchemeAndOfferAdapter by lazy {
         EMISchemeAndOfferAdapter(
             emiSchemeOfferDataList,
@@ -43,6 +47,13 @@ class EMISchemeAndOfferActivity : BaseActivity() {
             )
         }
         showProgress()
+
+        /*region====================Checking Condition whether Previous Transaction Flow Comes from Brand EMI:-
+        if(true)-------> Fetch Selected Brand EMI Data for IMEI and Other Validations if bits are on
+        */
+        if (cardProcessedDataModal?.getTransType() == TransactionType.BRAND_EMI.type) {
+            brandEMIData = runBlocking(Dispatchers.IO) { BrandEMIDataTable.getAllEMIData() }
+        }
 
         //region======================Getting Parcelable Data List of Emi Scheme&Offer , Emi TAndC and CardProcessedData:-
         emiSchemeOfferDataList = intent?.getParcelableArrayListExtra("emiSchemeDataList")
@@ -92,6 +103,7 @@ class EMISchemeAndOfferActivity : BaseActivity() {
     //region=========================control back to VFTransactionActivity==========================
     private fun navigateControlBackToTransaction(isTransactionContinue: Boolean) {
         if (isTransactionContinue) {
+            //Show IMEI Capture Dialog if bit on:-
             val intent = Intent().apply {
                 putExtra("cardProcessedData", cardProcessedDataModal)
                 putExtra(

@@ -1,6 +1,7 @@
 package com.example.verifonevx990app.transactions
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.text.InputFilter
 import android.util.Log
@@ -18,15 +19,15 @@ import com.example.verifonevx990app.R
 import com.example.verifonevx990app.brandemi.BrandEMIDataModal
 import com.example.verifonevx990app.databinding.FragmentNewInputAmountBinding
 import com.example.verifonevx990app.main.IFragmentRequest
+import com.example.verifonevx990app.main.MainActivity
+import com.example.verifonevx990app.realmtables.BrandEMIDataTable
 import com.example.verifonevx990app.realmtables.EDashboardItem
 import com.example.verifonevx990app.realmtables.HdfcCdt
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
 import com.example.verifonevx990app.utils.KeyboardModel
 import com.example.verifonevx990app.vxUtils.*
 import com.google.gson.Gson
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.*
 
 class NewInputAmountFragment : Fragment() {
@@ -356,34 +357,73 @@ class NewInputAmountFragment : Fragment() {
                             activity,
                             TransactionType.EMI_SALE.type
                         ) { extraPairData ->
-                            iFrReq?.onFragmentRequest(
-                                UiAction.BANK_EMI,
-                                Pair(binding?.saleAmount?.text.toString().trim(), "0"),
-                                extraPairData
-                            )
+                            if (extraPairData.third) {
+                                iFrReq?.onFragmentRequest(
+                                    UiAction.BANK_EMI,
+                                    Pair(binding?.saleAmount?.text.toString().trim(), "0"),
+                                    extraPairData
+                                )
+                            } else {
+                                startActivity(
+                                    Intent(
+                                        requireActivity(),
+                                        MainActivity::class.java
+                                    ).apply {
+                                        flags =
+                                            Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                    })
+                            }
                         }
                     } else if (tpt?.reservedValues?.substring(1, 2) == "1") {
                         showMobileBillDialog(
                             activity,
                             TransactionType.EMI_SALE.type
                         ) { extraPairData ->
-                            iFrReq?.onFragmentRequest(
-                                UiAction.BANK_EMI,
-                                Pair(binding?.saleAmount?.text.toString().trim(), "0"),
-                                extraPairData
-                            )
+                            if (extraPairData.third) {
+                                iFrReq?.onFragmentRequest(
+                                    UiAction.BANK_EMI,
+                                    Pair(binding?.saleAmount?.text.toString().trim(), "0"),
+                                    extraPairData
+                                )
+                            } else {
+                                startActivity(
+                                    Intent(
+                                        requireActivity(),
+                                        MainActivity::class.java
+                                    ).apply {
+                                        flags =
+                                            Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                    })
+                            }
                         }
                     } else if (tpt?.reservedValues?.substring(2, 3) == "1") {
                         showMobileBillDialog(
                             activity,
                             TransactionType.EMI_SALE.type
                         ) { extraPairData ->
-                            iFrReq?.onFragmentRequest(
-                                UiAction.BANK_EMI,
-                                Pair(binding?.saleAmount?.text.toString().trim(), "0"),
-                                extraPairData
-                            )
+                            if (extraPairData.third) {
+                                iFrReq?.onFragmentRequest(
+                                    UiAction.BANK_EMI,
+                                    Pair(binding?.saleAmount?.text.toString().trim(), "0"),
+                                    extraPairData
+                                )
+                            } else {
+                                startActivity(
+                                    Intent(
+                                        requireActivity(),
+                                        MainActivity::class.java
+                                    ).apply {
+                                        flags =
+                                            Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                    })
+                            }
                         }
+                    } else {
+                        iFrReq?.onFragmentRequest(
+                            UiAction.BANK_EMI,
+                            Pair(binding?.saleAmount?.text.toString().trim(), "0"),
+                            Triple("", "", true)
+                        )
                     }
                 }
 
@@ -455,20 +495,133 @@ class NewInputAmountFragment : Fragment() {
                     TransactionType.BRAND_EMI.type,
                     brandEMIDataModal
                 ) { extraPairData ->
-                    iFrReq?.onFragmentRequest(
-                        UiAction.BRAND_EMI,
-                        Pair(binding?.saleAmount?.text.toString().trim(), "0"),
-                        extraPairData
-                    )
+                    GlobalScope.launch(Dispatchers.Main) {
+                        if (extraPairData.third) {
+                            if (isShowIMEISerialDialog()) {
+                                showIMEISerialDialog(activity, brandEMIDataModal) { cbData ->
+                                    if (cbData.third) {
+                                        GlobalScope.launch(Dispatchers.IO) {
+                                            saveBrandEMIDataToDB(cbData.first, cbData.second)
+                                            withContext(Dispatchers.Main) {
+                                                iFrReq?.onFragmentRequest(
+                                                    UiAction.BRAND_EMI,
+                                                    Pair(
+                                                        binding?.saleAmount?.text.toString().trim(),
+                                                        "0"
+                                                    ),
+                                                    extraPairData
+                                                )
+                                            }
+                                        }
+                                    } else {
+                                        startActivity(
+                                            Intent(
+                                                requireActivity(),
+                                                MainActivity::class.java
+                                            ).apply {
+                                                flags =
+                                                    Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                            })
+                                    }
+                                }
+                            } else {
+                                GlobalScope.launch(Dispatchers.IO) {
+                                    saveBrandEMIDataToDB("", "")
+                                    withContext(Dispatchers.Main) {
+                                        iFrReq?.onFragmentRequest(
+                                            UiAction.BRAND_EMI,
+                                            Pair(binding?.saleAmount?.text.toString().trim(), "0"),
+                                            extraPairData
+                                        )
+                                    }
+                                }
+                            }
+                        } else {
+                            startActivity(
+                                Intent(
+                                    requireActivity(),
+                                    MainActivity::class.java
+                                ).apply {
+                                    flags =
+                                        Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                })
+                        }
+                    }
                 }
             } else {
-                iFrReq?.onFragmentRequest(
-                    UiAction.BRAND_EMI,
-                    Pair(binding?.saleAmount?.text.toString().trim(), "0"),
-                    Pair("", "")
-                )
+                GlobalScope.launch(Dispatchers.Main) {
+                    if (isShowIMEISerialDialog()) {
+                        showIMEISerialDialog(activity, brandEMIDataModal) { cbData ->
+                            if (cbData.third) {
+                                GlobalScope.launch(Dispatchers.IO) {
+                                    saveBrandEMIDataToDB(cbData.first, cbData.second)
+                                    withContext(Dispatchers.Main) {
+                                        iFrReq?.onFragmentRequest(
+                                            UiAction.BRAND_EMI,
+                                            Pair(binding?.saleAmount?.text.toString().trim(), "0"),
+                                            Triple("", "", true)
+                                        )
+                                    }
+                                }
+                            } else {
+                                startActivity(
+                                    Intent(
+                                        requireActivity(),
+                                        MainActivity::class.java
+                                    ).apply {
+                                        flags =
+                                            Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                    })
+                            }
+                        }
+                    } else {
+                        GlobalScope.launch(Dispatchers.IO) {
+                            saveBrandEMIDataToDB("", "")
+                            withContext(Dispatchers.Main) {
+                                iFrReq?.onFragmentRequest(
+                                    UiAction.BRAND_EMI,
+                                    Pair(binding?.saleAmount?.text.toString().trim(), "0"),
+                                    Triple("", "", true)
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
+    }
+    //endregion
+
+    //region=====================Condition to check Whether we need to show IMEI/Serial Dialog or not:-
+    private fun isShowIMEISerialDialog(): Boolean {
+        return brandEMIDataModal?.getValidationTypeName() == "IMEI" ||
+                brandEMIDataModal?.getValidationTypeName() == "imei" ||
+                brandEMIDataModal?.getValidationTypeName() == "Serial Number" ||
+                brandEMIDataModal?.getValidationTypeName() == "serial number"
+    }
+    //endregion
+
+    //region======================Saving BrandEMI Data To DB:-
+    private fun saveBrandEMIDataToDB(imeiNumber: String?, serialNumber: String?) {
+        val modal = BrandEMIDataTable()
+        runBlocking(Dispatchers.IO) { BrandEMIDataTable.clear() }
+
+        //Stubbing Data to BrandEMIDataTable:-
+        modal.brandID = brandEMIDataModal?.getBrandID() ?: ""
+        modal.brandName = brandEMIDataModal?.getBrandName() ?: ""
+        modal.brandReservedValues = brandEMIDataModal?.getBrandReservedValue() ?: ""
+        modal.categoryID = brandEMIDataModal?.getCategoryID() ?: ""
+        modal.categoryName = brandEMIDataModal?.getCategoryName() ?: ""
+        modal.productID = brandEMIDataModal?.getProductID() ?: ""
+        modal.productName = brandEMIDataModal?.getProductName() ?: ""
+        modal.childSubCategoryID = brandEMIDataModal?.getChildSubCategoryID() ?: ""
+        modal.childSubCategoryName = brandEMIDataModal?.getChildSubCategoryName() ?: ""
+        modal.validationTypeName = brandEMIDataModal?.getValidationTypeName() ?: ""
+        modal.isRequired = brandEMIDataModal?.getIsRequired() ?: ""
+        modal.inputDataType = brandEMIDataModal?.getInputDataType() ?: ""
+        modal.imeiNumber = imeiNumber ?: ""
+        modal.serialNumber = serialNumber ?: ""
+        runBlocking(Dispatchers.IO) { BrandEMIDataTable.performOperation(modal) }
     }
     //endregion
 

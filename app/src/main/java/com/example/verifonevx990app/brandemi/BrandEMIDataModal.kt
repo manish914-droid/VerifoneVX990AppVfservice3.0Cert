@@ -12,6 +12,9 @@ class BrandEMIDataModal : Serializable {
     private var productName: String? = null
     private var childSubCategoryID: String? = null
     private var childSubCategoryName: String? = null
+    private var validationTypeName: String? = null
+    private var isRequired: String? = null
+    private var inputDataType: String? = null
 
     fun setBrandID(brID: String) {
         this.brandID = brID
@@ -83,5 +86,29 @@ class BrandEMIDataModal : Serializable {
 
     fun getChildSubCategoryName(): String? {
         return childSubCategoryName
+    }
+
+    fun setValidationTypeName(validationTName: String) {
+        this.validationTypeName = validationTName
+    }
+
+    fun getValidationTypeName(): String? {
+        return validationTypeName
+    }
+
+    fun setIsRequired(required: String) {
+        this.isRequired = required
+    }
+
+    fun getIsRequired(): String? {
+        return isRequired
+    }
+
+    fun setInputDataType(inputDType: String) {
+        this.inputDataType = inputDType
+    }
+
+    fun getInputDataType(): String? {
+        return inputDataType
     }
 }

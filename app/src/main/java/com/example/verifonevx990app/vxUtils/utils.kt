@@ -11,10 +11,7 @@ import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.*
 import android.provider.Settings
-import android.text.Editable
-import android.text.InputFilter
-import android.text.TextUtils
-import android.text.TextWatcher
+import android.text.*
 import android.util.Log
 import android.view.*
 import android.widget.*
@@ -1347,7 +1344,7 @@ fun showMobileBillDialog(
     context: Context?,
     transactionType: Int,
     brandEMIDataModal: BrandEMIDataModal? = null,
-    dialogCB: (Pair<String, String>) -> Unit
+    dialogCB: (Triple<String, String, Boolean>) -> Unit
 ) {
     runBlocking(Dispatchers.Main) {
         val dialog = context?.let { Dialog(it) }
@@ -1396,7 +1393,7 @@ fun showMobileBillDialog(
         //Cancel Button OnClick:-
         cancelButton?.setOnClickListener {
             dialog.dismiss()
-            dialogCB(Pair("", ""))
+            dialogCB(Triple("", "", third = false))
         }
 
         //Ok Button OnClick:-
@@ -1409,9 +1406,10 @@ fun showMobileBillDialog(
                     ) {
                         dialog.dismiss()
                         dialogCB(
-                            Pair(
+                            Triple(
                                 mobileNumberET?.text.toString(),
-                                billNumberET?.text.toString()
+                                billNumberET?.text.toString(),
+                                third = true
                             )
                         )
                     } else if (brandEMIDataModal?.getBrandReservedValue()?.substring(0, 1) == "1" &&
@@ -1421,9 +1419,10 @@ fun showMobileBillDialog(
                         if (!TextUtils.isEmpty(billNumberET?.text.toString())) {
                             dialog.dismiss()
                             dialogCB(
-                                Pair(
+                                Triple(
                                     mobileNumberET?.text.toString(),
-                                    billNumberET?.text.toString()
+                                    billNumberET?.text.toString(),
+                                    third = true
                                 )
                             )
                         } else {
@@ -1436,9 +1435,10 @@ fun showMobileBillDialog(
                         if (!TextUtils.isEmpty(mobileNumberET?.text.toString()) && mobileNumberET?.text.toString().length in 10..13) {
                             dialog.dismiss()
                             dialogCB(
-                                Pair(
+                                Triple(
                                     mobileNumberET?.text.toString(),
-                                    billNumberET?.text.toString()
+                                    billNumberET?.text.toString(),
+                                    third = true
                                 )
                             )
                         } else {
@@ -1454,9 +1454,10 @@ fun showMobileBillDialog(
                             else -> {
                                 dialog.dismiss()
                                 dialogCB(
-                                    Pair(
+                                    Triple(
                                         mobileNumberET?.text.toString(),
-                                        billNumberET?.text.toString()
+                                        billNumberET?.text.toString(),
+                                        third = true
                                     )
                                 )
                             }
@@ -1475,12 +1476,12 @@ fun showMobileBillDialog(
                         when {
                             !TextUtils.isEmpty(mobileNumberET?.text.toString()) -> if (mobileNumberET?.text.toString().length in 10..13) {
                                 dialog.dismiss()
-                                dialogCB(Pair(mobileNumberET?.text.toString(), ""))
+                                dialogCB(Triple(mobileNumberET?.text.toString(), "", third = true))
                             } else
                                 VFService.showToast(context.getString(R.string.enter_valid_mobile_number))
                             TextUtils.isEmpty(mobileNumberET?.text.toString()) -> {
                                 dialog.dismiss()
-                                dialogCB(Pair("", ""))
+                                dialogCB(Triple("", "", third = true))
                             }
                         }
                     } else if (transactionType == TransactionType.EMI_SALE.type && tpt?.reservedValues?.substring(
@@ -1493,9 +1494,10 @@ fun showMobileBillDialog(
                                     && !TextUtils.isEmpty(billNumberET?.text.toString()) -> if (mobileNumberET?.text.toString().length in 10..13) {
                                 dialog.dismiss()
                                 dialogCB(
-                                    Pair(
+                                    Triple(
                                         mobileNumberET?.text.toString(),
-                                        billNumberET?.text.toString()
+                                        billNumberET?.text.toString(),
+                                        third = true
                                     )
                                 )
                             } else
@@ -1503,19 +1505,19 @@ fun showMobileBillDialog(
 
                             !TextUtils.isEmpty(mobileNumberET?.text.toString()) -> if (mobileNumberET?.text.toString().length in 10..13) {
                                 dialog.dismiss()
-                                dialogCB(Pair(mobileNumberET?.text.toString(), ""))
+                                dialogCB(Triple(mobileNumberET?.text.toString(), "", third = true))
                             } else
                                 VFService.showToast(context.getString(R.string.enter_valid_mobile_number))
 
                             !TextUtils.isEmpty(billNumberET?.text.toString()) -> {
                                 dialog.dismiss()
-                                dialogCB(Pair("", billNumberET?.text.toString()))
+                                dialogCB(Triple("", billNumberET?.text.toString(), third = true))
                             }
 
                             TextUtils.isEmpty(mobileNumberET?.text.toString()) &&
                                     TextUtils.isEmpty(mobileNumberET?.text.toString()) -> {
                                 dialog.dismiss()
-                                dialogCB(Pair("", ""))
+                                dialogCB(Triple("", "", third = true))
                             }
                         }
 
@@ -1527,12 +1529,12 @@ fun showMobileBillDialog(
                         when {
                             !TextUtils.isEmpty(mobileNumberET?.text.toString()) -> if (mobileNumberET?.text.toString().length in 10..13) {
                                 dialog.dismiss()
-                                dialogCB(Pair(mobileNumberET?.text.toString(), ""))
+                                dialogCB(Triple(mobileNumberET?.text.toString(), "", third = true))
                             } else
                                 VFService.showToast(context.getString(R.string.enter_valid_mobile_number))
                             TextUtils.isEmpty(mobileNumberET?.text.toString()) -> {
                                 dialog.dismiss()
-                                dialogCB(Pair("", ""))
+                                dialogCB(Triple("", "", third = true))
                             }
                         }
                     } else if (transactionType == TransactionType.EMI_SALE.type && tpt?.reservedValues?.substring(
@@ -1543,25 +1545,25 @@ fun showMobileBillDialog(
                         when {
                             !TextUtils.isEmpty(billNumberET?.text.toString()) -> {
                                 dialog.dismiss()
-                                dialogCB(Pair("", billNumberET?.text.toString()))
+                                dialogCB(Triple("", billNumberET?.text.toString(), third = true))
                             }
                             TextUtils.isEmpty(billNumberET?.text.toString()) -> {
                                 dialog.dismiss()
-                                dialogCB(Pair("", ""))
+                                dialogCB(Triple("", "", third = true))
                             }
                         }
                     } else if (transactionType == TransactionType.EMI_ENQUIRY.type) {
                         when {
                             !TextUtils.isEmpty(mobileNumberET?.text.toString()) -> if (mobileNumberET?.text.toString().length in 10..13) {
                                 dialog.dismiss()
-                                dialogCB(Pair(mobileNumberET?.text.toString(), ""))
+                                dialogCB(Triple(mobileNumberET?.text.toString(), "", third = true))
                             } else
                                 VFService.showToast(context.getString(R.string.enter_valid_mobile_number))
                         }
 
                     } else {
                         dialog.dismiss()
-                        dialogCB(Pair("", ""))
+                        dialogCB(Triple("", "", third = true))
                     }
                 }
                 //endregion
@@ -1572,6 +1574,96 @@ fun showMobileBillDialog(
 
     }
 }
+
+//region====================IMEI/Serial Number Pop-Up Dialog:-
+fun showIMEISerialDialog(
+    context: Context?, brandEMIDataModal: BrandEMIDataModal?,
+    dialogCB: (Triple<String, String, Boolean>) -> Unit
+) {
+    val dialog = context?.let { Dialog(it) }
+    val inflate = LayoutInflater.from(context).inflate(R.layout.imei_serial_number_view, null)
+    dialog?.setContentView(inflate)
+    dialog?.setCancelable(false)
+    dialog?.window?.attributes?.windowAnimations = R.style.DialogAnimation
+    val window = dialog?.window
+    window?.setLayout(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        WindowManager.LayoutParams.WRAP_CONTENT
+    )
+    val tilImeiNumber: BHTextInputLayout? = dialog?.findViewById(R.id.til_imei_number)
+    val imeiNumber: BHTextInputEditText? = dialog?.findViewById(R.id.tieIMEINumber)
+    val tilSerialNumber: BHTextInputLayout? = dialog?.findViewById(R.id.til_serial_number)
+    val serialNumber: BHTextInputEditText? = dialog?.findViewById(R.id.tieSerialNumber)
+    val cancelButton: Button? = dialog?.findViewById(R.id.cancel_btn)
+    val okButton: Button? = dialog?.findViewById(R.id.ok_btn)
+
+    //region=====================Hide/Show Field Check:-
+    when (brandEMIDataModal?.getValidationTypeName()) {
+        "IMEI", "imei" -> {
+            tilImeiNumber?.visibility = View.VISIBLE
+            tilSerialNumber?.visibility = View.GONE
+        }
+        "Serial Number", "serial number" -> {
+            tilImeiNumber?.visibility = View.GONE
+            tilSerialNumber?.visibility = View.VISIBLE
+        }
+    }
+    //endregion
+
+    //region===================Setting Input Type:-
+    when (brandEMIDataModal?.getInputDataType()) {
+        "0" -> {
+            imeiNumber?.inputType = InputType.TYPE_CLASS_NUMBER
+            serialNumber?.inputType = InputType.TYPE_CLASS_NUMBER
+        }
+        "1", "2" -> {
+            imeiNumber?.inputType = InputType.TYPE_CLASS_TEXT
+            serialNumber?.inputType = InputType.TYPE_CLASS_TEXT
+        }
+    }
+    //endregion
+
+    cancelButton?.setOnClickListener {
+        dialog.dismiss()
+        dialogCB(Triple("", "", false))
+    }
+
+    okButton?.setOnClickListener {
+        when (brandEMIDataModal?.getValidationTypeName()) {
+            "IMEI", "imei" -> {
+                if (TextUtils.isEmpty(imeiNumber?.text)) {
+                    VFService.showToast(context.getString(R.string.enter_valid_imei_number))
+                } else {
+                    dialog.dismiss()
+                    dialogCB(Triple(imeiNumber?.text?.toString() ?: "", "", third = true))
+                }
+            }
+
+            "Serial Number", "serial number" -> {
+                if (TextUtils.isEmpty(serialNumber?.text)) {
+                    VFService.showToast(context.getString(R.string.enter_valid_serial_number))
+                } else {
+                    dialog.dismiss()
+                    dialogCB(Triple("", serialNumber?.text?.toString() ?: "", third = true))
+                }
+            }
+
+            else -> {
+                dialog.dismiss()
+                dialogCB(
+                    Triple(
+                        imeiNumber?.text?.toString() ?: "",
+                        serialNumber?.text?.toString() ?: "",
+                        true
+                    )
+                )
+            }
+        }
+    }
+
+    dialog?.show()
+}
+//endregion
 
 fun checkInternetConnection(): Boolean {
     val cm =

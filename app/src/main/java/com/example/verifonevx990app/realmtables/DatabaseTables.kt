@@ -3971,6 +3971,101 @@ open class BrandEMIMasterTimeStamps() : RealmObject(), Parcelable {
 }
 //endregion
 
+//region===============Brand EMI Data Table:-
+@RealmClass
+open class BrandEMIDataTable() : RealmObject(), Parcelable {
+    @PrimaryKey
+    var brandID: String = ""
+    var brandName: String = ""
+    var brandReservedValues: String = ""
+    var categoryID: String = ""
+    var categoryName: String = ""
+    var productID: String = ""
+    var productName: String = ""
+    var childSubCategoryID: String = ""
+    var childSubCategoryName: String = ""
+    var validationTypeName: String = ""
+    var isRequired: String = ""
+    var inputDataType: String = ""
+    var imeiNumber: String = ""
+    var serialNumber: String = ""
+
+    private constructor(parcel: Parcel) : this() {
+        brandID = parcel.readString().toString()
+        brandName = parcel.readString().toString()
+        brandReservedValues = parcel.readString().toString()
+        categoryID = parcel.readString().toString()
+        categoryName = parcel.readString().toString()
+        productID = parcel.readString().toString()
+        productName = parcel.readString().toString()
+        childSubCategoryID = parcel.readString().toString()
+        childSubCategoryName = parcel.readString().toString()
+        validationTypeName = parcel.readString().toString()
+        isRequired = parcel.readString().toString()
+        inputDataType = parcel.readString().toString()
+        imeiNumber = parcel.readString().toString()
+        serialNumber = parcel.readString().toString()
+    }
+
+    override fun writeToParcel(p0: Parcel?, p1: Int) {
+        p0?.writeString(brandID)
+        p0?.writeString(brandName)
+        p0?.writeString(brandReservedValues)
+        p0?.writeString(categoryID)
+        p0?.writeString(categoryName)
+        p0?.writeString(productID)
+        p0?.writeString(productName)
+        p0?.writeString(childSubCategoryID)
+        p0?.writeString(childSubCategoryName)
+        p0?.writeString(validationTypeName)
+        p0?.writeString(isRequired)
+        p0?.writeString(inputDataType)
+        p0?.writeString(imeiNumber)
+        p0?.writeString(serialNumber)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object {
+        private val TAG = BrandEMIDataTable::class.java.simpleName
+
+        @JvmField
+        val CREATOR = object : Parcelable.Creator<BrandEMIDataTable> {
+            override fun createFromParcel(parcel: Parcel): BrandEMIDataTable {
+                return BrandEMIDataTable(parcel)
+            }
+
+            override fun newArray(size: Int): Array<BrandEMIDataTable> {
+                return Array(size) { BrandEMIDataTable() }
+            }
+        }
+
+        fun performOperation(param: BrandEMIDataTable) =
+            withRealm { it.executeTransaction { i -> i.insertOrUpdate(param) } }
+
+        //region====================Method to Get All IssuerTAndC Data================
+        fun getAllEMIData(): BrandEMIDataTable = runBlocking {
+            var result = BrandEMIDataTable()
+            getRealm {
+                val re = it.copyFromRealm(it.where(BrandEMIDataTable::class.java).findFirst())
+                if (re != null) result = re
+
+            }.await()
+            result
+        }
+        //endregion
+
+        //region===================Method to Clear BrandEMIData Table:-
+        fun clear() =
+            withRealm { it.executeTransaction { i -> i.delete(BrandEMIDataTable::class.java) } }
+        //endregion
+
+    }
+}
+//endregion
+
 
 @RealmClass
 open class OfflineSaleTable() : RealmObject(), Parcelable {

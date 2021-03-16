@@ -386,6 +386,10 @@
     <string name="product_min_amount">Product Min Amount</string>
     <string name="product_max_amount">Product Max Amount</string>
     <string name="issuer_brand_tandc_loading_error">Issuer/Brand TAndC Loading Error</string>
+    <string name="enter_imei_number">Enter IMEI Number</string>
+    <string name="enter_serial_number">Enter Serial Number</string>
+    <string name="enter_valid_imei_number">Enter a Valid IMEI Number</string>
+    <string name="enter_valid_serial_number">Enter a Valid Serial Number</string>
 
 
 </resources>

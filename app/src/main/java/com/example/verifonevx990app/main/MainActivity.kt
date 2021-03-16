@@ -613,7 +613,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
     override fun onFragmentRequest(
         action: UiAction,
         data: Any,
-        extraPairData: Pair<String, String>?
+        extraPairData: Triple<String, String, Boolean>?
     ) {
         when (action) {
             UiAction.INIT_WITH_KEY_EXCHANGE -> {
@@ -740,15 +740,9 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                 if (checkInternetConnection()) {
                     val amt = (data as Pair<*, *>).first.toString()
                     startActivityForResult(
-                        Intent(
-                            this,
-                            VFTransactionActivity::class.java
-                        ).apply {
+                        Intent(this, VFTransactionActivity::class.java).apply {
                             putExtra("amt", amt)
-                            putExtra(
-                                "type",
-                                TransactionType.EMI_SALE.type
-                            ) //EMI //UiAction.BANK_EMI
+                            putExtra("type", TransactionType.BRAND_EMI.type)
                             putExtra("proc_code", ProcessingCode.BRAND_EMI.code)
                             putExtra("mobileNumber", extraPairData?.first)
                             putExtra("billNumber", extraPairData?.second)
@@ -2277,7 +2271,7 @@ interface IFragmentRequest {
     fun onFragmentRequest(
         action: UiAction,
         data: Any,
-        extraPair: Pair<String, String>? = Pair("", "")
+        extraPair: Triple<String, String, Boolean>? = Triple("", "", third = true)
     )
 
     fun onDashBoardItemClick(action: EDashboardItem)
