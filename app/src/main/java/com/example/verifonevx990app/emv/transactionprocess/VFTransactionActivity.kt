@@ -100,11 +100,6 @@ class VFTransactionActivity : BaseActivity() {
         isManualEntryAllowed = tpt?.fManEntry == "1"
         globalCardProcessedModel.setTransType(transactionType)
 
-        GlobalScope.launch(Dispatchers.IO) {
-            val d = BrandEMIDataTable.getAllEMIData()
-            Log.d("BrandDataOnTrans:- ", Gson().toJson(d))
-        }
-
         if (!TextUtils.isEmpty(AppPreference.getString(AppPreference.GENERIC_REVERSAL_KEY))) {
             Log.d("Reversal:-", " Reversal Consist Data")
         } else {
@@ -246,7 +241,8 @@ class VFTransactionActivity : BaseActivity() {
                 when (cardProcessedData.getTransType()) {
                     TransactionType.SALE.type, TransactionType.PRE_AUTH.type,
                     TransactionType.REFUND.type, TransactionType.CASH_AT_POS.type,
-                    TransactionType.SALE_WITH_CASH.type, TransactionType.EMI_SALE.type -> emvProcessNext(
+                    TransactionType.SALE_WITH_CASH.type, TransactionType.EMI_SALE.type,
+                    TransactionType.BRAND_EMI.type -> emvProcessNext(
                         cardProcessedData
                     )
                     else -> {
@@ -907,7 +903,8 @@ class VFTransactionActivity : BaseActivity() {
         }
 
         if (cardProcessedDataModal.getTransType() == TransactionType.SALE.type ||
-            cardProcessedDataModal.getTransType() == TransactionType.EMI_SALE.type
+            cardProcessedDataModal.getTransType() == TransactionType.EMI_SALE.type ||
+            cardProcessedDataModal.getTransType() == TransactionType.BRAND_EMI.type
         ) {
 
             var limitAmt = 0f
@@ -1185,9 +1182,6 @@ class VFTransactionActivity : BaseActivity() {
             }
 
             EIntentRequest.BankEMISchemeOffer.code -> {
-                /*    val dialog = Dialog(this, R.style.generalnotitle)
-                      dialog.setContentView(R.layout.card_process_for_emi)
-                      dialog.show()*/
                 val cardProcessedData =
                     data?.getSerializableExtra("cardProcessedData") as CardProcessedDataModal
                 val maskedPan = cardProcessedData.getPanNumberData()?.let {
