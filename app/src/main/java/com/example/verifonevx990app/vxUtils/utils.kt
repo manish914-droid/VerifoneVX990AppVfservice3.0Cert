@@ -452,7 +452,6 @@ fun unzipZipedBytes(ba: ByteArray) {
         ze = zis?.nextEntry
     }
     zis?.close()
-
 }
 
 //Below method is used to show Invoice with Padding:-

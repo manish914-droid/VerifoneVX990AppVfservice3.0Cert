@@ -530,7 +530,7 @@ class ProcessCard(
                                                                             )
                                                                             putExtra(
                                                                                 "cardProcessedData",
-                                                                                cardProcessedDataModal
+                                                                                it
                                                                             )
                                                                         },
                                                                         EIntentRequest.BankEMISchemeOffer.code

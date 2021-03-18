@@ -853,7 +853,7 @@ class VFTransactionActivity : BaseActivity() {
         }
     }
     fun checkEmiInstaEmi(cardProcessedDataModal: CardProcessedDataModal, transactionCallback: (CardProcessedDataModal) -> Unit) {
-        cardProcessedDataModal.setProcessingCode(transactionProcessingCode)
+ /*       cardProcessedDataModal.setProcessingCode(transactionProcessingCode)
         cardProcessedDataModal.setTransactionAmount(transactionalAmount)
         cardProcessedDataModal.setOtherAmount(otherTransAmount)
         cardProcessedDataModal.setTransType(transactionType)
@@ -936,7 +936,8 @@ class VFTransactionActivity : BaseActivity() {
                 //  emvProcessNext(cardProcessedDataModal)
             }
 
-        }
+        }*/
+        transactionCallback(cardProcessedDataModal)
 
     }
 
@@ -1231,7 +1232,6 @@ class VFTransactionActivity : BaseActivity() {
                 }
             }
         }
-
     }
 
     // Creating transaction packet and

@@ -1240,7 +1240,7 @@ open class IssuerParameterTable() : RealmObject(), Parcelable {
                         it.executeTransaction { i ->
                             val rows =
                                 i.where(IssuerParameterTable::class.java)
-                                    .equalTo("issuerTypeId", issuerParamTable.issuerTypeId)
+                                    .equalTo("issuerId", issuerParamTable.issuerId)
                                     .findAll()
                             rows.deleteAllFromRealm()
                         }
