@@ -743,7 +743,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                         Intent(this, VFTransactionActivity::class.java).apply {
                             putExtra("amt", amt)
                             putExtra("type", TransactionType.BRAND_EMI.type)
-                            putExtra("proc_code", ProcessingCode.BRAND_EMI.code)
+                            putExtra("proc_code", ProcessingCode.SALE.code)
                             putExtra("mobileNumber", extraPairData?.first)
                             putExtra("billNumber", extraPairData?.second)
                         }, EIntentRequest.TRANSACTION.code

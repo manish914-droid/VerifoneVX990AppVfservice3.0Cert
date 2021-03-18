@@ -164,8 +164,15 @@ class CompleteSecondGenAc(var data: IsoDataReader, var isoData: IsoDataWriter? =
                         getValueOfTVRAndAID(tvrData ?: "", aidData ?: "", tsiData ?: "")
 
                     //Here we are Adding AID , TVR and TSI Data in Triple<String , String , String> to return values:-
-                    if (!TextUtils.isEmpty(aidData) && !TextUtils.isEmpty(tvrData) && !TextUtils.isEmpty(tsiData))
-                        printData = Triple(subsequenceData.first, subsequenceData.second, subsequenceData.third)
+                    if (!TextUtils.isEmpty(aidData) && !TextUtils.isEmpty(tvrData) && !TextUtils.isEmpty(
+                            tsiData
+                        )
+                    )
+                        printData = Triple(
+                            subsequenceData.first,
+                            subsequenceData.second,
+                            subsequenceData.third
+                        )
 
                     when (result) {
                         ConstOnlineResultHandler.onProccessResult.result.TC -> {

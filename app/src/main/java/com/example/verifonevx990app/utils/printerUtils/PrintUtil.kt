@@ -2695,18 +2695,19 @@ class PrintUtil(context: Context?) {
             printSeperator(textFormatBundle)
 
             if (!TextUtils.isEmpty(printerReceiptData.emiTransactionAmount)) {
-                val txnAmount =
+                val emiTxnAmount =
                     "%.2f".format(printerReceiptData.emiTransactionAmount.toFloat() / 100)
+                val authTxnAmount = "%.2f".format(printerReceiptData.transactionAmt.toFloat() / 100)
                 alignLeftRightText(
                     textInLineFormatBundle,
                     "TXN AMOUNT",
-                    txnAmount,
+                    emiTxnAmount,
                     ":  $currencySymbol "
                 )
                 alignLeftRightText(
                     textInLineFormatBundle,
                     "AUTH AMOUNT",
-                    txnAmount,
+                    authTxnAmount,
                     ":  $currencySymbol "
                 )
             }
@@ -2724,6 +2725,32 @@ class PrintUtil(context: Context?) {
             }
 
             alignLeftRightText(textInLineFormatBundle, "TENURE", printerReceiptData.tenure, ": ")
+
+            //region=============CashBack CalculatedValue====================
+            if (!TextUtils.isEmpty(printerReceiptData.cashBackCalculatedValue)) {
+                val cashBackAmount =
+                    "%.2f".format(printerReceiptData.cashBackCalculatedValue.toFloat() / 100)
+                alignLeftRightText(
+                    textInLineFormatBundle,
+                    "CASHBACK ",
+                    cashBackAmount,
+                    ":  $currencySymbol "
+                )
+            }
+            //endregion
+
+            //region=============Total Discount CalculatedValue====================
+            if (!TextUtils.isEmpty(printerReceiptData.discountCalculatedValue)) {
+                val cashBackAmount =
+                    "%.2f".format(printerReceiptData.discountCalculatedValue.toFloat() / 100)
+                alignLeftRightText(
+                    textInLineFormatBundle,
+                    "TOTAL CASHBACK ",
+                    cashBackAmount,
+                    ":  $currencySymbol "
+                )
+            }
+            //endregion
 
             if (!TextUtils.isEmpty(printerReceiptData.cashDiscountAmt)) {
                 val discAmount = "%.2f".format(printerReceiptData.cashDiscountAmt.toFloat() / 100)
@@ -2832,6 +2859,16 @@ class PrintUtil(context: Context?) {
             }
             //endregion
 
+            //region====================Printing DBD Wise TAndC==================
+            if (!TextUtils.isEmpty(printerReceiptData.tenureWiseDBDTAndC)) {
+                val tenureWiseTAndC: List<String> = chunkTnC(printerReceiptData.tenureWiseDBDTAndC)
+                for (st in tenureWiseTAndC) {
+                    logger("TNC", st, "e")
+                    alignLeftRightText(textFormatBundle, st, "", "")
+                }
+            }
+            //endregion
+
             //region====================Printing Tenure TAndC==================
             if (!TextUtils.isEmpty(printerReceiptData.tenureTAndC)) {
                 val tenureTAndC: List<String> = chunkTnC(printerReceiptData.tenureTAndC)
@@ -2845,8 +2882,7 @@ class PrintUtil(context: Context?) {
             printSeperator(textFormatBundle)
             printer?.feedLine(1)
             if (!TextUtils.isEmpty(printerReceiptData.emiTransactionAmount)) {
-                val baseAmount =
-                    "%.2f".format(printerReceiptData.emiTransactionAmount.toFloat() / 100)
+                val baseAmount = "%.2f".format(printerReceiptData.transactionAmt.toFloat() / 100)
                 centerText(
                     textFormatBundle,
                     "BASE AMOUNT  :     $currencySymbol  $baseAmount",
@@ -2930,7 +2966,9 @@ class PrintUtil(context: Context?) {
                     when (copyType) {
                         EPrintCopyType.MERCHANT -> {
                             GlobalScope.launch(Dispatchers.Main) {
-                                if (printerReceiptData.transactionType == TransactionType.EMI_SALE.type)
+                                if (printerReceiptData.transactionType == TransactionType.EMI_SALE.type ||
+                                    printerReceiptData.transactionType == TransactionType.BRAND_EMI.type
+                                )
                                     (context as VFTransactionActivity).showMerchantAlertBox(
                                         this@PrintUtil,
                                         printerReceiptData,

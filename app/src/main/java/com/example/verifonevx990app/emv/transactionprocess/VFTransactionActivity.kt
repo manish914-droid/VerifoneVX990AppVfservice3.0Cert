@@ -100,6 +100,7 @@ class VFTransactionActivity : BaseActivity() {
         isManualEntryAllowed = tpt?.fManEntry == "1"
         globalCardProcessedModel.setTransType(transactionType)
 
+
         if (!TextUtils.isEmpty(AppPreference.getString(AppPreference.GENERIC_REVERSAL_KEY))) {
             Log.d("Reversal:-", " Reversal Consist Data")
         } else {
@@ -253,13 +254,13 @@ class VFTransactionActivity : BaseActivity() {
 
             DetectCardType.EMV_CARD_TYPE -> {
                 //  when(cardProcessedData.getTransType()==)
-
                 if (cardProcessedData.getTransType() == TransactionType.SALE.type ||
                     cardProcessedData.getTransType() == TransactionType.PRE_AUTH.type ||
                     cardProcessedData.getTransType() == TransactionType.REFUND.type ||
                     cardProcessedData.getTransType() == TransactionType.CASH_AT_POS.type ||
                     cardProcessedData.getTransType() == TransactionType.SALE_WITH_CASH.type ||
-                    cardProcessedData.getTransType() == TransactionType.EMI_SALE.type
+                    cardProcessedData.getTransType() == TransactionType.EMI_SALE.type ||
+                    cardProcessedData.getTransType() == TransactionType.BRAND_EMI.type
                 ) {
                     emvProcessNext(cardProcessedData)
                 } else {
@@ -280,7 +281,10 @@ class VFTransactionActivity : BaseActivity() {
 
             DetectCardType.CONTACT_LESS_CARD_TYPE -> {
 
-                if (cardProcessedData.getTransType() == TransactionType.SALE.type || cardProcessedData.getTransType() == TransactionType.PRE_AUTH.type || cardProcessedData.getTransType() == TransactionType.REFUND.type) {
+                if (cardProcessedData.getTransType() == TransactionType.SALE.type ||
+                    cardProcessedData.getTransType() == TransactionType.PRE_AUTH.type ||
+                    cardProcessedData.getTransType() == TransactionType.REFUND.type
+                ) {
                     emvProcessNext(cardProcessedData)
                 } else {
                     /*  val transactionEMIISO = CreateEMITransactionPacket(
@@ -309,7 +313,10 @@ class VFTransactionActivity : BaseActivity() {
 
             DetectCardType.CONTACT_LESS_CARD_WITH_MAG_TYPE -> {
 
-                if (cardProcessedData.getTransType() == TransactionType.SALE.type || cardProcessedData.getTransType() == TransactionType.PRE_AUTH.type || cardProcessedData.getTransType() == TransactionType.REFUND.type) {
+                if (cardProcessedData.getTransType() == TransactionType.SALE.type ||
+                    cardProcessedData.getTransType() == TransactionType.PRE_AUTH.type ||
+                    cardProcessedData.getTransType() == TransactionType.REFUND.type
+                ) {
                     emvProcessNext(cardProcessedData)
                 } else {
                     /*  val transactionEMIISO = CreateEMITransactionPacket(
@@ -471,7 +478,9 @@ class VFTransactionActivity : BaseActivity() {
                             printExtraData
                         )
                         { stubbedData ->
-                            if (cardProcessedDataModal.getTransType() == TransactionType.EMI_SALE.type) {
+                            if (cardProcessedDataModal.getTransType() == TransactionType.EMI_SALE.type ||
+                                cardProcessedDataModal.getTransType() == TransactionType.BRAND_EMI.type
+                            ) {
                                 stubEMI(stubbedData, emiSelectedData, emiTAndCData) { data ->
                                     Log.d("StubbedEMIData:- ", data.toString())
                                     printSaveSaleEmiDataInBatch(data) { printCB ->
@@ -994,7 +1003,6 @@ class VFTransactionActivity : BaseActivity() {
             if (!dialog.isShowing && !(this as Activity).isFinishing) {
                 dialog.show()
             }
-
         }
         catch (ex: WindowManager.BadTokenException) {
             ex.printStackTrace()

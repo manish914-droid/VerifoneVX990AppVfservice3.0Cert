@@ -201,7 +201,9 @@ class IssuerListFragment : Fragment() {
                                     splitData[10], splitData[11],
                                     splitData[12], splitData[13],
                                     splitData[14], splitData[15],
-                                    splitData[16], splitData[17]
+                                    splitData[16], splitData[17],
+                                    splitData[18], splitData[19],
+                                    splitData[20]
                                 )
                             )
                         }

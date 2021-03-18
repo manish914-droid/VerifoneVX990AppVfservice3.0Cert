@@ -6,10 +6,13 @@ import com.example.verifonevx990app.R
 import com.example.verifonevx990app.bankemi.BankEMIDataModal
 import com.example.verifonevx990app.bankemi.BankEMIIssuerTAndCDataModal
 import com.example.verifonevx990app.main.DetectCardType
+import com.example.verifonevx990app.realmtables.BrandEMIDataTable
 import com.example.verifonevx990app.realmtables.CardDataTable
 import com.example.verifonevx990app.realmtables.IssuerParameterTable
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
 import com.example.verifonevx990app.vxUtils.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -21,6 +24,7 @@ class CreateTransactionPacket(
     ITransactionPacketExchange {
 
     private var indicator: String? = null
+    private var brandEMIDataTable: BrandEMIDataTable? = null
 
     //Below method is used to create Transaction Packet in all cases:-
     init {
@@ -29,6 +33,9 @@ class CreateTransactionPacket(
 
     override fun createTransactionPacket(): IsoDataWriter = IsoDataWriter().apply {
         //     val batchFileDataTable = BatchFileDataTable.selectBatchData()
+        if (cardProcessedData.getTransType() == TransactionType.BRAND_EMI.type) {
+            brandEMIDataTable = runBlocking(Dispatchers.IO) { BrandEMIDataTable.getAllEMIData() }
+        }
         val terminalData = TerminalParameterTable.selectFromSchemeTable()
         if (terminalData != null) {
             logger("PINREQUIRED--->  ", cardProcessedData.getIsOnline().toString(), "e")
@@ -131,17 +138,34 @@ class CreateTransactionPacket(
                     2
                 ) //cardDataTable.getA//"00"
 
-            //region===============Check If Transaction Type is EMI_SALE then Field would be appended with Bank EMI Scheme Offer Values:-
-            indicator = if (cardProcessedData.getTransType() == TransactionType.EMI_SALE.type) {
-                "$cardIndFirst|$firstTwoDigitFoCard|$cdtIndex|$accSellection," +
-                        "${cardProcessedData.getPanNumberData()?.substring(0, 8)}," +
-                        "${bankEmiTandCData?.issuerID},${bankEmiTandCData?.emiSchemeID},1,0,${cardProcessedData.getEmiTransactionAmount()}," +
-                        "${bankEmiSchemeData?.discountAmount},${bankEmiSchemeData?.loanAmount},${bankEmiSchemeData?.tenure}," +
-                        "${bankEmiSchemeData?.tenureInterestRate},${bankEmiSchemeData?.emiAmount},${bankEmiSchemeData?.cashBackAmount}," +
-                        "${bankEmiSchemeData?.netPay},,,,,,0,${bankEmiSchemeData?.processingFee},${bankEmiSchemeData?.processingRate}," +
-                        "${bankEmiSchemeData?.totalProcessingFee},,"
-            } else {
-                "$cardIndFirst|$firstTwoDigitFoCard|$cdtIndex|$accSellection"//used for visa// used for ruppay//"0|54|2|00"
+            //region===============Check If Transaction Type is EMI_SALE , Brand_EMI or Other then Field would be appended with Bank EMI Scheme Offer Values:-
+            when (cardProcessedData.getTransType()) {
+                TransactionType.EMI_SALE.type -> {
+                    indicator = "$cardIndFirst|$firstTwoDigitFoCard|$cdtIndex|$accSellection," +
+                            "${cardProcessedData.getPanNumberData()?.substring(0, 8)}," +
+                            "${bankEmiTandCData?.issuerID},${bankEmiTandCData?.emiSchemeID},1,0,${cardProcessedData.getEmiTransactionAmount()}," +
+                            "${bankEmiSchemeData?.discountAmount},${bankEmiSchemeData?.loanAmount},${bankEmiSchemeData?.tenure}," +
+                            "${bankEmiSchemeData?.tenureInterestRate},${bankEmiSchemeData?.emiAmount},${bankEmiSchemeData?.cashBackAmount}," +
+                            "${bankEmiSchemeData?.netPay},${cardProcessedData.getMobileBillExtraData()?.first ?: cardProcessedData.getMobileBillExtraData()?.second ?: ""}," +
+                            ",,,,0,${bankEmiSchemeData?.processingFee},${bankEmiSchemeData?.processingRate}," +
+                            "${bankEmiSchemeData?.totalProcessingFee},,"
+                }
+
+                TransactionType.BRAND_EMI.type -> {
+                    indicator = "$cardIndFirst|$firstTwoDigitFoCard|$cdtIndex|$accSellection," +
+                            "${cardProcessedData.getPanNumberData()?.substring(0, 8)}," +
+                            "${bankEmiTandCData?.issuerID},${bankEmiTandCData?.emiSchemeID},${brandEMIDataTable?.brandID}," +
+                            "${brandEMIDataTable?.productID},${cardProcessedData.getEmiTransactionAmount()}," +
+                            "${bankEmiSchemeData?.discountAmount},${bankEmiSchemeData?.loanAmount},${bankEmiSchemeData?.tenure}," +
+                            "${bankEmiSchemeData?.tenureInterestRate},${bankEmiSchemeData?.emiAmount},${bankEmiSchemeData?.cashBackAmount}," +
+                            "${bankEmiSchemeData?.netPay},${cardProcessedData.getMobileBillExtraData()?.first ?: cardProcessedData.getMobileBillExtraData()?.second ?: ""}," +
+                            "${brandEMIDataTable?.imeiNumber ?: brandEMIDataTable?.serialNumber ?: ""},,,,0,${bankEmiSchemeData?.processingFee},${bankEmiSchemeData?.processingRate}," +
+                            "${bankEmiSchemeData?.totalProcessingFee},,"
+                }
+
+                else -> {
+                    indicator = "$cardIndFirst|$firstTwoDigitFoCard|$cdtIndex|$accSellection"
+                }
             }
 
             Log.d("SALE Indicator:- ", indicator.toString())

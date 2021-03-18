@@ -6,12 +6,14 @@ import android.text.TextUtils
 import android.util.Log
 import com.example.verifonevx990app.emv.transactionprocess.CardProcessedDataModal
 import com.example.verifonevx990app.main.SplitterTypes
+import com.example.verifonevx990app.realmtables.BrandEMIDataTable
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
 import com.example.verifonevx990app.vxUtils.*
 import com.example.verifonevx990app.vxUtils.KeyExchanger.Companion.getF61
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.Parcelize
 // In triple last Boolean is for checking that card has a emi facility on sale time
 class GenericEMISchemeAndOffer(
@@ -27,12 +29,24 @@ class GenericEMISchemeAndOffer(
     private var isBool = false
     private var bankEMISchemesDataList: MutableList<BankEMIDataModal> = mutableListOf()
     private var bankEMIIssuerTAndCList: MutableList<BankEMIIssuerTAndCDataModal> = mutableListOf()
+    private var brandEMIDataTable: BrandEMIDataTable? = null
 
     init {
         bankEMISchemesDataList.clear()
         bankEMIIssuerTAndCList.clear()
+        runBlocking(Dispatchers.IO) {
+            brandEMIDataTable = BrandEMIDataTable.getAllEMIData()
+        }
         field57Request =
-            "$bankEMIRequestCode^0^1^0^^${cardBinValue.substring(0, 8)}^$transactionAmount"
+            if (cardProcessedDataModal.getTransType() == TransactionType.BRAND_EMI.type)
+                "$bankEMIRequestCode^0^${brandEMIDataTable?.brandID}^${brandEMIDataTable?.productID}^^${
+                    cardBinValue.substring(
+                        0,
+                        8
+                    )
+                }^$transactionAmount"
+            else
+                "$bankEMIRequestCode^0^1^0^^${cardBinValue.substring(0, 8)}^$transactionAmount"
         GlobalScope.launch(Dispatchers.IO) {
             fetchBankEMIDetailsFromHost()
         }
@@ -161,7 +175,9 @@ class GenericEMISchemeAndOffer(
                                     splitData[10], splitData[11],
                                     splitData[12], splitData[13],
                                     splitData[14], splitData[15],
-                                    splitData[16], splitData[17]
+                                    splitData[16], splitData[17],
+                                    splitData[18], splitData[19],
+                                    splitData[20]
                                 )
                             )
                         }
@@ -189,12 +205,22 @@ class GenericEMISchemeAndOffer(
 
                     //Refresh Field57 request value for Pagination if More Record Flag is True:-
                     if (moreDataFlag == "1") {
-                        field57Request = "$bankEMIRequestCode^$totalRecord^^^^${
-                            cardBinValue.substring(
-                                0,
-                                8
-                            )
-                        }^$transactionAmount"
+                        field57Request =
+                            if (cardProcessedDataModal.getTransType() == TransactionType.BRAND_EMI.type) {
+                                "$bankEMIRequestCode^$totalRecord^${brandEMIDataTable?.brandID}^${brandEMIDataTable?.productID}^^${
+                                    cardBinValue.substring(
+                                        0,
+                                        8
+                                    )
+                                }^$transactionAmount"
+                            } else {
+                                "$bankEMIRequestCode^$totalRecord^1^0^^${
+                                    cardBinValue.substring(
+                                        0,
+                                        8
+                                    )
+                                }^$transactionAmount"
+                            }
                         fetchBankEMIDetailsFromHost()
                     } else {
                         Log.d("Total BankEMI Data:- ", bankEMISchemesDataList.toString())
@@ -235,7 +261,10 @@ data class BankEMIDataModal(
     var totalInterestPay: String = "0",
     val cashBackAmount: String = "0",
     var netPay: String,
-    var tenureTAndC: String
+    var tenureTAndC: String,
+    var tenureWiseDBDTAndC: String,
+    var discountCalculatedValue: String,
+    var cashBackCalculatedValue: String
 ) : Parcelable
 //endregion
 

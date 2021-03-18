@@ -164,6 +164,9 @@ open class BatchFileDataTable() : RealmObject(), Parcelable {
     var issuerName = ""
     var bankEmiTAndC = ""
     var tenureTAndC = ""
+    var tenureWiseDBDTAndC = ""
+    var discountCalculatedValue = ""
+    var cashBackCalculatedValue = ""
 
     //EMI BrandDetail
     var brandId = "01"
