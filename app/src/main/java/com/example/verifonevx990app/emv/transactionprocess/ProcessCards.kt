@@ -20,6 +20,7 @@ import com.example.verifonevx990app.vxUtils.*
 import com.example.verifonevx990app.vxUtils.ROCProviderV2.getEncryptedTrackData
 import com.vfi.smartpos.deviceservice.aidl.CheckCardListener
 import com.vfi.smartpos.deviceservice.aidl.IEMV
+import com.vfi.smartpos.deviceservice.aidl.IssuerUpdateHandler
 import com.vfi.smartpos.deviceservice.aidl.PinInputListener
 import com.vfi.smartpos.deviceservice.constdefine.ConstCheckCardListener
 import com.vfi.smartpos.deviceservice.constdefine.ConstIPBOC
@@ -263,9 +264,11 @@ class ProcessCard(
                                         //  isPin = false
                                         if (isPin) {
                                             cardProcessedDataModal.setIsOnline(1)
+                                            cardProcessedDataModal.setPinEntryFlag("1")
                                         } else {
                                             //0 for no pin
                                             cardProcessedDataModal.setIsOnline(0)
+                                            cardProcessedDataModal.setPinEntryFlag("0")
                                         }
                                         if (cardProcessedDataModal.getFallbackType() != EFallbackCode.EMV_fallback.fallBackCode) {
                                             //Checking Fallback
@@ -358,6 +361,8 @@ class ProcessCard(
                                 }
                                 // println("Incorrect Date")
                             }
+
+
                         }
                     } catch (ex: NoSuchElementException) {
                         ex.printStackTrace()
@@ -642,12 +647,10 @@ class ProcessCard(
                         cardProcessedDataModal.setReadCardType(DetectCardType.CONTACT_LESS_CARD_TYPE)
                         VFService.vfBeeper?.startBeep(200)
                         println("Transactionamount is calling" + transactionalAmt.toString() + "Handler is" + handler)
-                        DoEmv(
-                            activity,
-                            handler,
-                            cardProcessedDataModal,
-                            ConstIPBOC.startEMV.intent.VALUE_cardType_contactless
-                        ) { cardProcessedDataModal ->
+
+                        issuerUpdate(iemv)
+
+                        DoEmv(activity, handler, cardProcessedDataModal, ConstIPBOC.startEMV.intent.VALUE_cardType_contactless) { cardProcessedDataModal ->
                             transactionCallback(cardProcessedDataModal)
                         }
                     } catch (ex: DeadObjectException) {
@@ -835,5 +838,24 @@ class ProcessCard(
                 }
             }, 200)
         }
+    }
+
+    var issuerUpdateHandler: IssuerUpdateHandler? = null
+    fun issuerUpdate(iemv: IEMV?) {
+        try {
+            iemv?.setIssuerUpdateHandler(issuerUpdateHandler)
+            }
+        catch (ex: RemoteException){
+            ex.printStackTrace()
+        }
+
+       issuerUpdateHandler = object : IssuerUpdateHandler.Stub(){
+
+           @Throws(RemoteException::class)
+          override fun onRequestIssuerUpdate() {
+
+          }
+
+      }
     }
 }

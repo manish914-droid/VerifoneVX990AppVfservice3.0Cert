@@ -14,15 +14,13 @@ import android.widget.RadioButton
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.verifonevx990app.R
-import com.example.verifonevx990app.main.DetectCardType
-import com.example.verifonevx990app.main.DetectError
-import com.example.verifonevx990app.main.MainActivity
-import com.example.verifonevx990app.main.PosEntryModeType
+import com.example.verifonevx990app.main.*
 import com.example.verifonevx990app.utils.Utility
 import com.example.verifonevx990app.vxUtils.*
 import com.example.verifonevx990app.vxUtils.ROCProviderV2.getField55
 import com.vfi.smartpos.deviceservice.aidl.EMVHandler
 import com.vfi.smartpos.deviceservice.aidl.IEMV
+import com.vfi.smartpos.deviceservice.aidl.IssuerUpdateHandler
 import com.vfi.smartpos.deviceservice.constdefine.ConstIPBOC
 import com.vfi.smartpos.deviceservice.constdefine.ConstPBOCHandler
 import kotlinx.coroutines.Dispatchers
@@ -39,6 +37,8 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
     private var retryTimess: Int = 0
     private var savedPan: String? = null
     private var tagOfF55: SparseArray<String>? = null
+
+
 
     override fun onRequestOnlineProcess(aaResult: Bundle?) {
         Log.d(MainActivity.TAG, "onRequestOnlineProcess...")
@@ -122,6 +122,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                     if(null != tag && "84".equals(Integer.toHexString(tag))){
                         //println("Aid value with Tag is ---> "+Integer.toHexString(tag) + Utility.byte2HexStr(tlv))
                         cardProcessedDataModal.setAID(Utility.byte2HexStr(tlv))
+
                     }
                 } else {
                     //  tagOfF55?.put(tag,"00")
@@ -136,6 +137,8 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
         Log.d(MainActivity.TAG, "start online request")
         processField55Data()
         Log.d(MainActivity.TAG, "online request finished")
+        processField57Data()
+
     }
 
     //1
@@ -244,17 +247,28 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                       CARD_TYPE:${info?.getInt(ConstPBOCHandler.onConfirmCardInfo.info.KEY_CARD_TYPE_String)}
                     """.trimIndent()
 
+        val tlvcardTypeLabel = iemv?.getCardData("50")   // card Type TAG
+        if(null != tlvcardTypeLabel && !(tlvcardTypeLabel.isEmpty())){
+            var cardType = Utility.byte2HexStr(tlvcardTypeLabel)
+            cardProcessedDataModal.setcardLabel(hexString2String(cardType))
+            println("Card  Type ---> "+ hexString2String(cardType))
+        }
+
         val tlv = iemv?.getCardData("5F20")   // CardHolder Name TAG
         if(null != tlv && !(tlv.isEmpty())){
             var cardholderName = Utility.byte2HexStr(tlv)
-            cardProcessedDataModal.setCardHolderName(hexString2String(cardholderName))
-            println("Card Holder Name ---> "+ hexString2String(cardholderName))
+            var removespace = hexString2String(cardholderName)
+            var finalstr = removespace.trimEnd()
+            cardProcessedDataModal.setCardHolderName(finalstr)
+            println("Card Holder Name ---> "+ finalstr)
         }
         val tlvapplabel = iemv?.getCardData("9F12")   // application label  TAG
         if(null != tlvapplabel && !(tlvapplabel.isEmpty())){
             var applicationlabel = Utility.byte2HexStr(tlvapplabel)
-            cardProcessedDataModal.setApplicationLabel(hexString2String(applicationlabel))
-            println("Application label ---> "+ hexString2String(applicationlabel))
+            var removespace = hexString2String(applicationlabel)
+            var finalstr = removespace.trimEnd()
+            cardProcessedDataModal.setApplicationLabel(finalstr)
+            println("Application label ---> "+ finalstr)
         }
 
         val tlvcardissuer = iemv?.getCardData("5F28")   // card issuer country code  TAG
@@ -265,11 +279,6 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
         }
 
         cardProcessedDataModal.setPinEntryFlag("0")
-
-        var dash             = "~"
-        var cardHolderName   =  if(isNullOrEmpty(cardProcessedDataModal.getCardHolderName())) "" else cardProcessedDataModal.getCardHolderName() + dash
-        var applicationlabel     =  if(isNullOrEmpty(cardProcessedDataModal.getApplicationLabel())) "" else cardProcessedDataModal.getApplicationLabel() + dash
-        var cardissuercountrycode     =  if(isNullOrEmpty(cardProcessedDataModal.getCardIssuerCountryCode())) "" else cardProcessedDataModal.getCardIssuerCountryCode() + dash
 
         //println("Card Type is ---> " + info?.getInt(ConstPBOCHandler.onConfirmCardInfo.info.KEY_CARD_TYPE_String))
 
@@ -319,37 +328,8 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                     bun.putString("ERROR", "Invalid Card Number")
                     onTransactionResult(DetectError.IncorrectPAN.errorCode, bun)
                 } else {
-                    // var track21 = "35|" + track2.replace("D", "=").replace("F", "")
-
-                    var track21 = "35,36|${
-                        track2.replace("D", "=").replace("F", "")
-                    }" + "|" + cardHolderName + applicationlabel + cardissuercountrycode +
-                            cardProcessedDataModal.getTypeOfTxnFlag() + "~" + cardProcessedDataModal.getPinEntryFlag()
-
-                    println(
-                        "Field 57 before encryption is -> 35|${
-                            track2.replace("D", "=").replace("F", "")
-                        }" + "|" + cardHolderName + applicationlabel + cardissuercountrycode +
-                                cardProcessedDataModal.getTypeOfTxnFlag() + "~" + cardProcessedDataModal.getPinEntryFlag()
-                    )
-
-                    val DIGIT_8 = 8
-
-                    val mod = track21.length % DIGIT_8
-                    if (mod!=0) {
-                        track21 = getEncryptedField57DataForVisa(track21.length,track21)
-                    }
-                    val byteArray = track21.toByteArray(StandardCharsets.ISO_8859_1)
-                    val encryptedTrack2ByteArray: ByteArray? =
-                        VFService.vfPinPad?.encryptTrackData(0, 2, byteArray)
-                    /*println(
-                        "Track 2 with encyption is --->" + Utility.byte2HexStr(
-                            encryptedTrack2ByteArray
-                        )
-                    )*/
-                    cardProcessedDataModal.setTrack2Data(
-                        Utility.byte2HexStr(encryptedTrack2ByteArray)
-                    )
+                       cardProcessedDataModal.setTrack1Data(track2)
+                  //   var track21 = "35,36|" + track2.replace("D", "=").replace("F", "")
 
                     //    VFService.showToast("onConfirmCardInfo:$result")
                     //  checkEmiInstaEmi(cardProcessedDataModal)
@@ -654,11 +634,13 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
         cardProcessedDataModal.setPinEntryFlag("1")
         retryTimess = retryTimes
         if (isOnlinePin) {
+            cardProcessedDataModal.setPinEntryFlag("1")
             //For Online Pin
             //Here we are inflating PinPad on App UI:-
             cardProcessedDataModal.setIsOnline(1)
             VFService.openPinPad(cardProcessedDataModal,activity)
         } else {
+            cardProcessedDataModal.setPinEntryFlag("2")
             //For Offline Pin
             //Here we are inflating PinPad on App UI:-
             cardProcessedDataModal.setRetryTimes(retryTimes)
@@ -764,6 +746,39 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                 }
             }
         }
+    }
+
+    private fun processField57Data(){
+
+        var dash             = "~"
+        var cardHolderName   =  if(isNullOrEmpty(cardProcessedDataModal.getCardHolderName())) "~" else cardProcessedDataModal.getCardHolderName() + dash
+        var applicationlabel     =  if(isNullOrEmpty(cardProcessedDataModal.getApplicationLabel())) "~" else cardProcessedDataModal.getApplicationLabel() + dash
+        var cardissuercountrycode     =  if(isNullOrEmpty(cardProcessedDataModal.getCardIssuerCountryCode())) "~" else cardProcessedDataModal.getCardIssuerCountryCode() + dash
+
+        var track21 = "35,36|${
+            cardProcessedDataModal.getTrack1Data()?.replace("D", "=")?.replace("F", "")
+        }" + "|" + cardHolderName + applicationlabel + cardissuercountrycode +
+                cardProcessedDataModal.getTypeOfTxnFlag() + "~" + cardProcessedDataModal.getPinEntryFlag()
+
+        println(
+            "Field 57 before encryption is -> 35,36|${
+                cardProcessedDataModal.getTrack1Data()?.replace("D", "=")?.replace("F", "")
+            }" + "|" + cardHolderName + applicationlabel + cardissuercountrycode +
+                    cardProcessedDataModal.getTypeOfTxnFlag() + "~" + cardProcessedDataModal.getPinEntryFlag()
+        )
+
+        val DIGIT_8 = 8
+
+        val mod = track21.length % DIGIT_8
+        if (mod!=0) {
+            track21 = getEncryptedField57DataForVisa(track21.length,track21)
+        }
+        val byteArray = track21.toByteArray(StandardCharsets.ISO_8859_1)
+        val encryptedTrack2ByteArray: ByteArray? =
+            VFService.vfPinPad?.encryptTrackData(0, 2, byteArray)
+        /*println(  "Track 2 with encyption is --->" + Utility.byte2HexStr(encryptedTrack2ByteArray ))*/
+        cardProcessedDataModal.setTrack2Data(Utility.byte2HexStr(encryptedTrack2ByteArray))
+
     }
 
     //Below method is used to get Field55:-
@@ -891,6 +906,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
         }
     }
 }
+
 
 open class MultiSelectionAppAdapter(
     var appList: MutableList<Bundle>,

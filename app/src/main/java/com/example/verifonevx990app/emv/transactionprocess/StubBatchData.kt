@@ -107,7 +107,15 @@ class StubBatchData(
         //batchFileData.operationType = isoPackageWriter.operationType(Need to Discuss by Ajay)
         batchFileData.transationName =
             TransactionTypeValues.getTransactionStringType(transactionType)
-        batchFileData.cardType = cardDataTable?.cardLabel ?: ""
+        when(cardProcessedDataModal.getReadCardType()){
+            DetectCardType.MAG_CARD_TYPE ->{
+                batchFileData.cardType = cardDataTable?.cardLabel ?: ""
+            }
+            else ->{
+                batchFileData.cardType = cardProcessedDataModal.getcardLabel() ?: ""
+            }
+        }
+
         batchFileData.isPinverified = true
         //Saving card number in mask form because we don't save the pan number in Plain text.
         batchFileData.cardNumber =

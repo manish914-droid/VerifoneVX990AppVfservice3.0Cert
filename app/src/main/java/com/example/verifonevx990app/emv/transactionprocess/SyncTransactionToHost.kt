@@ -4,6 +4,7 @@ import android.os.DeadObjectException
 import android.os.RemoteException
 import android.text.TextUtils
 import android.util.Log
+import com.example.verifonevx990app.main.CardAid
 import com.example.verifonevx990app.main.ConnectionError
 import com.example.verifonevx990app.main.DetectCardType
 import com.example.verifonevx990app.main.PrefConstant
@@ -63,12 +64,9 @@ class SyncTransactionToHost(
                     //println("Result is$success")
                     if (success) {
                         //Below we are incrementing previous ROC (Because ROC will always be incremented whenever Server Hit is performed:-
-                        ROCProviderV2.incrementFromResponse(
-                            ROCProviderV2.getRoc(AppPreference.getBankCode()).toString(),
-                            AppPreference.getBankCode()
-                        )
+                        ROCProviderV2.incrementFromResponse(ROCProviderV2.getRoc(AppPreference.getBankCode()).toString(), AppPreference.getBankCode())
                         Log.d("Success Data:- ", result)
-//if(!result.isNullOrBlank())
+                     //if(!result.isNullOrBlank())
                         if (!TextUtils.isEmpty(result)) {
                             val value = readtimeout.toIntOrNull()
                             if (null != value) {
@@ -108,16 +106,12 @@ class SyncTransactionToHost(
                                     readIso(result.toString(), false)
                                 logger("Transaction RESPONSE ", "---", "e")
                                 logger("Transaction RESPONSE --->>", responseIsoData.isoMap, "e")
-                                Log.e(
-                                    "Success 39-->  ",
-                                    responseIsoData.isoMap[39]?.parseRaw2String()
+                                Log.e("Success 39-->  ", responseIsoData.isoMap[39]?.parseRaw2String()
                                         .toString() + "---->" + responseIsoData.isoMap[58]?.parseRaw2String()
                                         .toString()
                                 )
-                                successResponseCode =
-                                    (responseIsoData.isoMap[39]?.parseRaw2String().toString())
-                                val authCode =
-                                    (responseIsoData.isoMap[38]?.parseRaw2String().toString())
+                                successResponseCode = (responseIsoData.isoMap[39]?.parseRaw2String().toString())
+                                val authCode = (responseIsoData.isoMap[38]?.parseRaw2String().toString())
                                 cardProcessedDataModal?.setAuthCode(authCode.trim())
                                 //Here we are getting RRN Number :-
                                 val rrnNumber = responseIsoData.isoMap[37]?.rawData ?: ""
@@ -142,68 +136,37 @@ class SyncTransactionToHost(
 
                                 if (successResponseCode == "00") {
 
-                                    AppPreference.saveBoolean(
-                                        AppPreference.ONLINE_EMV_DECLINED,
-                                        false
-                                    )
+                                    AppPreference.saveBoolean(AppPreference.ONLINE_EMV_DECLINED, false)
                                     //   VFService.showToast("Transaction Success")
+
                                     when (cardProcessedDataModal?.getReadCardType()) {
+
                                         DetectCardType.MAG_CARD_TYPE, DetectCardType.CONTACT_LESS_CARD_TYPE,
                                         DetectCardType.CONTACT_LESS_CARD_WITH_MAG_TYPE,
                                         DetectCardType.MANUAL_ENTRY_TYPE -> {
                                             clearReversal()
-                                            syncTransactionCallback(
-                                                true,
-                                                successResponseCode.toString(),
-                                                result,
-                                                null
-                                            )
+                                            syncTransactionCallback(true, successResponseCode.toString(), result, null)
                                         }
                                         DetectCardType.EMV_CARD_TYPE -> {
-                                            if (TextUtils.isEmpty(
-                                                    AppPreference.getString(GENERIC_REVERSAL_KEY)
-                                                )
-                                            ) {
+                                            if (TextUtils.isEmpty(AppPreference.getString(GENERIC_REVERSAL_KEY))) {
                                                 if (cardProcessedDataModal?.getTransType() != TransactionType.REFUND.type) {
-                                                    CompleteSecondGenAc(
-                                                        responseIsoData,
-                                                        transactionISOData
-                                                    ) { printExtraData ->
-                                                        syncTransactionCallback(
-                                                            true,
-                                                            successResponseCode.toString(),
-                                                            result,
-                                                            printExtraData
-                                                        )
+                                                    CompleteSecondGenAc(responseIsoData, transactionISOData) { printExtraData ->
+                                                        syncTransactionCallback(true, successResponseCode.toString(), result, printExtraData)
                                                     }
                                                 } else {
                                                     clearReversal()
-                                                    syncTransactionCallback(
-                                                        true,
-                                                        successResponseCode.toString(),
-                                                        result,
-                                                        null
-                                                    )
+                                                    syncTransactionCallback(true, successResponseCode.toString(), result, null)
 
                                                 }
 
 
                                             } else {
                                                 clearReversal()
-                                                syncTransactionCallback(
-                                                    true,
-                                                    successResponseCode.toString(),
-                                                    result,
-                                                    null
-                                                )
+                                                syncTransactionCallback(true, successResponseCode.toString(), result, null)
                                             }
                                         }
 
-                                        else -> logger(
-                                            "CARD_ERROR:- ",
-                                            cardProcessedDataModal?.getReadCardType().toString(),
-                                            "e"
-                                        )
+                                        else -> logger("CARD_ERROR:- ", cardProcessedDataModal?.getReadCardType().toString(), "e")
                                     }
                                     //remove emi case
 
@@ -215,31 +178,16 @@ class SyncTransactionToHost(
                                         DetectCardType.CONTACT_LESS_CARD_WITH_MAG_TYPE,
                                         DetectCardType.MANUAL_ENTRY_TYPE -> {
                                             clearReversal()
-                                            syncTransactionCallback(
-                                                true,
-                                                successResponseCode.toString(),
-                                                result,
-                                                null
-                                            )
+                                            syncTransactionCallback(true, successResponseCode.toString(), result, null)
                                         }
                                         DetectCardType.EMV_CARD_TYPE -> {
                                             clearReversal()
                                             if (cardProcessedDataModal?.getTransType() != TransactionType.REFUND.type) {
                                                 CompleteSecondGenAc(responseIsoData) { printExtraData ->
-                                                    syncTransactionCallback(
-                                                        true,
-                                                        successResponseCode.toString(),
-                                                        result,
-                                                        printExtraData
-                                                    )
+                                                    syncTransactionCallback(true, successResponseCode.toString(), result, printExtraData)
                                                 }
                                             } else {
-                                                syncTransactionCallback(
-                                                    true,
-                                                    successResponseCode.toString(),
-                                                    result,
-                                                    null
-                                                )
+                                                syncTransactionCallback(true, successResponseCode.toString(), result, null)
                                             }
 
                                         }

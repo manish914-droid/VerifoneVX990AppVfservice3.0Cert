@@ -934,10 +934,7 @@ object ROCProviderV2 {
     )
 
     //Below method is used to make and return Field55 Data:-
-    fun getField55(
-        isAmex: Boolean = false,
-        cardProcessedDataModal: CardProcessedDataModal
-    ): String {
+    fun getField55(isAmex: Boolean = false, cardProcessedDataModal: CardProcessedDataModal): String {
         val sb = StringBuilder()
         for (f in commonTagListemv) {
             val v = VFService.vfIEMV?.getCardData(Integer.toHexString(f).toUpperCase(Locale.ROOT))
@@ -973,6 +970,15 @@ object ROCProviderV2 {
                 sb.append("01")
                 sb.append("00")
             }
+
+   /*         else if (CardAid.Rupay.aid.equals(cardProcessedDataModal.getAID())
+                     && CardAid.Diners.aid.equals(cardProcessedDataModal.getAID())
+                     &&      CardAid.Jcb.aid.equals(cardProcessedDataModal.getAID())) {
+                sb.append(Integer.toHexString(0x9f5b))
+                sb.append("01")
+                sb.append("00")
+            }*/
+
         }// end of for loop
         return sb.toString().toUpperCase(Locale.ROOT)
     }

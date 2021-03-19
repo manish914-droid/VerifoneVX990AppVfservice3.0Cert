@@ -153,7 +153,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                         "DF010100" +
                         "DF140111" +
                         "DF170101" +
-                        "9F09020096" + //Application version number
+                        "9F0902008C" + //Application version number
                         "DF180101" +
                         "DF1205D84000F800" +
                         "9F1B0400000000" +
@@ -199,7 +199,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                         "DF010100" +
                         "DF140111" +
                         "DF170101" +
-                        "9F09020096" + //Application version number
+                        "9F09020002" + //Application version number
                         "DF180101" +
                         "DF1205F85080F800" +
                         "9F1B0400000000" +
@@ -221,7 +221,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                         "DF010100" +
                         "DF140111" +
                         "DF170101" +
-                        "9F09020096" + //Application version number
+                        "9F09020002" + //Application version number
                         "DF180101" +
                         "DF1205F85080F800" +
                         "9F1B0400000000" +
@@ -243,7 +243,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                         "DF010100" +
                         "DF140111" +
                         "DF170101" +
-                        "9F09020096" + //Application version number
+                        "9F09020002" + //Application version number
                         "DF180101" +
                         "DF1205F85080F800" +
                         "9F1B0400000000" +
@@ -343,7 +343,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                         "9F7B06000000100000" +
                         "DF13050010000000",
 
-//=================================================PBOC card Aids starts============================================================================================================
+//=================================================PBOC card Aids ends============================================================================================================
 
 
 // ================================================JCB contatct card Aids starts=============================================================================================================
@@ -356,7 +356,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                         "DF010100" +
                         "DF14039F3704" +
                         "DF170101" +
-                        "9F09020001" +
+                        "9F09020200" +  //Application version
                         "DF180101" +
                         "DF1205FC60ACF800" +
                         "9F1B0400000000" +
@@ -404,7 +404,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                         "DF14039F3704" +
                         "9F660432004000" + //Terminal transaction qualifier(TTQ)
                         "DF170101" +   // DDA public module length
-                        "9F09020096" + //Application version number
+                        "9F09020002" + //Application version number
                         "5F2A020356" + // Transaction currency code
                         "DF1B06000000000000" +
                         "9F350122" +   //Terminal type
@@ -831,7 +831,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                     "DF050420291231" + //Expiry Date
                     "DF0281B0833F275FCF5CA4CB6F1BF880E54DCFEB721A316692CAFEB28B698CAECAFA2B2D2AD8517B1EFB59DDEFC39F9C3B33DDEE40E7A63C03E90A4DD261BC0F28B42EA6E7A1F307178E2D63FA1649155C3A5F926B4C7D7C258BCA98EF90C7F4117C205E8E32C45D10E3D494059D2F2933891B979CE4A831B301B0550CDAE9B67064B31D8B481B85A5B046BE8FFA7BDB58DC0D7032525297F26FF619AF7F15BCEC0C92BCDCBC4FB207D115AA65CD04C1CF982191" + // module
                     "DF040103" + //exponent
-                    "DF0314C165C48EB36DDF969DDC0B326312AFE2F6B52713BF010131" +  // Checksum
+                    "DF031460154098CBBA350F5F486CA31083D1FC474E31F8" +  // Checksum
                     "DF070101", // ARITH_IND
 
             "9F0605A000000152" + //Aids
@@ -848,7 +848,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                     "DF0281F8AD938EA9888E5155F8CD272749172B3A8C504C17460EFA0BED7CBC5FD32C4A80FD810312281B5A35562800CDC325358A9639C501A537B7AE43DF263E6D232B811ACDB6DDE979D55D6C911173483993A423A0A5B1E1A70237885A241B8EEBB5571E2D32B41F9CC5514DF83F0D69270E109AF1422F985A52CCE04F3DF269B795155A68AD2D6B660DDCD759F0A5DA7B64104D22C2771ECE7A5FFD40C774E441379D1132FAF04CDF55B9504C6DCE9F61776D81C7C45F19B9EFB3749AC7D486A5AD2E781FA9D082FB2677665B99FA5F1553135A1FD2A2A9FBF625CA84A7D736521431178F13100A2516F9A43CE095B032B886C7A6AB126E203BE7" + // Module
                     "DF040103" + // exponent
                     "DF0314B51EC5F7DE9BB6D8BCE8FB5F69BA57A04221F39BBF010131" + // checksum
-                    "DF070101",// ARITH_IND
+                    "DF070101",// ARITH_IND*/
 //=========================================================================== Diners cap keys ends==================================================================================================================================================================================================================================
 //=========================================================================== JCB cap keys starts==================================================================================================================================================================================================================================
             // JCB
@@ -868,6 +868,15 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                     "DF040103" + // exponent
                     "DF031454CFAE617150DFA09D3F901C9123524523EBEDF3BF010131" + //checksum
                     "DF070101", //ARITH_IND
+
+            "9F0605A000000065" + //Aids
+                    "9F220111" + // Key id
+                    "DF050420250101" + // Expiry Date
+                    "DF0281B0A2583AA40746E3A63C22478F576D1EFC5FB046135A6FC739E82B55035F71B09BEB566EDB9968DD649B94B6DEDC033899884E908C27BE1CD291E5436F762553297763DAA3B890D778C0F01E3344CECDFB3BA70D7E055B8C760D0179A403D6B55F2B3B083912B183ADB7927441BED3395A199EEFE0DEBD1F5FC3264033DA856F4A8B93916885BD42F9C1F456AAB8CFA83AC574833EB5E87BB9D4C006A4B5346BD9E17E139AB6552D9C58BC041195336485" +
+                    "DF040103" + // exponent
+                    "DF0314D9FD62C9DD4E6DE7741E9A17FB1FF2C5DB948BCB" + //checksum
+                    "DF070101", //ARITH_IND
+
  //=========================================================================== JCB cap keys ends==================================================================================================================================================================================================================================
 //=========================================================================== People's bank of china cap keys starts==================================================================================================================================================================================================================================
             // PBOC

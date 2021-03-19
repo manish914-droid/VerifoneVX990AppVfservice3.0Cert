@@ -2241,7 +2241,12 @@ enum class ConnectionError(val errorCode: Int) {
 }
 enum class CardAid(val aid: String) {
     Rupay("A0000005241010"),
-
+    Diners("A0000001523010"),
+    Jcb("A0000000651010"),
+    UnionPay1("A000000333010101"),
+    UnionPay2("A000000333010102"),
+    UnionPay3("A000000333010103"),
+    UnionPay4("A000000333010106")
 }
 
 //region==============================Enum Class for Splitter Types:-

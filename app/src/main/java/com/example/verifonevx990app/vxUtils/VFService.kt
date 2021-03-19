@@ -24,6 +24,7 @@ import com.example.verifonevx990app.main.PosEntryModeType
 import com.example.verifonevx990app.realmtables.TerminalCommunicationTable
 import com.example.verifonevx990app.transactions.EmvSetAidRid
 import com.example.verifonevx990app.utils.Utility
+import com.example.verifonevx990app.vxUtils.IsoDataWriter.Companion.TAG
 import com.vfi.smartpos.deviceservice.aidl.*
 import com.vfi.smartpos.deviceservice.constdefine.ConstIPinpad
 import kotlinx.coroutines.Dispatchers
@@ -59,7 +60,10 @@ object VFService {
     fun getIpPort():InetSocketAddress?{
         val tct = TerminalCommunicationTable.selectFromSchemeTable()
         return if (tct != null) {
-            InetSocketAddress(InetAddress.getByName(tct.hostPrimaryIp), tct.hostPrimaryPortNo.toInt())
+            InetSocketAddress(
+                InetAddress.getByName(tct.hostPrimaryIp),
+                tct.hostPrimaryPortNo.toInt()
+            )
         }else{
             InetSocketAddress(InetAddress.getByName(NEWAMEXHDFC), NEWAMEXHDFCPort)
         }
@@ -88,12 +92,12 @@ object VFService {
                     var numericSerialnum: String? = bundle?.get("VRKSn") as String
 
                     if (numericSerialnum != null) {
-                        Log.d("Device Numeric  No:- " ,    numericSerialnum)
+                        Log.d("Device Numeric  No:- ", numericSerialnum)
                     }
 
                     if(isNullOrEmpty(numericSerialnum)){
-                        Log.d("Device  Serial No:- " , vfDeviceInfo?.serialNo?:"")
-                        AppPreference.saveString("serialNumber" , vfDeviceInfo?.serialNo?:"")
+                        Log.d("Device  Serial No:- ", vfDeviceInfo?.serialNo ?: "")
+                        AppPreference.saveString("serialNumber", vfDeviceInfo?.serialNo ?: "")
                     }
                     else{
                         strnum = String()
@@ -101,23 +105,23 @@ object VFService {
 
                         var numericSerialnum = number?.split("-")
 
-                        numericSerialnum?.forEach {str->
+                        numericSerialnum?.forEach { str->
                             strnum += str
                         }
 
 
-                        Log.d("Device Numeric Serial No:- " , strnum)
-                        AppPreference.saveString("serialNumber" , strnum)
+                        Log.d("Device Numeric Serial No:- ", strnum)
+                        AppPreference.saveString("serialNumber", strnum)
 
                     }
 
 
-                    Log.d("Device IMEI No:- " , vfDeviceInfo?.imei?:"")
-                    AppPreference.saveString("imeiNumber" , vfDeviceInfo?.imei?:"")
-                    Log.d("Android Version:- " , vfDeviceInfo?.androidOSVersion?:"")
-                    AppPreference.saveString("androidVersion" , vfDeviceInfo?.androidOSVersion?:"")
-                    Log.d("Device Model:- " , vfDeviceInfo?.model?:"")
-                    AppPreference.saveString("deviceModel" , vfDeviceInfo?.model?:"")
+                    Log.d("Device IMEI No:- ", vfDeviceInfo?.imei ?: "")
+                    AppPreference.saveString("imeiNumber", vfDeviceInfo?.imei ?: "")
+                    Log.d("Android Version:- ", vfDeviceInfo?.androidOSVersion ?: "")
+                    AppPreference.saveString("androidVersion", vfDeviceInfo?.androidOSVersion ?: "")
+                    Log.d("Device Model:- ", vfDeviceInfo?.model ?: "")
+                    AppPreference.saveString("deviceModel", vfDeviceInfo?.model ?: "")
                 } catch (e: RemoteException) {
                     e.printStackTrace()
                 }
@@ -150,13 +154,19 @@ object VFService {
         }
     }
     //Below Method is used to Inject Decripted TMK in VFService AIDL IPinPad.loadMainKey(int keyId, byte[] key, byte[] checkValue):-
-    fun injectTMK(decriptedTmk: ByteArray? = null , ppk: ByteArray, ppkcv: ByteArray , dpk: ByteArray, dpkcv: ByteArray,
-                  isLoadMainKey : Boolean = true) : Boolean? {
+    fun injectTMK(
+        decriptedTmk: ByteArray? = null,
+        ppk: ByteArray,
+        ppkcv: ByteArray,
+        dpk: ByteArray,
+        dpkcv: ByteArray,
+        isLoadMainKey: Boolean = true
+    ) : Boolean? {
         return try {
             var tmkKeyInsertSuccess : Boolean? = false
             if(isLoadMainKey){
-                tmkKeyInsertSuccess = vfPinPad?.loadMainKey(1 , decriptedTmk , null)}
-            Log.d("SUCCESS" , "TMK Inserted success")
+                tmkKeyInsertSuccess = vfPinPad?.loadMainKey(1, decriptedTmk, null)}
+            Log.d("SUCCESS", "TMK Inserted success")
             vfBeeper?.startBeep(300)
         //    showToast("TMK Inserted Successfully!!!")
             if(tmkKeyInsertSuccess == true) {
@@ -166,39 +176,39 @@ object VFService {
                 injectPPKKey(ppk, ppkcv, dpk, dpkcv)
             }else
                 false
-        }catch (e : Exception){
+        }catch (e: Exception){
             e.printStackTrace()
-            Log.d("FAILURE" , "TMK Inserted failed")
+            Log.d("FAILURE", "TMK Inserted failed")
             false
         }
     }
     //Below Method is used to Inject PPK in VFService AIDL IPinPad.loadWorkKey(int keyType, int mkId, int wkId, byte[] key, byte[] checkValue):-
-    private fun injectPPKKey(ppk: ByteArray, ppkcv: ByteArray , dpk: ByteArray, dpkcv: ByteArray) : Boolean? {
+    private fun injectPPKKey(ppk: ByteArray, ppkcv: ByteArray, dpk: ByteArray, dpkcv: ByteArray) : Boolean? {
         return try {
-            val ppkKeyInsertSuccess = vfPinPad?.loadWorkKey(PinpadKeyType.PINKEY , 1 , 2 , ppk , ppkcv)
-            Log.d("SUCCESS" , "PPK Inserted success")
+            val ppkKeyInsertSuccess = vfPinPad?.loadWorkKey(PinpadKeyType.PINKEY, 1, 2, ppk, ppkcv)
+            Log.d("SUCCESS", "PPK Inserted success")
             vfBeeper?.startBeep(100)
      //       showToast("PPK Inserted Successfully!!!")
             if(ppkKeyInsertSuccess == true)
-                injectDPKKey(dpk , dpkcv)
+                injectDPKKey(dpk, dpkcv)
             else
                 false
-        }catch (e : Exception){
+        }catch (e: Exception){
             e.printStackTrace()
-            Log.d("FAILURE" , "PPK Inserted failed")
+            Log.d("FAILURE", "PPK Inserted failed")
             false
         }
     }
     //Below Method is used to Inject DPK in VFService AIDL IPinPad.loadWorkKey(int keyType, int mkId, int wkId, byte[] key, byte[] checkValue):-
     private fun injectDPKKey(dpk: ByteArray, dpkcv: ByteArray) : Boolean? {
         return try {
-            val dpkKeyInsertSuccess = vfPinPad?.loadWorkKey(PinpadKeyType.TDKEY , 1 , 2 , dpk , dpkcv)
+            val dpkKeyInsertSuccess = vfPinPad?.loadWorkKey(PinpadKeyType.TDKEY, 1, 2, dpk, dpkcv)
             vfBeeper?.startBeep(50)
      //       showToast("DPK Inserted Successfully!!!")
             dpkKeyInsertSuccess == true
-        }catch (e : Exception){
+        }catch (e: Exception){
             e.printStackTrace()
-            Log.d("FAILURE" , "DPK Inserted failed")
+            Log.d("FAILURE", "DPK Inserted failed")
             false
         }
     }
@@ -212,7 +222,7 @@ object VFService {
     fun getPinPadData() : Boolean? {
         return try {
             vfPinPad?.isKeyExist(12, 1)
-        }catch (e : java.lang.Exception){
+        }catch (e: java.lang.Exception){
             e.printStackTrace()
             false
         }
@@ -221,9 +231,9 @@ object VFService {
     //Below method is used to get DupktKey from IPinPad:-
     fun getDupkt(i: Int, i1: Int, i2: Int, bytes: ByteArray, byteArrayOf: ByteArray) : ByteArray? {
         return try {
-            val data = vfPinPad?.dukptEncryptData(i , i1 , i2 , bytes , byteArrayOf)
+            val data = vfPinPad?.dukptEncryptData(i, i1, i2, bytes, byteArrayOf)
             data
-        }catch (e : java.lang.Exception){
+        }catch (e: java.lang.Exception){
             e.printStackTrace()
             null
         }
@@ -237,18 +247,18 @@ object VFService {
         //   mIsoWriter = isoPackageWriter
         //   isOnlinePin = onlinePin
         try {
-            doPinPad(cardProcessedDataModal,activity)
-        }catch (e : Exception){
+            doPinPad(cardProcessedDataModal, activity)
+        }catch (e: Exception){
             e.printStackTrace()
         }
     }
 
-    private fun doPinPad(cardProcessedDataModal: CardProcessedDataModal,activity: Activity) {
-        initializePinInputListener(cardProcessedDataModal,activity)
+    private fun doPinPad(cardProcessedDataModal: CardProcessedDataModal, activity: Activity) {
+        initializePinInputListener(cardProcessedDataModal, activity)
         val param = Bundle()
         val globleparam = Bundle()
         val panBlock: String? = cardProcessedDataModal.getPanNumberData()
-        val pinLimit = byteArrayOf(4, 5, 6) // byteArrayOf(Utility.HEX2DEC(retryTimes))
+        val pinLimit = byteArrayOf(0,4, 5, 6) // 0 means bypass pin input
         param.putByteArray(ConstIPinpad.startPinInput.param.KEY_pinLimit_ByteArray, pinLimit)
         param.putInt(ConstIPinpad.startPinInput.param.KEY_timeout_int, 30)
         when (cardProcessedDataModal.getIsOnline()) {
@@ -268,7 +278,7 @@ object VFService {
         }
     }
 
-    private fun initializePinInputListener(cardProcessedDataModal: CardProcessedDataModal,activity: Activity) {
+    private fun initializePinInputListener(cardProcessedDataModal: CardProcessedDataModal, activity: Activity) {
         pinInputListener = object : PinInputListener.Stub() {
             @Throws(RemoteException::class)
             override fun onInput(len: Int, key: Int) {
@@ -276,8 +286,11 @@ object VFService {
             }
 
             @Throws(RemoteException::class)
-            override fun onConfirm(data: ByteArray, isNonePin: Boolean) {
+            override fun onConfirm(data: ByteArray?, isNonePin: Boolean) {
                 Log.d("Data", "PinPad onConfirm")
+                Log.d(MainActivity.TAG, "PinPad byPassPin ---> " + data)
+                if(data != null) cardProcessedDataModal.setPinByPass(0)
+
                 vfIEMV?.importPin(1, data)
                 Log.d(MainActivity.TAG, "PinPad hex encrypted data ---> " + Utility.byte2HexStr(data))
                 savedPinblock = data
@@ -294,7 +307,7 @@ object VFService {
                             cardProcessedDataModal.setPosEntryMode(PosEntryModeType.EMV_POS_ENTRY_OFFLINE_PIN.posEntry.toString())
                         }
                     }
-                    DetectCardType.CONTACT_LESS_CARD_TYPE ->{
+                    DetectCardType.CONTACT_LESS_CARD_TYPE -> {
                         if (cardProcessedDataModal.getIsOnline() == 1) {
                             cardProcessedDataModal.setGeneratePinBlock(Utility.byte2HexStr(data))
                             cardProcessedDataModal.setPosEntryMode(PosEntryModeType.CTLS_EMV_POS_WITH_PIN.posEntry.toString())
@@ -355,33 +368,39 @@ object VFService {
         }
     }
 
+
+
     //Below method is used to set AID & RID :-
-    fun setAidRid(cvmValue : String , ctlsTransLimit : String) {
+    fun setAidRid(cvmValue: String, ctlsTransLimit: String) {
         try {
             var emvSetAidRid : EmvSetAidRid? = null
             emvSetAidRid = when{
-                cvmValue.toInt() == 0 && ctlsTransLimit.toInt() == 0 -> EmvSetAidRid(vfIEMV , "000000001000" , "009999999999")
-                cvmValue.toInt() == 0 -> EmvSetAidRid(vfIEMV , "000000001000" , ctlsTransLimit)
-                ctlsTransLimit.toInt() == 0 -> EmvSetAidRid(vfIEMV , cvmValue , "009999999999")
-                else -> EmvSetAidRid(vfIEMV , cvmValue , ctlsTransLimit)
+                cvmValue.toInt() == 0 && ctlsTransLimit.toInt() == 0 -> EmvSetAidRid(
+                    vfIEMV,
+                    "000000001000",
+                    "009999999999"
+                )
+                cvmValue.toInt() == 0 -> EmvSetAidRid(vfIEMV, "000000001000", ctlsTransLimit)
+                ctlsTransLimit.toInt() == 0 -> EmvSetAidRid(vfIEMV, cvmValue, "009999999999")
+                else -> EmvSetAidRid(vfIEMV, cvmValue, ctlsTransLimit)
             }
 
             emvSetAidRid.setAID(1)
             emvSetAidRid.setRID(1)
-        }catch (e : java.lang.Exception){
+        }catch (e: java.lang.Exception){
             e.printStackTrace()
         }
     }
 
     //Below method is used to show Toast on UI Thread:-
-    fun showToast(message : String){
+    fun showToast(message: String){
         GlobalScope.launch(Dispatchers.Main) {
            Toast.makeText(VerifoneApp.appContext, message, Toast.LENGTH_SHORT).show()
         }
     }
 }
 
-enum class EFallbackCode(var fallBackCode:Int){
+enum class EFallbackCode(var fallBackCode: Int){
     Swipe_fallback(111),
     EMV_fallback(8),
     NO_fallback(0),

@@ -87,7 +87,7 @@ class CreateTransactionPacket(
             addFieldByHex(48, ConnectionTimeStamps.getStamp())
 
             //Field 52 in case of Pin
-            if (!(TextUtils.isEmpty(cardProcessedData.getGeneratePinBlock())))
+            if (!(TextUtils.isEmpty(cardProcessedData.getGeneratePinBlock())) && cardProcessedData.getPinByPass() == 0)
                 addField(52, cardProcessedData.getGeneratePinBlock().toString())
 
             //Field 54 in case od sale with cash AND Cash at POS.
@@ -208,11 +208,10 @@ class CreateTransactionPacket(
                  issuerParameterTable?.customerIdentifierFiledType,
                  2
              )*/
-            val customerID =
-                issuerParameterTable?.customerIdentifierFiledType?.let { addPad(it, "0", 2) }
+            val customerID = issuerParameterTable?.customerIdentifierFiledType?.let { addPad(it, "0", 2) } ?: 0
 
             //  val walletIssuerID = HexStringConverter.addPreFixer(issuerParameterTable?.issuerId, 2)
-            val walletIssuerID = issuerParameterTable?.issuerId?.let { addPad(it, "0", 2) }
+            val walletIssuerID = issuerParameterTable?.issuerId?.let { addPad(it, "0", 2) } ?: 0
             addFieldByHex(
                 61, addPad(
                     AppPreference.getString("serialNumber"), " ", 15, false

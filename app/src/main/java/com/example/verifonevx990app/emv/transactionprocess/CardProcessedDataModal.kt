@@ -57,6 +57,11 @@ class CardProcessedDataModal : Serializable {
     // For Insta EMI Available
     private var hasInstaEmi: Boolean = false
 
+    private var cardlabel: String? = null
+
+    private var pinByPass: Int? = null
+
+
     fun getTrack1Data(): String? {
         return track1Data
     }
@@ -368,6 +373,22 @@ class CardProcessedDataModal : Serializable {
 
     fun getPinEntryFlag(): String? {
         return pinEntryFlag
+    }
+
+    fun setPinByPass(pinByPass: Int) {
+        this.pinByPass = pinByPass
+    }
+
+    fun getPinByPass(): Int? {
+        return pinByPass
+    }
+
+    fun setcardLabel(cardlabel: String?) {
+        this.cardlabel = cardlabel
+    }
+
+    fun getcardLabel(): String? {
+        return cardlabel
     }
 
     fun getEmiType() : Int{
