@@ -3,6 +3,8 @@ package com.example.verifonevx990app.emv.transactionprocess
 import android.text.TextUtils
 import android.util.Log
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.main.CardAid
+import com.example.verifonevx990app.main.DetectCardType
 import com.example.verifonevx990app.preAuth.CreateReversal
 import com.example.verifonevx990app.vxUtils.*
 import com.google.gson.Gson
@@ -10,10 +12,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class SyncReversalToHost(
-    private var transactionISOData: IsoDataWriter?,
-    var syncTransactionCallback: (Boolean, String) -> Unit
-) {
+class SyncReversalToHost(private var transactionISOData: IsoDataWriter?,
+                         var syncTransactionCallback: (Boolean, String) -> Unit) {
 
     private var successResponseCode: String? = null
     private var transMsg: String? = null
@@ -33,6 +33,16 @@ class SyncReversalToHost(
             transactionISOData?.additionalData?.get("F56reversal")
                 ?.let { transactionISOData?.addFieldByHex(56, it) }
             transactionISOData?.let { addIsoDateTime(it) }
+
+            if(!TextUtils.isEmpty(AppPreference.doubletap) && !TextUtils.isEmpty(AppPreference.doubletaptimeout)) {
+                transactionISOData?.addFieldByHex(39, "E2")
+               }
+
+                else if(!TextUtils.isEmpty(AppPreference.doubletap)) {
+                transactionISOData?.additionalData?.get("F39reversal")
+                    ?.let { transactionISOData?.addFieldByHex(39, it) }
+               }
+
         }
         val transactionISOByteArray = transactionISOData?.generateIsoByteRequest()
         if (transactionISOData != null) {

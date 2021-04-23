@@ -16,12 +16,7 @@ import com.vfi.smartpos.deviceservice.aidl.IEMV
 import java.text.SimpleDateFormat
 import java.util.*
 
-class StubBatchData(
-    var transactionType: Int,
-    var cardProcessedDataModal: CardProcessedDataModal,
-    private var printExtraData: Triple<String, String, String>?,
-    var batchStubCallback: (BatchFileDataTable) -> Unit
-) {
+class StubBatchData(private var de55: String?,var transactionType: Int, var cardProcessedDataModal: CardProcessedDataModal, private var printExtraData: Triple<String, String, String>?, var batchStubCallback: (BatchFileDataTable) -> Unit) {
 
     var vfIEMV: IEMV? = null
 
@@ -105,8 +100,7 @@ class StubBatchData(
         batchFileData.appVersion = addPad(getAppVersionNameAndRevisionID(), "0", 15, false)
         batchFileData.pcNumber = AppPreference.getString(AppPreference.PC_NUMBER_KEY)
         //batchFileData.operationType = isoPackageWriter.operationType(Need to Discuss by Ajay)
-        batchFileData.transationName =
-            TransactionTypeValues.getTransactionStringType(transactionType)
+        batchFileData.transationName = TransactionTypeValues.getTransactionStringType(transactionType)
         when(cardProcessedDataModal.getReadCardType()){
             DetectCardType.MAG_CARD_TYPE ->{
                 batchFileData.cardType = cardDataTable?.cardLabel ?: ""
@@ -130,6 +124,10 @@ class StubBatchData(
                     cardProcessedDataModal.getTrack2Data() ?: ""
                 )
             }
+
+
+            batchFileData.de55 = de55 ?: "abc"
+
         //batchFileData.detectedCardType=cardProcessedDataModal.getReadCardType()?:DetectCardType.CARD_ERROR_TYPE
         batchFileData.operationType =
             cardProcessedDataModal.getReadCardType()?.cardTypeName.toString()
@@ -213,10 +211,10 @@ class StubBatchData(
             DetectCardType.CONTACT_LESS_CARD_TYPE -> {
                 /*   val aidArray = arrayOf("0x9F06")
                val aidData = vfIEMV?.getAppTLVList(aidArray)*/
-                var aidData = cardProcessedDataModal.getAID() ?: ""
+                var aidData = cardProcessedDataModal.getAIDPrint() ?: ""
                 //println("Aid Data is ----> $aidData")
                 //val formattedAid = aidData?.subSequence(6, aidData.length)
-                batchFileData.aid = cardProcessedDataModal.getAID() ?: ""
+                batchFileData.aid = cardProcessedDataModal.getAIDPrint() ?: ""
             }
             else -> {
             }

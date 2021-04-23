@@ -15,12 +15,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.main.*
+import com.example.verifonevx990app.realmtables.BatchFileDataTable
 import com.example.verifonevx990app.utils.Utility
 import com.example.verifonevx990app.vxUtils.*
 import com.example.verifonevx990app.vxUtils.ROCProviderV2.getField55
 import com.vfi.smartpos.deviceservice.aidl.EMVHandler
 import com.vfi.smartpos.deviceservice.aidl.IEMV
-import com.vfi.smartpos.deviceservice.aidl.IssuerUpdateHandler
 import com.vfi.smartpos.deviceservice.constdefine.ConstIPBOC
 import com.vfi.smartpos.deviceservice.constdefine.ConstPBOCHandler
 import kotlinx.coroutines.Dispatchers
@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 import java.nio.charset.StandardCharsets
 import java.util.*
 
-class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?, var cardProcessedDataModal: CardProcessedDataModal, var vfEmvHandlerCallback: (CardProcessedDataModal) -> Unit) : EMVHandler.Stub() {
+class VFEmvHandler(var activity: Activity, var handler: Handler, var iemv: IEMV?, var cardProcessedDataModal: CardProcessedDataModal, var vfEmvHandlerCallback: (CardProcessedDataModal) -> Unit) : EMVHandler.Stub() {
     private var TAG = VFEmvHandler::class.java.name
     private var maxPin: Int = 0
     private var SuccessPin: Int = 1
@@ -102,26 +102,71 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
             0x84,
             0x9F03,
             0x9F33,
-            0x9F74
+            0x9F74,
+            0xDF20,
+            0xDF21
+
         )
         var count = 0
         try {
             for (tag in tagList) {
                 tlv = iemv?.getCardData(Integer.toHexString(tag).toUpperCase(Locale.ROOT))
                 if (null != tlv && tlv.isNotEmpty()) {
-                    Log.e(
-                        "TLV F55 REQ--",
-                        "TAG--> " + Integer.toHexString(tag) + ", VALUE-->" + Utility.byte2HexStr(
-                            tlv
-                        )
-                    )
+                    Log.e("TLV F55 REQ--", "TAG--> " + Integer.toHexString(tag) + ", VALUE-->" + Utility.byte2HexStr(tlv))
                     val length = Integer.toHexString(tlv.size)
                     count += Integer.valueOf(length)
                     tagOfF55?.put(tag, Utility.byte2HexStr(tlv)) // build up the field 55
 
+
+                    try {
+                        if(null !=tag && "95".equals(Integer.toHexString(tag))
+                            && CardAid.UnionPay.aid.equals(cardProcessedDataModal.getAID())){
+
+                            val f55Hash = HashMap<Int, String>()
+                            val str = Utility.byte2HexStr(tlv)
+
+                            var i = 0
+                            var j = 1
+                            while (i < str.length - 1) {
+                                val c = "" + str[i] + str[i + 1]
+                                f55Hash.put(j, c)
+                                println("95 value with pair is" + c)
+                                j += 1
+                                i += 2
+                            }
+
+                            var secondbyte: String = f55Hash.get(2) ?: ""
+
+                            var hexdec = CharArray(100)
+                            hexdec = secondbyte.toCharArray()
+
+                            var strbinarnum =  Utility.HexToBin(hexdec)
+
+                            f55Hash.clear()
+
+                             var  K=0
+                            while (K < strbinarnum.length - 1) {
+                                val c = "" + strbinarnum[K]
+                                f55Hash.put(K, c)
+                                println("Binary value with pair is" + c)
+                                K += 1
+                            }
+
+                            if(f55Hash.isNotEmpty() && f55Hash.get(1) == "1"){
+                                  VFService.showToast("App Expired")
+                                }
+
+                            println("Binary number is"+strbinarnum)
+
+                          }
+                        }
+                    catch (ex: ArrayIndexOutOfBoundsException){
+                        ex.printStackTrace()
+                    }
+
                     if(null != tag && "84".equals(Integer.toHexString(tag))){
                         //println("Aid value with Tag is ---> "+Integer.toHexString(tag) + Utility.byte2HexStr(tlv))
-                        cardProcessedDataModal.setAID(Utility.byte2HexStr(tlv))
+                        cardProcessedDataModal.setAIDPrint(Utility.byte2HexStr(tlv))
 
                     }
                 } else {
@@ -131,13 +176,43 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
             }
             //println("Total length of tag55 is$count")
         }
-        catch (ex : Exception){
-            Log.d("Exception during ARQC",""+ex.printStackTrace())
+        catch (ex: Exception){
+            Log.d("Exception during ARQC", "" + ex.printStackTrace())
         }
         Log.d(MainActivity.TAG, "start online request")
         processField55Data()
         Log.d(MainActivity.TAG, "online request finished")
         processField57Data()
+
+        val noCvmTagvalue = arrayOf("0x9F34")
+        val cvmresult = iemv?.getAppTLVList(noCvmTagvalue)
+        if(null != cvmresult && !(cvmresult.isEmpty())) {
+            println("CVM Result Data is ----> $cvmresult")
+            tlv = iemv?.getCardData(Integer.toHexString(0x9F34).toUpperCase(Locale.ROOT))
+            println("CVM Result Data value is ----> ${Utility.byte2HexStr(tlv)}")
+
+            val f55Hash = HashMap<Int, String>()
+            val str = Utility.byte2HexStr(tlv)
+
+            var i = 0
+            var j = 1
+            while (i < str.length - 1) {
+                val c = "" + str[i] + str[i + 1]
+                f55Hash.put(j, c)
+                println("9F34 value with pair is" + c)
+                j += 1
+                i += 2
+            }
+
+            var firstbyte: String = f55Hash.get(1) ?: ""
+
+            println("CVM Result first byte is ----> ${firstbyte}")
+
+            if("1F" == firstbyte || "5F" == firstbyte){
+                cardProcessedDataModal.setNoCVM(true)
+            }
+
+        }
 
     }
 
@@ -166,7 +241,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                     (activity as VFTransactionActivity).doProcessCard()
                 }
             }, 200)
-            println("VfEmvHandler error in onSelectApplication"+ex.message)
+            println("VfEmvHandler error in onSelectApplication" + ex.message)
         } catch (ex: RemoteException){
             ex.printStackTrace()
             Handler(Looper.getMainLooper()).postDelayed(Runnable {
@@ -178,10 +253,10 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                     (activity as VFTransactionActivity).doProcessCard()
                 }
             }, 200)
-            println("VfEmvHandler error in onSelectApplication"+ex.message)
+            println("VfEmvHandler error in onSelectApplication" + ex.message)
         } catch (ex: Exception){
             ex.printStackTrace()
-            println("VfEmvHandler error in onSelectApplication"+ex.message)
+            println("VfEmvHandler error in onSelectApplication" + ex.message)
         }
 
         /*  VFService.showToast("onSelectApplication..." + (appList?.get(0) ?: ""))
@@ -192,7 +267,11 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
         //VFService.showToast("onConfirmCertInfo, type:$certType,info:$certInfo")
         try {
             iemv?.importCertConfirmResult(ConstIPBOC.importCertConfirmResult.option.CONFIRM)
-            logger("onConfirmCertInfo","certInfo--->"+certInfo.toString()+"certType---> "+certType.toString(),"e")
+            logger(
+                "onConfirmCertInfo",
+                "certInfo--->" + certInfo.toString() + "certType---> " + certType.toString(),
+                "e"
+            )
         }
         catch (ex: DeadObjectException){
             ex.printStackTrace()
@@ -205,7 +284,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                     (activity as VFTransactionActivity).doProcessCard()
                 }
             }, 200)
-            println("VfEmvHandler error in onSelectApplication"+ex.message)
+            println("VfEmvHandler error in onSelectApplication" + ex.message)
         }
         catch (ex: RemoteException){
             ex.printStackTrace()
@@ -218,11 +297,11 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                     (activity as VFTransactionActivity).doProcessCard()
                 }
             }, 200)
-            println("VfEmvHandler error in onSelectApplication"+ex.message)
+            println("VfEmvHandler error in onSelectApplication" + ex.message)
         }
         catch (ex: Exception){
             ex.printStackTrace()
-            println("VfEmvHandler error in onConfirmCertInfo"+ex.message)
+            println("VfEmvHandler error in onConfirmCertInfo" + ex.message)
         }
     }
 
@@ -251,7 +330,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
         if(null != tlvcardTypeLabel && !(tlvcardTypeLabel.isEmpty())){
             var cardType = Utility.byte2HexStr(tlvcardTypeLabel)
             cardProcessedDataModal.setcardLabel(hexString2String(cardType))
-            println("Card  Type ---> "+ hexString2String(cardType))
+            println("Card  Type ---> " + hexString2String(cardType))
         }
 
         val tlv = iemv?.getCardData("5F20")   // CardHolder Name TAG
@@ -260,7 +339,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
             var removespace = hexString2String(cardholderName)
             var finalstr = removespace.trimEnd()
             cardProcessedDataModal.setCardHolderName(finalstr)
-            println("Card Holder Name ---> "+ finalstr)
+            println("Card Holder Name ---> " + finalstr)
         }
         val tlvapplabel = iemv?.getCardData("9F12")   // application label  TAG
         if(null != tlvapplabel && !(tlvapplabel.isEmpty())){
@@ -268,15 +347,27 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
             var removespace = hexString2String(applicationlabel)
             var finalstr = removespace.trimEnd()
             cardProcessedDataModal.setApplicationLabel(finalstr)
-            println("Application label ---> "+ finalstr)
+            println("Application label ---> " + finalstr)
         }
 
         val tlvcardissuer = iemv?.getCardData("5F28")   // card issuer country code  TAG
         if(null != tlvcardissuer && !(tlvcardissuer.isEmpty())){
             var cardissuercountrycode = Utility.byte2HexStr(tlvcardissuer)
             cardProcessedDataModal.setCardIssuerCountryCode(cardissuercountrycode)
-            println("Card issuer country code ---> "+ cardissuercountrycode)
+            println("Card issuer country code ---> " + cardissuercountrycode)
         }
+
+        val tlvaid = iemv?.getCardData("84")   // card issuer country code  TAG
+        if(null != tlvaid && !(tlvaid.isEmpty())){
+            var aid = Utility.byte2HexStr(tlvaid)
+
+            var aidstr = aid.subSequence(0, 10).toString()
+
+            cardProcessedDataModal.setAID(aidstr)
+            println("Aid  code ---> " + aidstr)
+        }
+
+
 
         cardProcessedDataModal.setPinEntryFlag("0")
 
@@ -363,7 +454,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                         (activity as VFTransactionActivity).doProcessCard()
                     }
                 }, 200)
-                println("VfEmvHandler error in onSelectApplication"+ex.message)
+                println("VfEmvHandler error in onSelectApplication" + ex.message)
             }
             catch (ex: RemoteException){
                 ex.printStackTrace()
@@ -376,11 +467,11 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                         (activity as VFTransactionActivity).doProcessCard()
                     }
                 }, 200)
-                println("VfEmvHandler error in onSelectApplication"+ex.message)
+                println("VfEmvHandler error in onSelectApplication" + ex.message)
             }
             catch (ex: Exception){
                 ex.printStackTrace()
-                println("VfEmvHandler error in onConfirmCardinfo"+ex.message)
+                println("VfEmvHandler error in onConfirmCardinfo" + ex.message)
             }
 
 
@@ -444,7 +535,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
             }
             DetectError.NoCoOwnedApp.errorCode == result -> {
                 (activity as VFTransactionActivity).handleEMVFallbackFromError(
-                    activity.getString(R.string.alert),
+                    activity.getString(R.string.emv_fallback),
                     activity.getString(R.string.please_use_another_card_for_transaction),
                     false
                 ) { alertCBBool ->
@@ -479,6 +570,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                 ) { alertCBBool ->
                     if (alertCBBool)
                         try {
+                            cardProcessedDataModal.setFallbackType(EFallbackCode.EMV_fallback.fallBackCode)
                             (activity as VFTransactionActivity).doProcessCard()
                         } catch (ex: Exception) {
                             ex.printStackTrace()
@@ -543,9 +635,46 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                 }
                 logger("onTransactionResult", "IncorrectPAN", "e")
             }
+            DetectError.AppLocked.errorCode == result -> {
+                (activity as VFTransactionActivity).handleEMVFallbackFromError(
+                    activity.getString(R.string.alert),
+                    activity.getString(R.string.application_blocked), false
+                ) { alertCBBool ->
+                    if (alertCBBool)
+                        try {
+                            (activity as VFTransactionActivity).declinedTransaction()
+                        } catch (ex: Exception) {
+                            ex.printStackTrace()
+                        }
+                }
+            }
+            DetectError.SecondTap_Approved.errorCode == result -> {
+                (activity as VFTransactionActivity).handleEMVFallbackFromError(activity.getString(R.string.alert), msg.toString(), false) { alertCBBool ->
+                    if (alertCBBool)
+                        try {
+                             AppPreference.clearReversal()
+                            (activity as VFTransactionActivity).printAndSaveDoubletapData()
+
+                        } catch (ex: Exception) {
+                            ex.printStackTrace()
+                        }
+                }
+            }
+            DetectError.TransactionReject.errorCode == result -> {
+                (activity as VFTransactionActivity).handleEMVFallbackFromError(activity.getString(R.string.alert), msg.toString(), false) { alertCBBool ->
+                    if (alertCBBool)
+                        try {
+                                (activity as VFTransactionActivity).processDoubleTap(cardProcessedDataModal)
+
+                        } catch (ex: Exception) {
+                            ex.printStackTrace()
+                        }
+                }
+            }
             else -> {
                 (activity as VFTransactionActivity).handleEMVFallbackFromError(
-                    activity.getString(R.string.alert), msg.toString(),
+                    activity.getString(R.string.alert),
+                    msg.toString(),
                     false
                 ) { alertCBBool ->
                     if (alertCBBool)
@@ -630,7 +759,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
     //3,2,1 --->
     override fun onRequestInputPIN(isOnlinePin: Boolean, retryTimes: Int) {
         //    VFService.showToast("onRequestInputPIN isOnlinePin:$isOnlinePin")
-        println("Invalid pin"+retryTimes)
+        println("Invalid pin" + retryTimes)
         cardProcessedDataModal.setPinEntryFlag("1")
         retryTimess = retryTimes
         if (isOnlinePin) {
@@ -638,7 +767,9 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
             //For Online Pin
             //Here we are inflating PinPad on App UI:-
             cardProcessedDataModal.setIsOnline(1)
-            VFService.openPinPad(cardProcessedDataModal,activity)
+            VFService.openPinPad(cardProcessedDataModal, activity){
+
+            }
         } else {
             cardProcessedDataModal.setPinEntryFlag("2")
             //For Offline Pin
@@ -656,7 +787,9 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                 when (retryTimess) {
                     3 -> {
 
-                        VFService.openPinPad(cardProcessedDataModal, activity)
+                        VFService.openPinPad(cardProcessedDataModal, activity){
+
+                        }
                     }
                     2 -> {
                         GlobalScope.launch(Dispatchers.Main) {
@@ -664,13 +797,17 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                                 null, null, "Invalid PIN",
                                 "Wrong PIN please try again", false, "OK", { alertCallback ->
                                     if (alertCallback) {
-                                        VFService.openPinPad(cardProcessedDataModal, activity)
+                                        VFService.openPinPad(cardProcessedDataModal, activity){
+
+                                        }
                                     }
 
                                 }) { alertCallback ->
                                 if (alertCallback) {
 
-                                    VFService.openPinPad(cardProcessedDataModal, activity)
+                                    VFService.openPinPad(cardProcessedDataModal, activity){
+
+                                    }
                                 }
                             }
                         }
@@ -679,14 +816,17 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                         GlobalScope.launch(Dispatchers.Main) {
                             (activity as BaseActivity).alertBoxWithAction(
                                 null, null, "Invalid PIN",
-                                "This is your last attempt", false, "OK"
-                                , {alertCallback->
+                                "This is your last attempt", false, "OK", { alertCallback ->
                                     if (alertCallback) {
-                                        VFService.openPinPad(cardProcessedDataModal, activity)
+                                        VFService.openPinPad(cardProcessedDataModal, activity){
+
+                                        }
                                     }
                                 }) { alertCallback ->
                                 if (alertCallback) {
-                                    VFService.openPinPad(cardProcessedDataModal, activity)
+                                    VFService.openPinPad(cardProcessedDataModal, activity){
+
+                                    }
                                 }
                             }
                         }
@@ -696,7 +836,9 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
             else if(retryTimess==2){
                 when (retryTimess) {
                     2 -> {
-                        VFService.openPinPad(cardProcessedDataModal, activity)
+                        VFService.openPinPad(cardProcessedDataModal, activity){
+
+                        }
                         /*      GlobalScope.launch(Dispatchers.Main) {
                                   (activity as BaseActivity).alertBoxWithAction(
                                       null, null, "Invalid PIN",
@@ -710,15 +852,25 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                     }
                     1 -> {
                         GlobalScope.launch(Dispatchers.Main) {
-                            (activity as BaseActivity).alertBoxWithAction(null, null, "Invalid PIN", "This is your last attempt", false, "OK", {alertCallback ->
-                                if (alertCallback) {
-                                    VFService.openPinPad(cardProcessedDataModal, activity)
-                                }
+                            (activity as BaseActivity).alertBoxWithAction(
+                                null,
+                                null,
+                                "Invalid PIN",
+                                "This is your last attempt",
+                                false,
+                                "OK",
+                                { alertCallback ->
+                                    if (alertCallback) {
+                                        VFService.openPinPad(cardProcessedDataModal, activity){
 
-                            }) {
-                                    alertCallback ->
+                                        }
+                                    }
+
+                                }) { alertCallback ->
                                 if (alertCallback) {
-                                    VFService.openPinPad(cardProcessedDataModal, activity)
+                                    VFService.openPinPad(cardProcessedDataModal, activity){
+
+                                    }
                                 }
                             }
                         }
@@ -731,14 +883,17 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
                         GlobalScope.launch(Dispatchers.Main) {
                             (activity as BaseActivity).alertBoxWithAction(
                                 null, null, "Invalid PIN",
-                                "This is your last attempt", false, "OK"
-                                , {alertCallback->
+                                "This is your last attempt", false, "OK", { alertCallback ->
                                     if (alertCallback) {
-                                        VFService.openPinPad(cardProcessedDataModal, activity)
+                                        VFService.openPinPad(cardProcessedDataModal, activity){
+
+                                        }
                                     }
                                 }) { alertCallback ->
                                 if (alertCallback) {
-                                    VFService.openPinPad(cardProcessedDataModal, activity)
+                                    VFService.openPinPad(cardProcessedDataModal, activity){
+
+                                    }
                                 }
                             }
                         }
@@ -771,7 +926,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
 
         val mod = track21.length % DIGIT_8
         if (mod!=0) {
-            track21 = getEncryptedField57DataForVisa(track21.length,track21)
+            track21 = getEncryptedField57DataForVisa(track21.length, track21)
         }
         val byteArray = track21.toByteArray(StandardCharsets.ISO_8859_1)
         val encryptedTrack2ByteArray: ByteArray? =
@@ -803,7 +958,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
 
                 when (cardProcessedDataModal.getReadCardType()) {
                     DetectCardType.EMV_CARD_TYPE -> {
-                        val f55 = getField55(false,cardProcessedDataModal)
+                        val f55 = getField55(false, cardProcessedDataModal)
                         cardProcessedDataModal.setField55(f55)
                         //println("Field 55 is -> " + f55)
                         vfEmvHandlerCallback(cardProcessedDataModal)
@@ -843,7 +998,7 @@ class VFEmvHandler(var activity: Activity,var handler: Handler, var iemv: IEMV?,
         }
     }
     //App Selection Rv
-    private fun inflateAppsDialog(appList: MutableList<Bundle> , multiAppCB : (Int) -> Unit) {
+    private fun inflateAppsDialog(appList: MutableList<Bundle>, multiAppCB: (Int) -> Unit) {
         activity.runOnUiThread {
             var appSelectedPosition = 1
             val dialog = Dialog(activity)

@@ -78,7 +78,7 @@ public class DRLUtil {
         drlID = new byte[]{0x06};
         clssFloorLimit = new byte[]{0, 0, 0, 0, 4, 0};
         clssTransLimit = new byte[]{0, 0, 0, 0, 7, 0};
-        clssRequiredLimit = new byte[]{0, 0, 0, 0, 2, 0};
+        clssRequiredLimit = new byte[]{0, 0, 2, 0, 0, 0};
 
         drlData = new DRLData(drlID, clssFloorLimit, clssTransLimit, clssRequiredLimit);
         drlDataList.add(drlData);
@@ -86,7 +86,7 @@ public class DRLUtil {
         drlID = new byte[]{0x0B};
         clssFloorLimit = new byte[]{0,0,0,0,1,0};
         clssTransLimit = new byte[]{0,0,0,0,3,0};
-        clssRequiredLimit = new byte[]{0,0,0,0,2,0};
+        clssRequiredLimit = new byte[]{0,0,2,0,0,0};
         drlData = new DRLData(drlID, clssFloorLimit, clssTransLimit, clssRequiredLimit);
         drlDataList.add(drlData);
         return drlDataList;

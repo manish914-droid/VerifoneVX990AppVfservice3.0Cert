@@ -16,11 +16,7 @@ import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
 import java.util.*
 
-class CreateTransactionPacket(
-    private var cardProcessedData: CardProcessedDataModal,
-    private var bankEmiSchemeData: BankEMIDataModal? = null,
-    private var bankEmiTandCData: BankEMIIssuerTAndCDataModal? = null
-) :
+class CreateTransactionPacket(private var cardProcessedData: CardProcessedDataModal, private var bankEmiSchemeData: BankEMIDataModal? = null, private var bankEmiTandCData: BankEMIIssuerTAndCDataModal? = null) :
     ITransactionPacketExchange {
 
     private var indicator: String? = null

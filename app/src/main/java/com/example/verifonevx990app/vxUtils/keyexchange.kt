@@ -568,10 +568,14 @@ class KeyExchanger(
                         false
                     )
                     val tpt = TerminalParameterTable.selectFromSchemeTable()
-                    VFService.setAidRid(
+                 /*   VFService.setAidRid(
                         addPad(tpt?.minCtlsTransAmt ?: "", "0", 12, true),
                         addPad(tpt?.maxCtlsTransAmt ?: "", "0", 12, true)
-                    )
+                    )*/
+
+                    VFService.setAidRid(addPad(tpt?.minCtlsTransAmt ?: "", "0", 12, true),
+                        addPad(tpt?.maxCtlsTransAmt ?: "", "0", 12, true))
+
                 } else {
                     AppPreference.saveBoolean(
                         PrefConstant.INIT_AFTER_SETTLEMENT.keyName.toString(),

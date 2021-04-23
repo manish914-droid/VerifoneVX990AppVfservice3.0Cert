@@ -59,7 +59,7 @@ class SyncAuthTransToHost(activityContext: BaseActivity) {
                             it
                         )
                     }
-                    StubBatchData(
+                    StubBatchData("",
                         cardProcessedDataModal.getTransType(),
                         cardProcessedDataModal,
                         null

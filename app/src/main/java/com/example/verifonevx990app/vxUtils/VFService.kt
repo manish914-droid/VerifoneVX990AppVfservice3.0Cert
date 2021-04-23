@@ -18,6 +18,7 @@ import com.example.verifonevx990app.emv.VFEmv.savedPinblock
 import com.example.verifonevx990app.emv.VFEmv.workKeyId
 import com.example.verifonevx990app.emv.transactionprocess.CardProcessedDataModal
 import com.example.verifonevx990app.emv.transactionprocess.VFTransactionActivity
+import com.example.verifonevx990app.main.CardAid
 import com.example.verifonevx990app.main.DetectCardType
 import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.main.PosEntryModeType
@@ -240,25 +241,33 @@ object VFService {
     }
 
     //Below method is used to Open Pin Pad in Terminal:-
-    fun openPinPad(
-        cardProcessedDataModal: CardProcessedDataModal,
-        activity: Activity
-    ) {
+    fun openPinPad(cardProcessedDataModal: CardProcessedDataModal, activity: Activity,vfServiceCallback: (Boolean) -> Unit) {
         //   mIsoWriter = isoPackageWriter
         //   isOnlinePin = onlinePin
         try {
-            doPinPad(cardProcessedDataModal, activity)
+            doPinPad(cardProcessedDataModal, activity){
+                vfServiceCallback(it)
+            }
         }catch (e: Exception){
             e.printStackTrace()
         }
     }
 
-    private fun doPinPad(cardProcessedDataModal: CardProcessedDataModal, activity: Activity) {
-        initializePinInputListener(cardProcessedDataModal, activity)
+    private fun doPinPad(cardProcessedDataModal: CardProcessedDataModal, activity: Activity, vfServiceCallback: (Boolean) -> Unit) {
+        initializePinInputListener(cardProcessedDataModal, activity){
+            vfServiceCallback(it)
+        }
         val param = Bundle()
         val globleparam = Bundle()
         val panBlock: String? = cardProcessedDataModal.getPanNumberData()
-        val pinLimit = byteArrayOf(0,4, 5, 6) // 0 means bypass pin input
+        var pinLimit: ByteArray? = null
+        if(CardAid.UnionPay.aid.equals(cardProcessedDataModal.getAID())) {
+            pinLimit = byteArrayOf(0,4, 5, 6, 12) // 0 means bypass pin input
+        }
+        else
+            pinLimit = byteArrayOf(4, 5, 6,12)
+
+
         param.putByteArray(ConstIPinpad.startPinInput.param.KEY_pinLimit_ByteArray, pinLimit)
         param.putInt(ConstIPinpad.startPinInput.param.KEY_timeout_int, 30)
         when (cardProcessedDataModal.getIsOnline()) {
@@ -278,7 +287,8 @@ object VFService {
         }
     }
 
-    private fun initializePinInputListener(cardProcessedDataModal: CardProcessedDataModal, activity: Activity) {
+    private fun initializePinInputListener(cardProcessedDataModal: CardProcessedDataModal, activity: Activity,
+                                           vfServiceCallback: (Boolean) -> Unit) {
         pinInputListener = object : PinInputListener.Stub() {
             @Throws(RemoteException::class)
             override fun onInput(len: Int, key: Int) {
@@ -290,10 +300,16 @@ object VFService {
                 Log.d("Data", "PinPad onConfirm")
                 Log.d(MainActivity.TAG, "PinPad byPassPin ---> " + data)
                 if(data != null) cardProcessedDataModal.setPinByPass(0)
+                else {
+                    cardProcessedDataModal.setPinByPass(1)
+                    cardProcessedDataModal.setIsOnline(0)
+                }
 
                 vfIEMV?.importPin(1, data)
                 Log.d(MainActivity.TAG, "PinPad hex encrypted data ---> " + Utility.byte2HexStr(data))
                 savedPinblock = data
+
+                vfServiceCallback(true)
 
                 when(cardProcessedDataModal.getReadCardType()){
                     DetectCardType.EMV_CARD_TYPE -> {
@@ -377,12 +393,12 @@ object VFService {
             emvSetAidRid = when{
                 cvmValue.toInt() == 0 && ctlsTransLimit.toInt() == 0 -> EmvSetAidRid(
                     vfIEMV,
-                    "000000001000",
+                    "000000100000",
                     "009999999999"
                 )
-                cvmValue.toInt() == 0 -> EmvSetAidRid(vfIEMV, "000000001000", ctlsTransLimit)
-                ctlsTransLimit.toInt() == 0 -> EmvSetAidRid(vfIEMV, cvmValue, "009999999999")
-                else -> EmvSetAidRid(vfIEMV, cvmValue, ctlsTransLimit)
+                cvmValue.toInt() == 0 -> EmvSetAidRid(vfIEMV, "000000100000", ctlsTransLimit)
+                ctlsTransLimit.toInt() == 0 -> EmvSetAidRid(vfIEMV, "000000100000", "009999999999")
+                else -> EmvSetAidRid(vfIEMV, "000000140000", "000000200000")
             }
 
             emvSetAidRid.setAID(1)

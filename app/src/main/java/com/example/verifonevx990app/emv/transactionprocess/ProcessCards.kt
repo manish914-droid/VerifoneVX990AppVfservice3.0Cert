@@ -9,10 +9,7 @@ import android.util.Log
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.bankemi.EMISchemeAndOfferActivity
 import com.example.verifonevx990app.bankemi.GenericEMISchemeAndOffer
-import com.example.verifonevx990app.main.DetectCardType
-import com.example.verifonevx990app.main.DetectError
-import com.example.verifonevx990app.main.MainActivity
-import com.example.verifonevx990app.main.PosEntryModeType
+import com.example.verifonevx990app.main.*
 import com.example.verifonevx990app.realmtables.TerminalParameterTable
 import com.example.verifonevx990app.utils.GenericReadCardData
 import com.example.verifonevx990app.utils.Utility
@@ -30,12 +27,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class ProcessCard(
-    var activity: Activity,
-    var handler: Handler,
-    var cardProcessedDataModal: CardProcessedDataModal,
-    var transactionCallback: (CardProcessedDataModal) -> Unit
-) {
+class ProcessCard(private var issuerUpdateHandler: IssuerUpdateHandler?,var activity: Activity, var handler: Handler, var cardProcessedDataModal: CardProcessedDataModal, var transactionCallback: (CardProcessedDataModal) -> Unit) {
     var transactionalAmt = cardProcessedDataModal.getTransactionAmount() ?: 0
     var otherAmt = cardProcessedDataModal.getOtherAmount() ?: 0
 
@@ -57,10 +49,7 @@ class ProcessCard(
                 //This Override Function will only execute in case of Mag stripe card type:-
                 override fun onCardSwiped(track: Bundle) {
                     // Process Swipe card with or without PIN .
-                    fun processSwipeCardWithPINorWithoutPIN(
-                        ispin: Boolean,
-                        cardProcessedDataModal: CardProcessedDataModal
-                    ) {
+                    fun processSwipeCardWithPINorWithoutPIN(ispin: Boolean, cardProcessedDataModal: CardProcessedDataModal) {
                         if (ispin) {
 
                             val param = Bundle()
@@ -103,16 +92,10 @@ class ProcessCard(
                                     override fun onConfirm(data: ByteArray, isNonePin: Boolean) {
                                         Log.d("Data", "PinPad onConfirm")
                                         //   VFEmv.iemv?.importPin(1, data)
-                                        Log.d(
-                                            "SWIPEPIN",
-                                            "PinPad hex encrypted data ---> " + Utility.byte2HexStr(
-                                                data
-                                            )
-                                        )
+                                        Log.d("SWIPEPIN", "PinPad hex encrypted data ---> " + Utility.byte2HexStr(data))
+                                        if(data != null) cardProcessedDataModal.setPinByPass(0)
 
-                                        cardProcessedDataModal.setGeneratePinBlock(
-                                            Utility.byte2HexStr(data)
-                                        )
+                                        cardProcessedDataModal.setGeneratePinBlock(Utility.byte2HexStr(data))
 
                                         if (cardProcessedDataModal.getFallbackType() == EFallbackCode.EMV_fallback.fallBackCode)
                                             cardProcessedDataModal.setPosEntryMode(PosEntryModeType.EMV_POS_ENTRY_FALL_MAGPIN.posEntry.toString())
@@ -273,10 +256,7 @@ class ProcessCard(
                                         if (cardProcessedDataModal.getFallbackType() != EFallbackCode.EMV_fallback.fallBackCode) {
                                             //Checking Fallback
                                             if (scFirstByte == '2' || scFirstByte == '6') {
-                                                onError(
-                                                    EFallbackCode.Swipe_fallback.fallBackCode,
-                                                    "FallBack"
-                                                )
+                                                onError(EFallbackCode.Swipe_fallback.fallBackCode, "FallBack")
                                             } else {
                                                 if (cardProcessedDataModal.getTransType() == TransactionType.SALE.type) {
                                                     (activity as VFTransactionActivity).checkEmiInstaEmi(
@@ -415,16 +395,21 @@ class ProcessCard(
                         iemv?.abortEMV()
                         cardProcessedDataModal.setTypeOfTxnFlag("2")
                         cardProcessedDataModal.setReadCardType(DetectCardType.EMV_CARD_TYPE)
+                        cardProcessedDataModal.setIsOnline(0)
 
                         VFService.vfBeeper?.startBeep(200)
                         println("TransactionAmount is calling" + transactionalAmt.toString() + "Handler is" + handler)
+
+                        DoEmv(issuerUpdateHandler,activity, handler, cardProcessedDataModal, ConstIPBOC.startEMV.intent.VALUE_cardType_smart_card) { cardProcessedDataModal ->
+                            transactionCallback(cardProcessedDataModal)
+                        }
                         when (cardProcessedDataModal.getTransType()) {
                             TransactionType.EMI_SALE.type, TransactionType.BRAND_EMI.type -> {
                                 //region=========This Field is use only in case of BankEMI Field58 Transaction Amount:-
                                 cardProcessedDataModal.setEmiTransactionAmount(transactionalAmt)
                                 //endregion
-                                iemv?.startEMV(ConstIPBOC.startEMV.processType.full_process,
-                                    Bundle(),
+
+                            /* iemv?.startEMV(ConstIPBOC.startEMV.processType.full_process, Bundle(),
                                     GenericReadCardData(activity, iemv) { cardBinValue ->
                                         if (!TextUtils.isEmpty(cardBinValue)) {
                                             GlobalScope.launch(Dispatchers.Main) { (activity as VFTransactionActivity).showProgress();iemv?.stopCheckCard() }
@@ -475,10 +460,10 @@ class ProcessCard(
                                                 }
                                             }
                                         }
-                                    })
+                                    })*/
                             }
 
-                            TransactionType.SALE.type -> {
+                           /* TransactionType.SALE.type -> {
                                 var hasInstaEmi = false
                                 val tpt = TerminalParameterTable.selectFromSchemeTable()
                                 var limitAmt = 0f
@@ -582,7 +567,7 @@ class ProcessCard(
                                 ) { cardProcessedDataModal ->
                                     transactionCallback(cardProcessedDataModal)
                                 }
-                            }
+                            }*/
                         }
                     } catch (ex: DeadObjectException) {
                         ex.printStackTrace()
@@ -641,18 +626,32 @@ class ProcessCard(
                 override fun onCardActivate() {
                     try {
                         println("Contactless is calling")
-                        iemv?.stopCheckCard()
-                        iemv?.abortEMV()
+                       if(TextUtils.isEmpty(AppPreference.getString(AppPreference.doubletap))){
+                            iemv?.stopCheckCard()
+                            iemv?.abortEMV()
+                       }
                         cardProcessedDataModal.setTypeOfTxnFlag("3")
                         cardProcessedDataModal.setReadCardType(DetectCardType.CONTACT_LESS_CARD_TYPE)
                         VFService.vfBeeper?.startBeep(200)
                         println("Transactionamount is calling" + transactionalAmt.toString() + "Handler is" + handler)
 
-                        issuerUpdate(iemv)
+                     //   issuerUpdate(iemv)
 
-                        DoEmv(activity, handler, cardProcessedDataModal, ConstIPBOC.startEMV.intent.VALUE_cardType_contactless) { cardProcessedDataModal ->
-                            transactionCallback(cardProcessedDataModal)
+                       if(TextUtils.isEmpty(AppPreference.getString("doubletap"))){
+                            DoEmv(issuerUpdateHandler,activity, handler, cardProcessedDataModal, ConstIPBOC.startEMV.intent.VALUE_cardType_contactless) { cardProcessedDataModal ->
+                                transactionCallback(cardProcessedDataModal)
+                            }
                         }
+                        else {
+
+                            iemv?.setIssuerUpdateScript()
+                            println("Issuer update script called")
+                            AppPreference.clearDoubleTap()
+
+                           transactionCallback(cardProcessedDataModal)
+
+                        }
+
                     } catch (ex: DeadObjectException) {
                         ex.printStackTrace()
                         println("Process card error14" + ex.message)
@@ -711,8 +710,14 @@ class ProcessCard(
                 override fun onTimeout() {
                     //To resolve timeout issue
                     cardProcessedDataModal.setReadCardType(DetectCardType.CARD_ERROR_TYPE)
+
+                    if(CardAid.Rupay.aid == cardProcessedDataModal.getAID())
+                        AppPreference.saveString(AppPreference.doubletaptimeout,"doubletaptimeout")
+
                     transactionCallback(cardProcessedDataModal)
                     VFService.showToast("timeout")
+
+
                 }
 
                 //This Override method will call when something went wrong or any kind of exception happen in case of card detecting:-
@@ -726,12 +731,8 @@ class ProcessCard(
                                 (activity as VFTransactionActivity).handleEMVFallbackFromError(
                                     activity.getString(
                                         R.string.fallback
-                                    ), activity.getString(R.string.please_use_another_option), false
-                                ) {
-                                    detectCard(
-
-                                        error
-                                    )
+                                    ), activity.getString(R.string.please_use_another_option), false) {
+                                    detectCard(error)
                                 }
                             }
                             CardErrorCode.CTLS_ERROR_CODE.errorCode -> {
@@ -840,22 +841,4 @@ class ProcessCard(
         }
     }
 
-    var issuerUpdateHandler: IssuerUpdateHandler? = null
-    fun issuerUpdate(iemv: IEMV?) {
-        try {
-            iemv?.setIssuerUpdateHandler(issuerUpdateHandler)
-            }
-        catch (ex: RemoteException){
-            ex.printStackTrace()
-        }
-
-       issuerUpdateHandler = object : IssuerUpdateHandler.Stub(){
-
-           @Throws(RemoteException::class)
-          override fun onRequestIssuerUpdate() {
-
-          }
-
-      }
-    }
 }

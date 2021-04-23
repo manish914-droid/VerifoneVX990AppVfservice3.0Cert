@@ -119,11 +119,12 @@
     <string name="transaction_delined_msg">Transaction Declined</string>
     <string name="transaction_failed_msg">Transaction Failed</string>
     <string name="network_error">Please enable your data connection</string>
+    <string name="double_tap">Please tap again</string>
     <string name="positive_button_ok">OK</string>
     <string name="positive_button_yes">Yes</string>
     <string name="emv_fallback">EMV Fallback</string>
     <string name="contactless_seephone_error">Contactless SeePhone Fallback</string>
-    <string name="please_use_another_card_for_transaction">Please use another card for Transaction</string>
+    <string name="please_use_another_card_for_transaction">Please swipe card</string>
     <string name="read_card_fail">ReadCard Fail</string>
     <string name="multi_card_error">MultiCard Error</string>
     <string name="no_coowned_app">No Cowned App</string>
@@ -308,6 +309,7 @@
     <string name="please_enter_a_valid_8digit_tid">Please Enter a Valid 8 Digit TID</string>
     <string name="no_reversal_found">No Reversal Found</string>
     <string name="card_read_failed">Failed to Read Card</string>
+    <string name="application_blocked">Application Blocked</string>
     <string name="read_failed">Read Failed</string>
     <string name="offline_sale_data_saved_successfully">Offline Sale Data Saved Successfully</string>
     <string name="offline_transaction_approved">Offline Sale Approved </string>

@@ -1,6 +1,8 @@
 package com.example.verifonevx990app.disputetransaction
 
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.emv.transactionprocess.CardProcessedDataModal
+import com.example.verifonevx990app.main.CardAid
 import com.example.verifonevx990app.realmtables.BatchFileDataTable
 import com.example.verifonevx990app.realmtables.IssuerParameterTable
 import com.example.verifonevx990app.utils.HexStringConverter
@@ -39,6 +41,15 @@ class CreateVoidPacket(val batch: BatchFileDataTable) : IVoidExchange {
 
         if(batch.transactionType == TransactionType.TIP_SALE.type)
             addFieldByHex(54, addPad(batch.tipAmmount, "0", 12))
+
+
+        var aidstr = batch.aid.subSequence(0,10).toString()
+        if(batch.operationType == "Chip" && (CardAid.Rupay.aid == aidstr ||
+                    CardAid.Diners.aid == aidstr || CardAid.Jcb.aid == aidstr)){
+
+            addField(55, batch.de55)
+        }
+
 
 
         //Transaction's ROC, transactionDate, transaction Time

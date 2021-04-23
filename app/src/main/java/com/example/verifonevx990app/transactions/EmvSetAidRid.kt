@@ -73,7 +73,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                 // Visa credit or debit	10 10
                 // Visa credit or debit	10 10
 
-                       "9F3303E020C8" +     //Terminal capability
+                "9F3303E0F8C8" +     //Terminal capability
                         "DF1A06000000012000" +
                         "9F0607A0000000031010" + //Application Aid
                         "9F40056F00F0F001" +  //Additional terminal capability
@@ -99,7 +99,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
 
                 // Visa credit or debit	10 10
                 // Visa credit or debit	10 10
-                       "9F3303E0F0C8" +
+                "9F3303E0F8C8" +
                         "97099F02065F2A029A0390" +
                         "9F40056F00F0F001" + //additional terminal capability
                         "9F0607A0000000031010" +
@@ -122,7 +122,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
 
                 // Visa credit or debit	10 10
                 // Visa credit or debit	10 10
-                       "9F3303E0F0C8" +
+                "9F3303E0F8C8" +
                         "97099F02065F2A029A0390" +
                         "9F40056F00F0F001" + //additional terminal capability
                         "9F0608A000000003101001" +
@@ -145,7 +145,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
 
                 // Visa credit or debit	10 10
                 // Visa credit or debit	10 10
-                       "9F3303E0F0C8" +
+                "9F3303E0F8C8" +
                         "97099F02065F2A029A0390" +
                         "9F40056F00F0F001" + //additional terminal capability
                         "9F0608A000000003101002" +
@@ -168,7 +168,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
 
                 // Visa Electron	20 10
                 // Visa Electron	20 10
-                        "9F3303E0F0C8" +
+                "9F3303E0F8C8" +
                         "97099F02065F2A029A0390" +
                         "9F40056F00F0F001" + //additional terminal capability
                         "9F0607A0000000032010" +
@@ -191,7 +191,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
 // =============================================Visa Contact card Aids Ends============================================================================================
 // ===================================================Masters Contact card Aids starts=================================================================================
                 // MasterCard credit or debit	10 10
-                        "9F3303E0F0C8" + //terminal capability
+                "9F3303E0F8C8" + //terminal capability
                         "97099F02065F2A029A0390" +
                         "9F40056F00F0F001" + //additional terminal capability
                         "9F0607A0000000041010" +
@@ -213,7 +213,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                         "DF13050000400000",
 
                 // MasterCard(debit card)_	30 60
-                        "9F3303E0F0C8" + //terminal capability
+                "9F3303E0F8C8" + //terminal capability
                         "97099F02065F2A029A0390" +
                         "9F40056F00F0F001" + //additional terminal capability
                         "9F0607A0000000043060" +
@@ -235,7 +235,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                         "DF13050000400000",
 
                 // MasterCard
-                       "9F3303E0F0C8" + //terminal capability
+                "9F3303E0F8C8" + //terminal capability
                         "97099F02065F2A029A0390" +
                         "9F40056F00F0F001" + //additional terminal capability
                         "9F0607A0000000044010" +
@@ -260,7 +260,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
 
 // ===============================================PBOC card Aids starts=======================================================================================================
                 // PBOC
-                        "9F3303E0F0C8" + //terminal capability
+                "9F3303E0F8C8" + //terminal capability
                         "97099F02065F2A029A0390" +
                         "9F40056F00F0F001" + //additional terminal capability
                         "9F0608A000000333010103" +
@@ -281,7 +281,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                         "9F7B06000000100000" +
                         "DF13050010000000",
 
-                        "9F3303E0F0C8" + //terminal capability
+                "9F3303E0F8C8" + //terminal capability
                         "97099F02065F2A029A0390" +
                         "9F40056F00F0F001" + //additional terminal capability
                         "9F0608A000000333010101" +
@@ -302,10 +302,10 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                         "9F7B06000000100000" +
                         "DF13050010000000",
 
-                       "9F3303E0F0C8" + //terminal capability
+                "9F3303E0F8C8" + //terminal capability
                         "97099F02065F2A029A0390" +
                         "9F40056F00F0F001" + //additional terminal capability
-                       "9F0608A000000333010106" +
+                        "9F0608A000000333010106" +
                         "DF2006009999999999" +
                         "DF010100" +
                         "DF14039F3704" +
@@ -322,10 +322,10 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                         "9F7B06000000100000" +
                         "DF13050010000000",
 
-                        "9F3303E0F0C8" + //terminal capability
+                "9F3303E0F8C8" + //terminal capability
                         "97099F02065F2A029A0390" +
                         "9F40056F00F0F001" + //additional terminal capability
-                       "9F0608A000000333010102" +
+                        "9F0608A000000333010102" +
                         "DF2006009999999999" +
                         "DF010100" +
                         "DF14039F3704" +
@@ -347,8 +347,8 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
 
 
 // ================================================JCB contatct card Aids starts=============================================================================================================
-                       // JCB
-                        "9F3303E0F0C8" +      //Terminal capability
+                // JCB
+                "9F3303E0F8C8" +      //Terminal capability
                         "97099F02065F2A029A0390" +
                         "9F40056F00F0F001" + //additional terminal capability
                         "9F0607A0000000651010" +
@@ -371,7 +371,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
 // ==================================================JCB contact card Aids ends============================================================================================================
 
 //=====================================================================Diners card Aids starts========================================================
-                       "9F3303E0F0C8" +      //Terminal capability
+                "9F3303E0F8C8" +      //Terminal capability
                         "97099F02065F2A029A0390" +
                         "9F40056F00F0F001" + //additional terminal capability
                         "9F0607A0000001523010" +
@@ -395,7 +395,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
 //========================================================================Diners card Aids ends===========================================================
 // =======================================================================Rupay Contact card Aids starts============================================================================================
 
-                "9F3303E0F0C8" +     //Terminal capability
+                "9F3303E0F8C8" +     //Terminal capability
                         "DF1A06000000012000" +
                         "9F0607A0000005241010" + //Application Aid
                         "9F40056F00F0F001" +  //Additional terminal cpability
@@ -425,7 +425,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                 "9F0606A00000002501" +
                         "DF2006009999999999DF010100DF14039F3704DF1701999F09020001DF180101DF1205CC000080009F1B0400000000DF160199DF150400000000DF1105CC00000000DF19060000000000009F7B06000010000000DF130500000000009F1A020356",
 
-            )
+                )
         val AID_CTLS_Card = arrayOf(
 
             //American express Aid's
@@ -462,12 +462,12 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
             // Visa, Plus	80 10
             // Visa, Plus	80 10
 
-            "9F3303E0F0C8" +
+            "9F3303E0F8C8" +
                     "97099F02065F2A029A0390" +
                     "9F40056F00F0F001" + //additional terminal capability
                     "9F0607A0000000038010" +
                     "DF0306009999999999" +
-                    "DF2006009999999999" +
+                    "DF2006${ctlsVal}" +
                     "DF010100" +
                     "DF14039F3704" +
                     "9F6604F6004000" +
@@ -478,7 +478,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                     "DF1205D84004F800" + //Tac online
                     "9F1B0400000000" +
                     "9F1A020356" +
-                    "DF2106000000000000" +
+                    "DF2106${cvmVal}" +
                     "DF160101" +
                     "DF150400000000" +
                     "DF1105D84004A800" +
@@ -487,12 +487,12 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                     "DF13050010000000",
 
 
-                    "9F3303E0F0C8" +
+            "9F3303E0F8C8" +
                     "97099F02065F2A029A0390" +
                     "9F40056F00F0F001" +  //Additional terminal capability
                     "9F0607A0000000031010" +
                     "DF0306009999999999" +
-                    "DF2006009999999999" + //Contact less Maximum Transaction Limit
+                    "DF2006${ctlsVal}" + //Contact less Maximum Transaction Limit
                     "DF010100" +           //Application id
                     "DF14039F3704" +       //DDOL (Dynamic data authetication...)
                     "9F6604F6004000" +           //Teminal transaction qualifier
@@ -503,7 +503,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                     "DF1205A0109C9800" +   //TAC online
                     "9F1B0400000000" +      //Minimum Limit //floor limit
                     "9F1A020356" +          //Terminal Country code
-                    "DF2106000000001000" +  //Terminal cvm(cardholder verification methods) quota
+                    "DF2106${cvmVal}" +  //Terminal cvm(cardholder verification methods) quota
                     "DF160101" +             //Bias select the maximum percentage of target
                     "DF150400000000" +       //offset Randomly selected thresold
                     "DF1105A4109C0000" +     //TAC Default
@@ -511,11 +511,11 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                     "DF1906000000000000" +    //Contact less offline minimum
                     "DF13055C40000000",       //TAC Refuse
 
-                    "9F3303E0F0C8" +
+            "9F3303E0F8C8" +
                     "97099F02065F2A029A0390" +
                     "9F40056F00F0F001" +  //Additional terminal capability
                     "9F0608A000000003101001" +
-                    "DF2006009999999999" +
+                    "DF2006${ctlsVal}" +
                     "DF010100" +
                     "DF14039F3704" +
                     "9F6604F6004000" +
@@ -526,7 +526,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                     "DF1205A0109C9800" +
                     "9F1B0400000000" +
                     "9F1A020356" +
-                    "DF2106000000001000" +
+                    "DF2106${cvmVal}" +
                     "DF160101" +
                     "DF150400000000" +
                     "DF1105A4109C0000" +
@@ -534,11 +534,11 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                     "DF1906000000000000" +
                     "DF13055C40000000",
 
-            "9F3303E0F0C8" +
+            "9F3303E0F8C8" +
                     "97099F02065F2A029A0390" +
                     "9F40056F00F0F001" +  //Additional terminal capability
                     "9F0608A000000003101002" +
-                    "DF2006009999999999" +
+                    "DF2006${ctlsVal}" +
                     "DF010100" +
                     "DF14039F3704" +
                     "9F6604F6004000" +
@@ -549,7 +549,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                     "DF1205A0109C9800" +
                     "9F1B0400000000" +
                     "9F1A020356" +
-                    "DF2106000000001000" +
+                    "DF2106${cvmVal}" +
                     "DF160101" +
                     "DF150400000000" +
                     "DF1105A4109C0000" +
@@ -561,12 +561,12 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
 // =================================Masters Contactless card Aids starts===================================================================================================
 
             // MasterCard credit or debit	10 10
-            "9F3303E0F0C8" + //terminal capability
+            "9F3303E0F8C8" + //terminal capability
                     "97099F02065F2A029A0390" +
                     "9F40056F00F0F001" + //additional terminal capability
                     "9F0607A0000000041010" +
                     "DF0306009999999999" +
-                    "DF2006009999999999" + // Max^m txn limit
+                    "DF2006${ctlsVal}" + // Max^m txn limit
                     "DF010100" +          //  Application Id
                     "DF14039F3704" +
                     "9F6604F6004000" +          //TTQ
@@ -574,10 +574,11 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                     "DF170101" +
                     "9F09020096" + //Application version number
                     "DF180101" +
+                    "DF810170" +   //CVM Required
                     "DF1205A0109C9800" +
                     "9F1B043B9ACA00" +
                     "9F1A020356" +   //Terminal country code
-                    "DF2106000000001000" + //Internet authentication flag
+                    "DF2106${cvmVal}" + //Internet authentication flag
                     "DF160101" +
                     "DF150400000000" +
                     "DF1105A4109C0000" +
@@ -585,15 +586,17 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                     "DF1906000000000000" +
                     "DF13055C40000000", //
 
+
+
 //==================================================================Masters Contactless card Aids Ends==========================================================================================
 
 //==================================================================Diners Contactless card Aids Start==========================================================================================
-            "9F3303E0F0C8" + // terminal capability
+            "9F3303E0F8C8" + // terminal capability
                     "97099F02065F2A029A0390" +
                     "9F40056F00F0F001" + //additional terminal capability
                     "9F0607A0000001523010" +
                     "DF0306009999999999" +
-                    "DF2006009999999999" +
+                    "DF2006${ctlsVal}" +
                     "DF010100" +
                     "DF14039F3704" +
                     "9F6604F6004000" + //TTQ
@@ -604,7 +607,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                     "DF1205D84004F800" +
                     "9F1B0400000000" +
                     "9F1A020356" +
-                    "DF2106000000000100" +
+                    "DF2106${cvmVal}" +
                     "DF160101" +
                     "DF150400000000" +
                     "DF1105D84004A800" +
@@ -616,23 +619,23 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
 
 //==================================================================Rupay Contactless card Aids Start==========================================================================================
 
-                    "9F3303E0F0C8" + // terminal capability
+            "9F3303E0F8C8" + // terminal capability
                     "97099F02065F2A029A0390" +
                     "9F40056F00F0F001" + //additional terminal capability
                     "9f0607A0000005241010" +
                     "DF0306009999999999" +
-                    "DF2006009999999999" +
+                    "DF2006${ctlsVal}" +
                     "DF010100" +
                     "DF14039F3704" +
                     "9F6604F6004000" + //TTQ
                     "5F2A020356" +
                     "DF170101" +
-                    "9F09020001" +
+                    "9F09020002" +
                     "DF180101" +
                     "DF1205D84004F800" +
                     "9F1B0400000000" +
                     "9F1A020356" +
-                    "DF2106000000000100" +
+                    "DF2106${cvmVal}" +   //CVm Limit
                     "DF160101" +
                     "DF150400000000" +
                     "DF1105D84004A800" +
@@ -668,7 +671,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
         dataList.addAll(ctlsCardDataList)
         isSuccess = false
 
-    //Below For Loop is to set All AID of AID_SmartCard && CTLS_SmartCard by changing aidType:-
+        //Below For Loop is to set All AID of AID_SmartCard && CTLS_SmartCard by changing aidType:-
         for (i in 0 until dataList.size) {
             if (dataList[i].isEmpty()) {
                 continue
@@ -715,7 +718,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
     fun setRID(type: Int) {
         var isSuccess: Boolean
         if (type == 3) {
-         // clear RID
+            // clear RID
             isSuccess = false
             try {
                 isSuccess = ipboc!!.updateRID(3, null)
@@ -877,7 +880,7 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
                     "DF0314D9FD62C9DD4E6DE7741E9A17FB1FF2C5DB948BCB" + //checksum
                     "DF070101", //ARITH_IND
 
- //=========================================================================== JCB cap keys ends==================================================================================================================================================================================================================================
+            //=========================================================================== JCB cap keys ends==================================================================================================================================================================================================================================
 //=========================================================================== People's bank of china cap keys starts==================================================================================================================================================================================================================================
             // PBOC
             // PBOC
@@ -940,42 +943,42 @@ class EmvSetAidRid( private var ipboc: IEMV?, private var updateCVMValue: String
 //=========================================================================== People's bank of china cap keys ends==================================================================================================================================================================================================================================
 //=========================================================================== Rupay Cap keys starts==================================================================================================================================================================================================================================
             //Rupay Cap Keys
-              //Test
-             "9F0605A000000524"+ //Aids
-                     "9F22016A" + //Key Id
-                     "DF050420221231" + //expiry Date
-                     "DF02"+"8180"+"92795EAA4FE39EB30441FE952D5423778E02F86783B89DD7C587AE80A69F4D6DC55EAFB6604040D875C72002425EE529CE4EA26FD864BAD760160C2AA0C5AF92381894A5CBBC8AB3AF2641606C379B927A397CB1E9B9EA2EF8C0A9C0DDEBB81B0F8913A118F7044156EA7D23AF626EAF30C2C9ECE8534D3563EF5FE95DE76249"+ //Module
-                     "DF040103"+ //exponent
-                     "DF031451ED4570323CD41A0348BDFEA81CCC0B8D9BAB3F" + //checksum
-                     "DF070101", //ARITH IND
+            //Test
+            "9F0605A000000524"+ //Aids
+                    "9F22016A" + //Key Id
+                    "DF050420221231" + //expiry Date
+                    "DF02"+"8180"+"92795EAA4FE39EB30441FE952D5423778E02F86783B89DD7C587AE80A69F4D6DC55EAFB6604040D875C72002425EE529CE4EA26FD864BAD760160C2AA0C5AF92381894A5CBBC8AB3AF2641606C379B927A397CB1E9B9EA2EF8C0A9C0DDEBB81B0F8913A118F7044156EA7D23AF626EAF30C2C9ECE8534D3563EF5FE95DE76249"+ //Module
+                    "DF040103"+ //exponent
+                    "DF031451ED4570323CD41A0348BDFEA81CCC0B8D9BAB3F" + //checksum
+                    "DF070101", //ARITH IND
 
-              //Test
-             "9F0605A000000524"+ //Aids
-                     "9F22016C" + //Key Id
-                     "DF050420221231" + //expiry Date
-                     "DF02"+"81B0"+"C76259FF785ABD5FF613223C01F5BDA0F36F9342CF336B66C32D4B2CD5096E094D8E04DFA11A9B2E3BC78DA63B5C10148D8ED79EBA685D5D0EFE1C58B3F929D861B40FF3AAA3B527148D0C24921EE42DA048E01E38F6A3A49DFA67DD1CD5DD2091412DD36D3269FAF7D2E0FFB1A3E028969CB6BA5A9303A6FF65540F421B069A31B553398EE525EFA5C2CE26BCB81C5345018D5E3E9B7130F72F598C0EAA4682D4DA2F2204518780A8108F82DDC9CF1F"+ //Module
-                     "DF040103"+ //exponent
-                     "DF03"+"14"+"3B18A21BF34F781208145D7567982513D1CE8C92" + //checksum
-                     "DF070101", //ARITH IND
-              //Test
-              "9F0605A000000524"+ //Aids
-                     "9F22016D" + //Key Id
-                     "DF050420221231" + //expiry Date
-                     "DF02"+"81F8"+"B747E8CB3615E8D26231355488F3C76C4746F7BB1C381E6C6E6ABF0A6D7CD93CFC6B2C310288CA8BE7EE1730DE621A59D1BB2D8C02C9148FA06E5D1F5E672EEFCE8AECBAD4A1C18F3175F1BEA1AEF539376592366B46A5044E32E59B3F35F50E85F843BA01851E5386B7EBE27367D3D483C5472D3020AF42116DDDA32341557EBABB043EBC6006B99A652009045BFA50C527028586E05942E1D594223B49FE8566931C31FBE8C903ABD4F283E1FAB03D758247EC4B728A85A9897601B753293263ADBD10BE988D0C52FE0091C2721DC02C5130FC7663E95739A70EE2F84DFD2E50C88A1A26587EF7CC047FCA2D03C2CF0CE4B524B4EC3F07"+ //Module
-                     "DF040103"+ //exponent
-                     "DF03"+"14"+"411008F9921B89C62E2160F6D0358614115ECD4A" + //checksum
-                     "DF070101", //ARITH IND
+            //Test
+            "9F0605A000000524"+ //Aids
+                    "9F22016C" + //Key Id
+                    "DF050420221231" + //expiry Date
+                    "DF02"+"81B0"+"C76259FF785ABD5FF613223C01F5BDA0F36F9342CF336B66C32D4B2CD5096E094D8E04DFA11A9B2E3BC78DA63B5C10148D8ED79EBA685D5D0EFE1C58B3F929D861B40FF3AAA3B527148D0C24921EE42DA048E01E38F6A3A49DFA67DD1CD5DD2091412DD36D3269FAF7D2E0FFB1A3E028969CB6BA5A9303A6FF65540F421B069A31B553398EE525EFA5C2CE26BCB81C5345018D5E3E9B7130F72F598C0EAA4682D4DA2F2204518780A8108F82DDC9CF1F"+ //Module
+                    "DF040103"+ //exponent
+                    "DF03"+"14"+"3B18A21BF34F781208145D7567982513D1CE8C92" + //checksum
+                    "DF070101", //ARITH IND
+            //Test
+            "9F0605A000000524"+ //Aids
+                    "9F22016D" + //Key Id
+                    "DF050420221231" + //expiry Date
+                    "DF02"+"81F8"+"B747E8CB3615E8D26231355488F3C76C4746F7BB1C381E6C6E6ABF0A6D7CD93CFC6B2C310288CA8BE7EE1730DE621A59D1BB2D8C02C9148FA06E5D1F5E672EEFCE8AECBAD4A1C18F3175F1BEA1AEF539376592366B46A5044E32E59B3F35F50E85F843BA01851E5386B7EBE27367D3D483C5472D3020AF42116DDDA32341557EBABB043EBC6006B99A652009045BFA50C527028586E05942E1D594223B49FE8566931C31FBE8C903ABD4F283E1FAB03D758247EC4B728A85A9897601B753293263ADBD10BE988D0C52FE0091C2721DC02C5130FC7663E95739A70EE2F84DFD2E50C88A1A26587EF7CC047FCA2D03C2CF0CE4B524B4EC3F07"+ //Module
+                    "DF040103"+ //exponent
+                    "DF03"+"14"+"411008F9921B89C62E2160F6D0358614115ECD4A" + //checksum
+                    "DF070101", //ARITH IND
 
-                //Test
-              "9F0605A000000524"+ //Aids
-                     "9F22016B" + //Key Id
-                     "DF050420221231" + //expiry Date
-                     "DF02"+"8190"+"C9DFDB625ADA4B5E86049F85A0237627B59524F52BD499B4C5482C1EE012D61A1446E9383CC0B7EE2922D323A5ECDA12941EA8177CFA512DA6B5B7663A89B793B10D314CBB776EB96D0B1734EDE7E1591713915E9991B7B4E8A017A6901279AEBDD6136C9FE7E0C6CBF94C77FA606B629D00B1F890473905EB4DAD1AD93B29C2C1829A82F880B08986B9387611EE409D"+ //Module
-                     "DF040103"+ //exponent
-                     "DF03"+"14"+"9602428A46271C63CCC6DD99477CDB70435D6D5B" + //checksum
-                     "DF070101" //ARITH IND
+            //Test
+            "9F0605A000000524"+ //Aids
+                    "9F22016B" + //Key Id
+                    "DF050420221231" + //expiry Date
+                    "DF02"+"8190"+"C9DFDB625ADA4B5E86049F85A0237627B59524F52BD499B4C5482C1EE012D61A1446E9383CC0B7EE2922D323A5ECDA12941EA8177CFA512DA6B5B7663A89B793B10D314CBB776EB96D0B1734EDE7E1591713915E9991B7B4E8A017A6901279AEBDD6136C9FE7E0C6CBF94C77FA606B629D00B1F890473905EB4DAD1AD93B29C2C1829A82F880B08986B9387611EE409D"+ //Module
+                    "DF040103"+ //exponent
+                    "DF03"+"14"+"9602428A46271C63CCC6DD99477CDB70435D6D5B" + //checksum
+                    "DF070101" //ARITH IND
 //=========================================================================== Rupay Cap keys ends==================================================================================================================================================================================================================================
-               )
+        )
         try {
             isSuccess = ipboc!!.updateRID(3, null)
             Log.d("TAG", "Clear RID :$isSuccess")

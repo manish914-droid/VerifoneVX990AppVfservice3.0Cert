@@ -93,6 +93,7 @@ class VoidTransactionFragment : Fragment() {
             } catch (ex: Exception) {
                 ex.printStackTrace()
             }
+
             if (voidData != null)
                 withContext(Dispatchers.Main) {
                     voidTransConfirmationDialog(voidData!!)
@@ -177,9 +178,7 @@ class VoidTransactionFragment : Fragment() {
             if (TextUtils.isEmpty(AppPreference.getString(AppPreference.GENERIC_REVERSAL_KEY))) {
                 GlobalScope.launch {
                     delay(1000)
-                    VoidHelper(
-                        activity as MainActivity, voidData
-                    ) { code, respnosedatareader, msg ->
+                    VoidHelper(activity as MainActivity, voidData) { code, respnosedatareader, msg ->
                         GlobalScope.launch(Dispatchers.Main) {
                             voidRefundBT?.isEnabled = true
                             when (code) {
@@ -302,11 +301,7 @@ class VoidTransactionFragment : Fragment() {
         }
     }
 
-    internal class VoidHelper(
-        val context: Activity,
-        val batch: BatchFileDataTable,
-        private val callback: (Int, IsoDataReader?, String) -> Unit
-    ) {
+    internal class VoidHelper(val context: Activity, val batch: BatchFileDataTable, private val callback: (Int, IsoDataReader?, String) -> Unit) {
         companion object
 
         val TAG = VoidHelper::class.java.simpleName

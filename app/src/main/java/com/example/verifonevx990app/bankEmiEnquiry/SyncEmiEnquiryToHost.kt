@@ -3,6 +3,7 @@ package com.example.verifonevx990app.bankEmiEnquiry
 import android.text.TextUtils
 import android.util.Log
 import com.example.verifonevx990app.R
+import com.example.verifonevx990app.emv.transactionprocess.CardProcessedDataModal
 import com.example.verifonevx990app.emv.transactionprocess.SyncReversalToHost
 import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.vxUtils.*

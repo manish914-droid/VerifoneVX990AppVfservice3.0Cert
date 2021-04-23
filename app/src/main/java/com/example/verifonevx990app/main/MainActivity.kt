@@ -121,12 +121,12 @@ class MainActivity : BaseActivity(), IFragmentRequest,
         initUI()
         decideHome()
 
-        Handler().postDelayed({
+      /*  Handler().postDelayed({
             VFService.setAidRid(
-                addPad("000000", "0", 12, true),
-                addPad("000000", "0", 12, true)
+                addPad("000000200100", "0", 12, true),
+                addPad("009999999999", "0", 12, true)
             )
-        }, 2000)
+        }, 2000)*/
 
         refreshToolbarLogos(this)
         Log.d("AppVerAndRev:- ", getAppVersionNameAndRevisionID())
@@ -2142,7 +2142,7 @@ enum class DetectCardType(val cardType: Int, val cardTypeName: String = "") {
 enum class DetectError(val errorCode: Int) {
     SeePhone(150),
     DynamicLimit(208),
-    RefuseTrans(202),
+    TransactionReject(202),
     Terminalcapability(204),
     EMVFallBack(12),
     NoCoOwnedApp(8),
@@ -2152,6 +2152,8 @@ enum class DetectError(val errorCode: Int) {
     IncorrectPAN(2007),
     OtherErrorTransactionterminated(11),
     CTLS_CARD_READ_FAILED_ERROR(29),
+    AppLocked(14),
+    SecondTap_Approved(209)
 }
 
 //Below Enum class is used to handle Host Response Codes:-
@@ -2240,13 +2242,11 @@ enum class ConnectionError(val errorCode: Int) {
     Success(200)
 }
 enum class CardAid(val aid: String) {
-    Rupay("A0000005241010"),
-    Diners("A0000001523010"),
-    Jcb("A0000000651010"),
-    UnionPay1("A000000333010101"),
-    UnionPay2("A000000333010102"),
-    UnionPay3("A000000333010103"),
-    UnionPay4("A000000333010106")
+    Rupay("A000000524"),
+    Diners("A000000152"),
+    Jcb("A000000065"),
+    UnionPay("A000000333"),
+
 }
 
 //region==============================Enum Class for Splitter Types:-

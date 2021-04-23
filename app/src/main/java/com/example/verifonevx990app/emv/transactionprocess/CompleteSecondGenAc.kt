@@ -3,6 +3,7 @@ package com.example.verifonevx990app.emv.transactionprocess
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
+import com.example.verifonevx990app.main.CardAid
 import com.example.verifonevx990app.main.HostResponseCode
 import com.example.verifonevx990app.main.MainActivity
 import com.example.verifonevx990app.utils.Utility
@@ -15,16 +16,17 @@ import com.vfi.smartpos.deviceservice.aidl.OnlineResultHandler
 import com.vfi.smartpos.deviceservice.constdefine.ConstIPBOC
 import com.vfi.smartpos.deviceservice.constdefine.ConstOnlineResultHandler
 
-class CompleteSecondGenAc(var data: IsoDataReader, var isoData: IsoDataWriter? = null, var printExtraDataSB: (Triple<String, String, String>?) -> Unit) {
+class CompleteSecondGenAc(var cardProcessedDataModal: CardProcessedDataModal?,var data: IsoDataReader, var isoData: IsoDataWriter? = null, var printExtraDataSB: (Triple<String, String, String>?,String?) -> Unit) {
     val iemv: IEMV? by lazy { VFService.vfIEMV }
 
     init {
-        performSecondGenAc(data)
+        performSecondGenAc(cardProcessedDataModal,data)
     }
 
     //Below method is used to complete second gen ac in case of EMV Card Type:-
-    private fun performSecondGenAc(data: IsoDataReader) {
+    private fun performSecondGenAc(cardProcessedDataModal: CardProcessedDataModal?,data: IsoDataReader) {
         var printData: Triple<String, String, String>? = null
+        var de55: String?= null
         var tc = false
         val authCode = data.isoMap[38]?.parseRaw2ByteArr() ?: byteArrayOf()
         if (authCode.isNotEmpty()) {
@@ -106,7 +108,7 @@ class CompleteSecondGenAc(var data: IsoDataReader, var isoData: IsoDataWriter? =
             onlineResult.putString(ConstIPBOC.inputOnlineResult.onlineResult.KEY_authCode_String, "00")
 
             if (field55 != null && field55.isNotEmpty() && mba1.size == 8) {
-                onlineResult.putString(ConstIPBOC.inputOnlineResult.onlineResult.KEY_field55_String, Integer.toHexString(ta91) + "0A" + Utility.byte2HexStr(mba.toByteArray()) + f72)
+                onlineResult.putString(ConstIPBOC.inputOnlineResult.onlineResult.KEY_field55_String, Integer.toHexString(ta91) + "0A" + Utility.byte2HexStr(mba.toByteArray()) + f72 + f71)
                   //At least 0A length for 91
                 println("Field55 value inside ---> " + Integer.toHexString(ta91) + "0A" + Utility.byte2HexStr(mba.toByteArray()) + f72)
             }
@@ -160,19 +162,34 @@ class CompleteSecondGenAc(var data: IsoDataReader, var isoData: IsoDataWriter? =
                     val tsiArray = arrayOf("0x9B")
                     val tsiData = iemv?.getAppTLVList(tsiArray)
                     //println("TSI Data is ----> $tsiData")
-                    val subsequenceData =
-                        getValueOfTVRAndAID(tvrData ?: "", aidData ?: "", tsiData ?: "")
+
+
+                    val tcvalue = arrayOf("0x9F26")
+                    val tcData = iemv?.getAppTLVList(tcvalue) ?: ""
+                    //println("TC Data is ----> tcvalue")
+
+                    val issuerscriptresult = arrayOf("0x9F5B")
+                    val issuerscriptdata = iemv?.getAppTLVList(issuerscriptresult)
+
+                    println("Issuerscript Data is ----> $issuerscriptdata")
+
+                     de55 = field55 + issuerscriptdata
+
+
+                    AppPreference.saveString("de_55",de55)
+
+                    val tcHash = HashMap<Int, String>()
+                    tlvParser(tcData, tcHash)
+
+                    tcHash.forEach { (key, value) -> cardProcessedDataModal?.setTC(value) }
+
+                    val subsequenceData = getValueOfTVRAndAID(tvrData ?: "", aidData ?: "", tsiData ?: "")
+
+
 
                     //Here we are Adding AID , TVR and TSI Data in Triple<String , String , String> to return values:-
-                    if (!TextUtils.isEmpty(aidData) && !TextUtils.isEmpty(tvrData) && !TextUtils.isEmpty(
-                            tsiData
-                        )
-                    )
-                        printData = Triple(
-                            subsequenceData.first,
-                            subsequenceData.second,
-                            subsequenceData.third
-                        )
+                    if (!TextUtils.isEmpty(aidData) && !TextUtils.isEmpty(tvrData) && !TextUtils.isEmpty(tsiData))
+                        printData = Triple(subsequenceData.first, subsequenceData.second, subsequenceData.third)
 
                     when (result) {
                         ConstOnlineResultHandler.onProccessResult.result.TC -> {
@@ -184,13 +201,17 @@ class CompleteSecondGenAc(var data: IsoDataReader, var isoData: IsoDataWriter? =
                             //VFService.showToast("Online_AAC")
                             //Here we need to Generate Reversal:-
                             if (responseCode == HostResponseCode.SUCCESS.code) {
-                                Log.d(
-                                    "Response:- ",
-                                    "Response Success and Terminal Declined with Save Reversal"
-                                )
+                                Log.d("Response:- ", "Response Success and Terminal Declined with Save Reversal")
 
                                 //Reversal save To Preference code here.............
                                 isoData?.mti = "0400"
+
+                                var aidstr = cardProcessedDataModal?.getAID()
+                                if(CardAid.Rupay.aid == aidstr || CardAid.Diners.aid == aidstr || CardAid.Jcb.aid == aidstr)
+                                    isoData?.apply {
+                                          additionalData["F39reversal"] = "E1"
+                                     }
+
                                 val reversalPacket = Gson().toJson(isoData)
                                 AppPreference.saveString(GENERIC_REVERSAL_KEY, reversalPacket)
                                 AppPreference.saveBoolean(ONLINE_EMV_DECLINED, true)
@@ -261,10 +282,10 @@ class CompleteSecondGenAc(var data: IsoDataReader, var isoData: IsoDataWriter? =
             //println("Exception is" + ex.printStackTrace())
         }
         if (tc)
-            printExtraDataSB(printData)
+            printExtraDataSB(printData,de55)
         else {
             printData = Triple("", "", "")
-            printExtraDataSB(printData)
+            printExtraDataSB(printData,de55)
         }
     }
 }

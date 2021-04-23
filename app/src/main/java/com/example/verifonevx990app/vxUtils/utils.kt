@@ -927,7 +927,7 @@ object ROCProviderV2 {
         0x9F35,
         0x9F36,
         0x9F37,
-        0x9F10,
+        0x9F10
         //   0x9F21 to "9F21"
         //  0x9F47 to "9F47"
         /// 0x9A03 to "9A03"
@@ -1676,6 +1676,9 @@ fun checkInternetConnection(): Boolean {
     val activeNetwork = cm.activeNetworkInfo
     return activeNetwork != null && activeNetwork.isConnectedOrConnecting
 }
+
+
+
 
 //Below method is used to convert String2NibbleArray and then NibbleArray2String for our CVM && CTLS Max Limit use case:-
 fun convertStr2Nibble2Str(data: String): String {

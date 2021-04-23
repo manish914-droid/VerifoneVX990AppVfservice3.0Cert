@@ -3,6 +3,7 @@ package com.example.verifonevx990app.vxUtils
 
 import android.app.Activity
 import android.app.Dialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -100,6 +101,31 @@ abstract class BaseActivity : AppCompatActivity(), IDialog {
 
     }
 
+    override fun getInfoDialogdoubletap(title: String, msg: String, acceptCb: (Boolean, Dialog) -> Unit) {
+        val dialog = Dialog(this)
+        dialog.apply {
+            requestWindowFeature(Window.FEATURE_NO_TITLE)
+            setContentView(R.layout.msg_dialog)
+            setCancelable(false)
+
+            findViewById<TextView>(R.id.msg_dialog_title).text = title
+            findViewById<TextView>(R.id.msg_dialog_msg).text = msg
+            findViewById<TextView>(R.id.msg_dialog_ok).visibility = View.INVISIBLE
+
+          with(findViewById<View>(R.id.msg_dialog_ok)) {
+              View.GONE
+              Handler(Looper.getMainLooper()).postDelayed({
+                    acceptCb(true,dialog)
+                }, 500)
+
+            }
+
+
+            findViewById<View>(R.id.msg_dialog_cancel).visibility = View.INVISIBLE
+        }.show()
+
+    }
+
     override fun getMsgDialog(
         title: String, msg: String, positiveTxt: String, negativeTxt: String
         , positiveAction: () -> Unit, negativeAction: () -> Unit, isCancellable: Boolean
@@ -134,12 +160,9 @@ abstract class BaseActivity : AppCompatActivity(), IDialog {
 
     }
 
-    override fun alertBoxWithAction(
-        printUtils: PrintUtil?, batchData: BatchFileDataTable?,
-        title: String, msg: String, showCancelButton: Boolean,
-        positiveButtonText: String, alertCallback: (Boolean) -> Unit,
-        cancelButtonCallback: (Boolean) -> Unit
-    ) {
+
+
+    override fun alertBoxWithAction(printUtils: PrintUtil?, batchData: BatchFileDataTable?, title: String, msg: String, showCancelButton: Boolean, positiveButtonText: String, alertCallback: (Boolean) -> Unit, cancelButtonCallback: (Boolean) -> Unit) {
 
         val builder = androidx.appcompat.app.AlertDialog.Builder(this)
         builder.setTitle(title)
@@ -189,6 +212,7 @@ abstract class BaseActivity : AppCompatActivity(), IDialog {
         if (isBackStackAdded) trans.addToBackStack(null)
         return trans.commitAllowingStateLoss() >= 0
     }
+
 
     fun showMerchantAlertBox2(printerUtil: PrintUtil, batchData: BatchFileDataTable, dialogCB: (Boolean) -> Unit) {
         alertBoxWithAction(
@@ -301,6 +325,7 @@ interface IDialog {
     fun showProgress(progressMsg: String = "Please Wait....")
     fun hideProgress()
     fun getInfoDialog(title: String, msg: String, acceptCb: () -> Unit)
+    fun getInfoDialogdoubletap(title: String, msg: String, acceptCb: (Boolean, Dialog) -> Unit)
     fun alertBoxWithAction(
         printUtils: PrintUtil? = null, batchData: BatchFileDataTable? = null,
         title: String, msg: String, showCancelButton: Boolean, positiveButtonText: String,

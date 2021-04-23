@@ -105,6 +105,7 @@ open class BatchFileDataTable() : RealmObject(), Parcelable {
     var cardType: String = ""
     var expiry: String = ""
     var cardNumber: String = ""
+    var de55: String = ""
 
     //    var autthCode: String = ""
     var referenceNumber: String = ""
@@ -113,6 +114,7 @@ open class BatchFileDataTable() : RealmObject(), Parcelable {
     var tipAmmount: String = ""
     var totalAmmount: String = ""
     var isPinverified: Boolean = false
+    var nocvm: Boolean = false
     var discaimerMessage: String = ""
     var isMerchantCoppy = true
     var message: String = ""
@@ -263,6 +265,7 @@ open class BatchFileDataTable() : RealmObject(), Parcelable {
         cardType = parcel.readString().toString()
         expiry = parcel.readString().toString()
         cardNumber = parcel.readString().toString()
+        de55       = parcel.readString().toString()
 
         referenceNumber = parcel.readString().toString()
         aid = parcel.readString().toString()
@@ -365,6 +368,7 @@ open class BatchFileDataTable() : RealmObject(), Parcelable {
         parcel.writeString(cardType)
         parcel.writeString(expiry)
         parcel.writeString(cardNumber)
+        parcel.writeString(de55)
 
         parcel.writeString(referenceNumber)
         parcel.writeString(aid)

@@ -20,6 +20,7 @@ class CardProcessedDataModal : Serializable {
     private var isOnline: Int = 0
     private var genratedPinBlock: String? = null
     private var aid: String? = null
+    private var aidPrint: String? = null
     private var cardholderName: String? = null
     private var date: String? = null
     private var time: String? = null
@@ -53,6 +54,11 @@ class CardProcessedDataModal : Serializable {
     private var typeOfTxnFlag: String? = null
     private var pinEntryFlag: String? = null
     //endregion
+
+    //region==================================================No cvm required value:-
+    private var noCVMneeded: Boolean = false
+
+    //region
 
     // For Insta EMI Available
     private var hasInstaEmi: Boolean = false
@@ -334,6 +340,15 @@ class CardProcessedDataModal : Serializable {
         return aid
     }
 
+    fun setAIDPrint(aid: String?) {
+
+        this.aidPrint = aid
+    }
+    fun getAIDPrint(): String? {
+
+        return aidPrint
+    }
+
     fun getCardHolderName() : String?{
 
         return cardholderName
@@ -381,6 +396,14 @@ class CardProcessedDataModal : Serializable {
 
     fun getPinByPass(): Int? {
         return pinByPass
+    }
+
+    fun setNoCVM(noCVMneeded: Boolean) {
+        this.noCVMneeded = noCVMneeded
+    }
+
+    fun getNoCVM(): Boolean? {
+        return noCVMneeded
     }
 
     fun setcardLabel(cardlabel: String?) {

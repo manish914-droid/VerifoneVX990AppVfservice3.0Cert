@@ -89,6 +89,7 @@ class SecondGenAcOnNetworkError(
                         val tsiData = vfIEMV?.getAppTLVList(tsiArray)
                         //println("TSI Data is ----> $tsiData")
 
+
                         //Here we are Adding AID , TVR and TSI Data in Triple<String , String , String> to return values:-
                         if (!TextUtils.isEmpty(aidData) && !TextUtils.isEmpty(tvrData) && !TextUtils.isEmpty(
                                 tsiData

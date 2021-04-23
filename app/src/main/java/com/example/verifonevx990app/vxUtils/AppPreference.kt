@@ -33,6 +33,12 @@ object AppPreference {
 
     const val BANK_CODE_KEY = "bank_code_key"
 
+    const val de55 = "de_55"
+
+    const val doubletap = "doubletap"
+
+    const val doubletaptimeout = "doubletaptimeout"
+
     const val LAST_BATCH = "last_batch"
     const val HEADER_FOOTER = "header_footer"
 
@@ -187,6 +193,16 @@ object AppPreference {
             ed?.putString(GENERIC_REVERSAL_KEY, "")
             ed?.apply()
             Log.e("REVERSAL", "CLEAR REVERSAL")
+        }
+    }
+
+    fun clearDoubleTap(){
+        logger(TAG, "========clearDoubleTap=========", "e")
+        VerifoneApp.appContext.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE).apply {
+            val ed = edit()
+            ed?.putString(doubletap, "")
+            ed?.apply()
+            Log.e("Double Tap", "CLEAR Double Tap")
         }
     }
 
