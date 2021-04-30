@@ -108,6 +108,11 @@ class VFTransactionActivity : BaseActivity() {
         } else {
             Log.d("Reversal:-", " Reversal Consist No Data")
         }
+
+        if(!TextUtils.isEmpty(AppPreference.getString("doubletap"))){
+            AppPreference.clearDoubleTap()
+        }
+
         //    doProcessCard()
         Handler(Looper.getMainLooper()).postDelayed({
             initUI()
@@ -767,8 +772,8 @@ class VFTransactionActivity : BaseActivity() {
     }
 
 
-     fun printAndSaveDoubletapData() {
-         mstubbedData
+     fun printAndSaveDoubletapData(tcValue: String?) {
+         mstubbedData.tc = tcValue ?: ""
         // printerReceiptData will not be saved in Batch if transaction is pre auth
          printAndSaveBatchDataInDB(mstubbedData){ printCB ->
              if (!printCB) {

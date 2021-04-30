@@ -111,6 +111,7 @@ class StubBatchData(private var de55: String?,var transactionType: Int, var card
         }
 
         batchFileData.isPinverified = true
+        VFService.showToast("Stubbing no cvm value"+cardProcessedDataModal.getNoCVM())
         //no cvm needed
         batchFileData.nocvm = cardProcessedDataModal.getNoCVM() ?: false
         //Saving card number in mask form because we don't save the pan number in Plain text.

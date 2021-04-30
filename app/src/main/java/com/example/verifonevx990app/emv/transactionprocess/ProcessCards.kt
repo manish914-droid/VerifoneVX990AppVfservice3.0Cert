@@ -644,10 +644,9 @@ class ProcessCard(private var issuerUpdateHandler: IssuerUpdateHandler?,var acti
                         }
                         else {
 
+                            AppPreference.clearDoubleTap()
                             iemv?.setIssuerUpdateScript()
                             println("Issuer update script called")
-                            AppPreference.clearDoubleTap()
-
                            transactionCallback(cardProcessedDataModal)
 
                         }

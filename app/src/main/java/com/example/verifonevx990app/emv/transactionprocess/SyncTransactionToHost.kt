@@ -194,6 +194,10 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
 
                                                 }
 
+                                                else{
+                                                    clearReversal()
+                                                }
+
                                                 println("Element at key $7 : ${f55Hash.get(7)}")
 
 
@@ -263,13 +267,6 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
                                                     override fun onProccessResult(result: Int, data: Bundle) {
                                                         Log.i(MainActivity.TAG, "onProccessResult callback:")
 
-                                                        val tcvalue = arrayOf("0x9F26")
-                                                        val tcData = iemv?.getAppTLVList(tcvalue) ?: ""
-
-                                                        val tcHash = HashMap<Int, String>()
-                                                        tlvParser(tcData, tcHash)
-
-                                                        tcHash.forEach { (key, value) -> cardProcessedDataModal?.setTC(value) }
                                                     }
                                                 })
 
@@ -311,12 +308,12 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
                                         DetectCardType.CONTACT_LESS_CARD_WITH_MAG_TYPE,
                                         DetectCardType.MANUAL_ENTRY_TYPE -> {
 
-                                         /*   if(CardAid.Rupay.aid.equals(cardProcessedDataModal?.getAID())) {
+                                    /*        if(true) {
 
                                                 val ta91 = 0x91
                                                 val ta8A = 0x8A
-
                                                 val field55 = responseIsoData.isoMap[55]?.rawData ?: "91109836BE3880804000FFFE000000000001"
+                                              //  val field55 = responseIsoData.isoMap[55]?.rawData ?: ""
                                                 println("Filed55 value is --> $field55")
 
                                                 val f55Hash = HashMap<Int, String>()
@@ -351,6 +348,10 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
                                                     val reversalPacket = Gson().toJson(transactionISOData)
                                                     AppPreference.saveString(GENERIC_REVERSAL_KEY, reversalPacket)
 
+                                                }
+
+                                                else{
+                                                    clearReversal()
                                                 }
 
                                                 println("Element at key $7 : ${f55Hash.get(7)}")
