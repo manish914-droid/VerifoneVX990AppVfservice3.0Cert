@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.verifonevx990app.R
 import com.example.verifonevx990app.main.*
+import com.example.verifonevx990app.realmtables.TerminalParameterTable
 import com.example.verifonevx990app.utils.Utility
 import com.example.verifonevx990app.vxUtils.*
 import com.example.verifonevx990app.vxUtils.ROCProviderV2.getField55
@@ -475,6 +476,15 @@ override fun onConfirmCardInfo(info: Bundle?) {
       }
       catch (ex: Exception){
           ex.printStackTrace()
+          Handler(Looper.getMainLooper()).postDelayed(Runnable {
+              GlobalScope.launch {
+                  VFService.connectToVFService(VerifoneApp.appContext)
+                  delay(200)
+                  //  iemv = VFService.vfIEMV
+                  delay(100)
+                  (activity as VFTransactionActivity).doProcessCard()
+              }
+          }, 200)
           println("VfEmvHandler error in onConfirmCardinfo" + ex.message)
       }
 
@@ -494,7 +504,9 @@ override fun onTransactionResult(result: Int, data: Bundle?) {
       return
   }*/
 
-  val msg = data?.getString("ERROR")
+    val msg = data?.getString("ERROR")
+   // VFService.showToast("Buzzer error code is -->"+result + "error msg is"+msg)
+
   when {
       DetectError.SeePhone.errorCode == result -> {
           (activity as VFTransactionActivity).handleEMVFallbackFromError(
@@ -553,17 +565,52 @@ override fun onTransactionResult(result: Int, data: Bundle?) {
           }
       }
       DetectError.NeedContact.errorCode == result -> {
-          (activity as VFTransactionActivity).handleEMVFallbackFromError(
-              activity.getString(R.string.card_read_error),
-              activity.getString(R.string.reinitiate_trans),
-              false
-          ) { alertCBBool ->
-              if (alertCBBool)
-                  try {
+          val tpt = TerminalParameterTable.selectFromSchemeTable()
+          if(cardProcessedDataModal.getTransactionAmount()!! >= tpt?.maxCtlsTransAmt?.toLong()!!){
+
+              (activity as VFTransactionActivity).handleEMVFallbackFromError(activity.getString(R.string.switch_interface_alert), activity.getString(R.string.switch_interface_error), false) { alertCBBool ->
+                  if (alertCBBool)
+                      try {
+                          (activity as VFTransactionActivity).declinedTransaction()
+                      } catch (ex: Exception) {
+                          ex.printStackTrace()
+                      }
+              }
+          }
+          else{
+             // VFService.showToast("Going in buzzer cond.")
+              try {
+                  GlobalScope.launch {
+                      delay(1000)
+                      VFService.vfBeeper?.stopBeep()
                       (activity as VFTransactionActivity).declinedTransaction()
-                  } catch (ex: Exception) {
-                      ex.printStackTrace()
                   }
+              }
+              catch (ex : RemoteException){
+                  ex.printStackTrace()
+                  Handler(Looper.getMainLooper()).postDelayed(Runnable {
+                      GlobalScope.launch {
+                          VFService.connectToVFService(VerifoneApp.appContext)
+                          delay(200)
+                          //  iemv = VFService.vfIEMV
+                          delay(100)
+                          (activity as VFTransactionActivity).doProcessCard()
+                      }
+                  }, 200)
+              }
+              catch (ex: java.lang.Exception){
+                  ex.printStackTrace()
+                  Handler(Looper.getMainLooper()).postDelayed(Runnable {
+                      GlobalScope.launch {
+                          VFService.connectToVFService(VerifoneApp.appContext)
+                          delay(200)
+                          //  iemv = VFService.vfIEMV
+                          delay(100)
+                          (activity as VFTransactionActivity).doProcessCard()
+                      }
+                  }, 200)
+              }
+
           }
       }
       DetectError.EMVFallBack.errorCode == result -> {
@@ -660,7 +707,15 @@ override fun onTransactionResult(result: Int, data: Bundle?) {
           VFService.showToast("TC value in vfemv handler is"+tcValue)
           cardProcessedDataModal?.setTC(tcValue)
 
-          (activity as VFTransactionActivity).handleEMVFallbackFromError(activity.getString(R.string.alert), msg.toString(), false) { alertCBBool ->
+          try {
+              AppPreference.clearReversal()
+              (activity as VFTransactionActivity).printAndSaveDoubletapData(tcValue)
+
+          } catch (ex: Exception) {
+              ex.printStackTrace()
+          }
+
+        /*  (activity as VFTransactionActivity).handleEMVFallbackFromError(activity.getString(R.string.alert), msg.toString(), false) { alertCBBool ->
               if (alertCBBool)
                   try {
                       AppPreference.clearReversal()
@@ -669,7 +724,7 @@ override fun onTransactionResult(result: Int, data: Bundle?) {
                   } catch (ex: Exception) {
                       ex.printStackTrace()
                   }
-          }
+          }*/
       }
       DetectError.TransactionReject.errorCode == result -> {
           (activity as VFTransactionActivity).handleEMVFallbackFromError(activity.getString(R.string.alert), msg.toString(), false) { alertCBBool ->

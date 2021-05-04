@@ -34,11 +34,12 @@ class SyncReversalToHost(private var transactionISOData: IsoDataWriter?,
                 ?.let { transactionISOData?.addFieldByHex(56, it) }
             transactionISOData?.let { addIsoDateTime(it) }
 
-            if(!TextUtils.isEmpty(AppPreference.doubletap) && !TextUtils.isEmpty(AppPreference.doubletaptimeout)) {
+            if(!TextUtils.isEmpty(AppPreference.getString(AppPreference.doubletap))
+                && !TextUtils.isEmpty(AppPreference.getString(AppPreference.doubletaptimeout))) {
                 transactionISOData?.addFieldByHex(39, "E2")
                }
 
-                else if(!TextUtils.isEmpty(AppPreference.doubletap)) {
+                else if(!TextUtils.isEmpty(AppPreference.getString(AppPreference.doubletap))) {
                 transactionISOData?.additionalData?.get("F39reversal")
                     ?.let { transactionISOData?.addFieldByHex(39, it) }
                }

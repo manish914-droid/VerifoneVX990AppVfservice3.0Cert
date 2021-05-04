@@ -398,7 +398,7 @@ object VFService {
                 )
                 cvmValue.toInt() == 0 -> EmvSetAidRid(vfIEMV, "000000100000", ctlsTransLimit)
                 ctlsTransLimit.toInt() == 0 -> EmvSetAidRid(vfIEMV, "000000100000", "009999999999")
-                else -> EmvSetAidRid(vfIEMV, "000000140000", "000000200000")
+                else -> EmvSetAidRid(vfIEMV, "000000140000", "000000140100")
             }
 
             emvSetAidRid.setAID(1)

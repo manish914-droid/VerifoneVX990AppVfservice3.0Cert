@@ -39,7 +39,10 @@ class CreateSettlementPacket(
 
             //ROC will not go in case of AMEX on all PORT but for HDFC it was mandatory:-
             // Sending ROC in case of HDFC ........
-            addField(11, ROCProviderV2.getRoc(AppPreference.getBankCode()).toString())
+            if(settlementProcessingCode == ProcessingCode.SETTLEMENTWITH95.code)
+                addField(11, (ROCProviderV2.getRoc(AppPreference.getBankCode()).toString().toInt() + 1).toString())
+            else
+                addField(11, ROCProviderV2.getRoc(AppPreference.getBankCode()).toString())
 
             //adding nii
             addField(24, Nii.DEFAULT.nii)

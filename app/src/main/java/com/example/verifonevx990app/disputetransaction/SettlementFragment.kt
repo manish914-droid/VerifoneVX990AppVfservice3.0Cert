@@ -65,38 +65,19 @@ class SettlementFragment : Fragment(R.layout.activity_settlement_view) {
                             (activity as MainActivity).hideProgress()
                             if (VFService.vfPrinter?.status != 240 && VFService.vfPrinter?.status == 0) {
                                 if (batchList.size > 0) {
-                                    (activity as MainActivity).alertBoxWithAction(
-                                        null,
-                                        null,
-                                        getString(R.string.settlement),
-                                        getString(R.string.settle_batch_hint),
-                                        true,
-                                        getString(R.string.positive_button_yes),
-                                        {
+                                    (activity as MainActivity).alertBoxWithAction(null, null, getString(R.string.settlement), getString(R.string.settle_batch_hint), true, getString(R.string.positive_button_yes), {
                                             (activity as MainActivity).showProgress()
-                                            PrintUtil(activity).printDetailReport(
-                                                batchList,
-                                                activity
-                                            ) { detailPrintStatus ->
+                                            PrintUtil(activity).printDetailReport(batchList, activity) { detailPrintStatus ->
                                                 if (detailPrintStatus) {
                                                     GlobalScope.launch(Dispatchers.IO) {
-                                                        val data = CreateSettlementPacket(
-                                                            ProcessingCode.SETTLEMENT.code,
-                                                            batchList
-                                                        ).createSettlementISOPacket()
-                                                        settlementByteArray =
-                                                            data.generateIsoByteRequest()
+                                                        val data = CreateSettlementPacket(ProcessingCode.SETTLEMENT.code, batchList).createSettlementISOPacket()
+                                                        settlementByteArray = data.generateIsoByteRequest()
                                                         try {
                                                             (activity as MainActivity).hideProgress()
-                                                            (activity as MainActivity).settleBatch(
-                                                                settlementByteArray
-                                                            ) {
+                                                            (activity as MainActivity).settleBatch(settlementByteArray) {
                                                                 if (!it)
-                                                                    runBlocking(Dispatchers.Main) {
-                                                                        enableDisableSettlementButton(
-                                                                            true
-                                                                        )
-                                                                    }
+                                                                    batchUploadingat95() //Added by Manish Kumar
+                                                                // enableDisableSettlementButton(true) //commented by Manish Kumar
                                                             }
                                                         } catch (ex: Exception) {
                                                             (activity as MainActivity).hideProgress()
@@ -104,33 +85,21 @@ class SettlementFragment : Fragment(R.layout.activity_settlement_view) {
                                                             ex.printStackTrace()
                                                         }
                                                     }
-                                                } else {
+                                                }
+                                                else {
                                                     (activity as MainActivity).hideProgress()
                                                     GlobalScope.launch(Dispatchers.Main) {
-                                                        (activity as MainActivity).alertBoxWithAction(
-                                                            null,
-                                                            null,
-                                                            getString(R.string.printer_error),
-                                                            getString(R.string.please_check_printing_roll),
-                                                            true,
-                                                            getString(R.string.positive_button_ok),
-                                                            {
+                                                        (activity as MainActivity).alertBoxWithAction(null, null, getString(R.string.printer_error), getString(R.string.please_check_printing_roll), true, getString(R.string.positive_button_ok), {
                                                                 val data = CreateSettlementPacket(
-                                                                    ProcessingCode.SETTLEMENT.code,
-                                                                    batchList
-                                                                ).createSettlementISOPacket()
-                                                                settlementByteArray =
-                                                                    data.generateIsoByteRequest()
+                                                                    ProcessingCode.SETTLEMENT.code, batchList).createSettlementISOPacket()
+                                                                settlementByteArray = data.generateIsoByteRequest()
                                                                 try {
                                                                     (activity as MainActivity).hideProgress()
                                                                     GlobalScope.launch(Dispatchers.IO) {
-                                                                        (activity as MainActivity).settleBatch(
-                                                                            settlementByteArray
-                                                                        ) {
+                                                                        (activity as MainActivity).settleBatch(settlementByteArray) {
                                                                             if (!it)
-                                                                                enableDisableSettlementButton(
-                                                                                    true
-                                                                                )
+                                                                                batchUploadingat95()  //Added By Manish Kumar
+                                                                             //   enableDisableSettlementButton(true) //Commnted By Manish KUmar
                                                                         }
                                                                     }
                                                                 } catch (ex: Exception) {
@@ -190,37 +159,17 @@ class SettlementFragment : Fragment(R.layout.activity_settlement_view) {
                                     (activity as MainActivity).hideProgress()
                                     if (VFService.vfPrinter?.status != 240 && VFService.vfPrinter?.status == 0) {
                                         if (batchList.size > 0) {
-                                            (activity as MainActivity).alertBoxWithAction(
-                                                null,
-                                                null,
-                                                getString(R.string.settlement),
-                                                getString(R.string.settle_batch_hint),
-                                                true,
-                                                getString(R.string.positive_button_yes),
-                                                {
-                                                    PrintUtil(activity).printDetailReport(
-                                                        batchList,
-                                                        activity
-                                                    ) { detailPrintStatus ->
+                                            (activity as MainActivity).alertBoxWithAction(null, null, getString(R.string.settlement), getString(R.string.settle_batch_hint), true, getString(R.string.positive_button_yes), {
+                                                    PrintUtil(activity).printDetailReport(batchList, activity) { detailPrintStatus ->
                                                         if (detailPrintStatus) {
-                                                            GlobalScope.launch(
-                                                                Dispatchers.IO
-                                                            ) {
-                                                                val data =
-                                                                    CreateSettlementPacket(
-                                                                        ProcessingCode.SETTLEMENT.code,
-                                                                        batchList
-                                                                    ).createSettlementISOPacket()
-                                                                settlementByteArray =
-                                                                    data.generateIsoByteRequest()
+                                                            GlobalScope.launch(Dispatchers.IO) {
+                                                                val data = CreateSettlementPacket(ProcessingCode.SETTLEMENT.code, batchList).createSettlementISOPacket()
+                                                                settlementByteArray = data.generateIsoByteRequest()
                                                                 try {
-                                                                    (activity as MainActivity).settleBatch(
-                                                                        settlementByteArray
-                                                                    ) {
+                                                                    (activity as MainActivity).settleBatch(settlementByteArray) {
                                                                         if (!it)
-                                                                            enableDisableSettlementButton(
-                                                                                true
-                                                                            )
+                                                                            batchUploadingat95()  //Added by Manish Kumar
+                                                                          //  enableDisableSettlementButton(true) //commented by Manish Kumar
                                                                     }
                                                                 } catch (ex: Exception) {
                                                                     (activity as MainActivity).hideProgress()
@@ -233,33 +182,17 @@ class SettlementFragment : Fragment(R.layout.activity_settlement_view) {
                                                         } else {
                                                             (activity as MainActivity).hideProgress()
                                                             GlobalScope.launch(Dispatchers.Main) {
-                                                                (activity as MainActivity).alertBoxWithAction(
-                                                                    null,
-                                                                    null,
-                                                                    getString(R.string.printer_error),
-                                                                    getString(R.string.please_check_printing_roll),
-                                                                    true,
-                                                                    getString(R.string.yes),
-                                                                    {
+                                                                (activity as MainActivity).alertBoxWithAction(null, null, getString(R.string.printer_error), getString(R.string.please_check_printing_roll), true, getString(R.string.yes), {
                                                                         val data =
-                                                                            CreateSettlementPacket(
-                                                                                ProcessingCode.SETTLEMENT.code,
-                                                                                batchList
-                                                                            ).createSettlementISOPacket()
-                                                                        settlementByteArray =
-                                                                            data.generateIsoByteRequest()
+                                                                            CreateSettlementPacket(ProcessingCode.SETTLEMENT.code, batchList).createSettlementISOPacket()
+                                                                        settlementByteArray = data.generateIsoByteRequest()
                                                                         try {
                                                                             (activity as MainActivity).hideProgress()
-                                                                            GlobalScope.launch(
-                                                                                Dispatchers.IO
-                                                                            ) {
-                                                                                (activity as MainActivity).settleBatch(
-                                                                                    settlementByteArray
-                                                                                ) {
+                                                                            GlobalScope.launch(Dispatchers.IO) {
+                                                                                (activity as MainActivity).settleBatch(settlementByteArray) {
                                                                                     if (!it)
-                                                                                        enableDisableSettlementButton(
-                                                                                            true
-                                                                                        )
+                                                                                        batchUploadingat95() //Added By Manish Kumar
+                                                                                       // enableDisableSettlementButton(true) //commented by Manish Kumar
                                                                                 }
                                                                             }
                                                                         } catch (ex: Exception) {
@@ -293,14 +226,7 @@ class SettlementFragment : Fragment(R.layout.activity_settlement_view) {
                                     enableDisableSettlementButton(true)
                                     (activity as MainActivity).hideProgress()
                                     VFService.showToast(getString(R.string.offline_sale_upload_fails_please_try_again) + "\n" + responseValidationMsg)
-                                    (activity as MainActivity).alertBoxWithAction(null,
-                                        null,
-                                        getString(R.string.offline_upload),
-                                        getString(R.string.offline_sale_failed_to_upload),
-                                        false,
-                                        getString(R.string.positive_button_ok),
-                                        {},
-                                        {})
+                                    (activity as MainActivity).alertBoxWithAction(null, null, getString(R.string.offline_upload), getString(R.string.offline_sale_failed_to_upload), false, getString(R.string.positive_button_ok), {}, {})
                                 }
                             }
                         }
@@ -311,6 +237,28 @@ class SettlementFragment : Fragment(R.layout.activity_settlement_view) {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private fun batchUploadingat95() {
+        GlobalScope.launch(Dispatchers.IO) {
+            val data = CreateSettlementPacket(ProcessingCode.SETTLEMENTWITH95.code, batchList).createSettlementISOPacket()
+            settlementByteArray = data.generateIsoByteRequest()
+            try {
+                (activity as MainActivity).hideProgress()
+                (activity as MainActivity).settleBatch(settlementByteArray) {
+                    if (!it)
+                        runBlocking(Dispatchers.Main) {
+                        enableDisableSettlementButton(
+                            true
+                        )
+                    }
+                }
+            } catch (ex: Exception) {
+                (activity as MainActivity).hideProgress()
+                enableDisableSettlementButton(true)
+                ex.printStackTrace()
             }
         }
     }

@@ -268,6 +268,8 @@
     <string name="card_error">Card Error</string>
     <string name="card_read_error">Card Read Error</string>
     <string name="reinitiate_trans">Please reinitiate the transaction.</string>
+    <string name="switch_interface_alert">Switch Interface Error</string>
+    <string name="switch_interface_error">Contactless Limit Exceeded.\nPlease Insert/Swipe Card.</string>
     <string name="error_hint">Error</string>
     <string name="print_customer_copy">Print Customer Copy</string>
     <string name="print_merchant_copy">Print Merchant Copy</string>

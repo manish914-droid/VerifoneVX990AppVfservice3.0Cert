@@ -626,7 +626,7 @@ class ProcessCard(private var issuerUpdateHandler: IssuerUpdateHandler?,var acti
                 override fun onCardActivate() {
                     try {
                         println("Contactless is calling")
-                       if(TextUtils.isEmpty(AppPreference.getString(AppPreference.doubletap))){
+                       if(null != cardProcessedDataModal.getDoubeTap() && !(cardProcessedDataModal.getDoubeTap() == true)){
                             iemv?.stopCheckCard()
                             iemv?.abortEMV()
                        }
@@ -637,7 +637,8 @@ class ProcessCard(private var issuerUpdateHandler: IssuerUpdateHandler?,var acti
 
                      //   issuerUpdate(iemv)
 
-                       if(TextUtils.isEmpty(AppPreference.getString("doubletap"))){
+                        if(null != cardProcessedDataModal.getDoubeTap() && !(cardProcessedDataModal.getDoubeTap() == true)){
+
                             DoEmv(issuerUpdateHandler,activity, handler, cardProcessedDataModal, ConstIPBOC.startEMV.intent.VALUE_cardType_contactless) { cardProcessedDataModal ->
                                 transactionCallback(cardProcessedDataModal)
                             }
@@ -678,29 +679,15 @@ class ProcessCard(private var issuerUpdateHandler: IssuerUpdateHandler?,var acti
                     } catch (ex: Exception) {
                         ex.printStackTrace()
                         println("Process card error16" + ex.message)
-                        val builder = AlertDialog.Builder(activity)
-                        object : Thread() {
-                            override fun run() {
-                                Looper.prepare()
-                                builder.setTitle("Alert...!!")
-                                builder.setCancelable(false)
-                                builder.setMessage(
-                                    "Service stopped , " +
-                                            "Please reinitiate the transaction."
-                                )
-                                    .setCancelable(false)
-                                    .setPositiveButton("Start") { _, _ ->
-                                        forceStart(activity)
-                                    }
-                                    .setNeutralButton("Cancel") { dialog, _ ->
-                                        dialog.dismiss()
-                                        (activity).finishAffinity()
-                                    }
-                                val alert: AlertDialog? = builder.create()
-                                alert?.show()
-                                Looper.loop()
+                        Handler(Looper.getMainLooper()).postDelayed(Runnable {
+                            GlobalScope.launch {
+                                VFService.connectToVFService(VerifoneApp.appContext)
+                                delay(100)
+                                iemv = VFService.vfIEMV
+                                delay(100)
+                                detectCard(0)
                             }
-                        }.start()
+                        }, 200)
                     }
 
                 }
@@ -710,7 +697,7 @@ class ProcessCard(private var issuerUpdateHandler: IssuerUpdateHandler?,var acti
                     //To resolve timeout issue
                     cardProcessedDataModal.setReadCardType(DetectCardType.CARD_ERROR_TYPE)
 
-                    if(CardAid.Rupay.aid == cardProcessedDataModal.getAID())
+                    if(CardAid.Rupay.aid == cardProcessedDataModal.getAID() && !TextUtils.isEmpty(AppPreference.getString(AppPreference.doubletap)))
                         AppPreference.saveString(AppPreference.doubletaptimeout,"doubletaptimeout")
 
                     transactionCallback(cardProcessedDataModal)

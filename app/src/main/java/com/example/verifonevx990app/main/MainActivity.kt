@@ -1628,10 +1628,7 @@ class MainActivity : BaseActivity(), IFragmentRequest,
     }
 
     //Settle Batch and Do the Init:-
-    suspend fun settleBatch(
-        settlementByteArray: ByteArray?,
-        settlementCB: ((Boolean) -> Unit)? = null
-    ) {
+    suspend fun settleBatch(settlementByteArray: ByteArray?, settlementCB: ((Boolean) -> Unit)? = null) {
         runOnUiThread {
             showProgress()
         }
@@ -1993,36 +1990,23 @@ class MainActivity : BaseActivity(), IFragmentRequest,
                         settlementCB?.invoke(false)
                     }
 
-                } else {
+                }
+                else {
                     hideProgress()
                     runOnUiThread {
-                        AppPreference.saveBoolean(
-                            PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString(),
-                            true
-                        )
+                        AppPreference.saveBoolean(PrefConstant.BLOCK_MENU_OPTIONS.keyName.toString(), true)
                     }
                     VFService.showToast("Settlement Failure")
                     Log.d("Failure Data:- ", result)
-                    AppPreference.saveString(
-                        PrefConstant.SETTLEMENT_PROCESSING_CODE.keyName.toString(),
-                        ProcessingCode.FORCE_SETTLEMENT.code
-                    )
+                    AppPreference.saveString(PrefConstant.SETTLEMENT_PROCESSING_CODE.keyName.toString(), ProcessingCode.FORCE_SETTLEMENT.code)
 
                     //Added by Ajay Thakur
-                    val settlement_roc =
-                        AppPreference.getIntData(PrefConstant.SETTLEMENT_ROC_INCREMENT.keyName.toString()) + 1
-                    AppPreference.setIntData(
-                        PrefConstant.SETTLEMENT_ROC_INCREMENT.keyName.toString(), settlement_roc
-                    )
+                    val settlement_roc = AppPreference.getIntData(PrefConstant.SETTLEMENT_ROC_INCREMENT.keyName.toString()) + 1
+                    AppPreference.setIntData(PrefConstant.SETTLEMENT_ROC_INCREMENT.keyName.toString(), settlement_roc)
 
-                    AppPreference.saveString(
-                        PrefConstant.SETTLEMENT_PROCESSING_CODE.keyName.toString(),
-                        ProcessingCode.FORCE_SETTLEMENT.code
-                    )
+                    AppPreference.saveString(PrefConstant.SETTLEMENT_PROCESSING_CODE.keyName.toString(), ProcessingCode.FORCE_SETTLEMENT.code)
 
-                    AppPreference.saveBoolean(
-                        PrefConstant.SETTLE_BATCH_SUCCESS.keyName.toString(), true
-                    )
+                    AppPreference.saveBoolean(PrefConstant.SETTLE_BATCH_SUCCESS.keyName.toString(), true)
                     settlementCB?.invoke(false)
                 }
             }, {

@@ -57,7 +57,10 @@ class CardProcessedDataModal : Serializable {
 
     //region==================================================No cvm required value:-
     private var noCVMneeded: Boolean = false
+    //region
 
+    //region==================================================No cvm required value:-
+    private var doubleTap: Boolean = false
     //region
 
     // For Insta EMI Available
@@ -404,6 +407,14 @@ class CardProcessedDataModal : Serializable {
 
     fun getNoCVM(): Boolean? {
         return noCVMneeded
+    }
+
+    fun setDoubeTap(dobleTap: Boolean) {
+        this.doubleTap = doubleTap
+    }
+
+    fun getDoubeTap(): Boolean? {
+        return doubleTap
     }
 
     fun setcardLabel(cardlabel: String?) {

@@ -109,10 +109,6 @@ class VFTransactionActivity : BaseActivity() {
             Log.d("Reversal:-", " Reversal Consist No Data")
         }
 
-        if(!TextUtils.isEmpty(AppPreference.getString("doubletap"))){
-            AppPreference.clearDoubleTap()
-        }
-
         //    doProcessCard()
         Handler(Looper.getMainLooper()).postDelayed({
             initUI()
@@ -129,10 +125,10 @@ class VFTransactionActivity : BaseActivity() {
                 override fun onRequestIssuerUpdate() {
                     VFService.showToast("Request issuer update called")
                     println("Request issuer update called")
-
                     GlobalScope.launch(Dispatchers.Main) {
                         getInfoDialogdoubletap(getString(R.string.alert), getString(R.string.double_tap)) { alertPositiveCallback, dialog ->
                             if (alertPositiveCallback)
+                                globalCardProcessedModel.setDoubeTap(true)
                                 ProcessCard(issuerUpdateHandler, this@VFTransactionActivity, pinHandler, globalCardProcessedModel) { localCardProcessedData ->
                                     dialog.dismiss()
                                     VFService.showToast("Second Tap callback")
@@ -349,13 +345,15 @@ class VFTransactionActivity : BaseActivity() {
 
             DetectCardType.CARD_ERROR_TYPE -> {
 
-                if(CardAid.Rupay.aid == cardProcessedData.getAID()){
+                if(CardAid.Rupay.aid == cardProcessedData.getAID() && !TextUtils.isEmpty(AppPreference.getString(AppPreference.doubletap))){
                      if (!TextUtils.isEmpty(AppPreference.getString(AppPreference.GENERIC_REVERSAL_KEY))) {
+                         if(!TextUtils.isEmpty(AppPreference.getString("doubletap"))) {
+                             AppPreference.clearDoubleTap()
+                         }
                         //   checkForPrintReversalReceipt(this@VFTransactionActivity) {
                         GlobalScope.launch(Dispatchers.Main) {
                             alertBoxWithAction(null, null, getString(R.string.declined), getString(R.string.transaction_delined_msg), false, getString(R.string.positive_button_ok), { alertPositiveCallback ->
                                 if (alertPositiveCallback) {
-                                    AppPreference.clearDoubleTap()
                                     checkForPrintReversalReceipt(this@VFTransactionActivity) {}
                                     syncOfflineSaleAndAskAutoSettlement(autoSettlementCheck.substring(0, 1) )
                                 }
@@ -384,11 +382,11 @@ class VFTransactionActivity : BaseActivity() {
             DetectCardType.CARD_ERROR_TYPE -> {
                 if(CardAid.Rupay.aid == cardProcessedData.getAID()){
                     if (!TextUtils.isEmpty(AppPreference.getString(AppPreference.GENERIC_REVERSAL_KEY))) {
+                        AppPreference.clearDoubleTap()
                         //   checkForPrintReversalReceipt(this@VFTransactionActivity) {
                         GlobalScope.launch(Dispatchers.Main) {
                             alertBoxWithAction(null, null, getString(R.string.declined), getString(R.string.transaction_delined_msg), false, getString(R.string.positive_button_ok), { alertPositiveCallback ->
                                 if (alertPositiveCallback) {
-                                    AppPreference.clearDoubleTap()
                                     checkForPrintReversalReceipt(this@VFTransactionActivity) {}
                                     syncOfflineSaleAndAskAutoSettlement(autoSettlementCheck.substring(0, 1) )
                                 }
@@ -412,11 +410,11 @@ class VFTransactionActivity : BaseActivity() {
     fun processDoubleTap(cardProcessedData: CardProcessedDataModal) {
         when{
             DetectError.TransactionReject.errorCode == 202-> {
-                if(CardAid.Rupay.aid == cardProcessedData.getAID()){
+                if(CardAid.Rupay.aid == cardProcessedData.getAID() && !TextUtils.isEmpty(AppPreference.getString(AppPreference.doubletap))){
                     if (!TextUtils.isEmpty(AppPreference.getString(AppPreference.GENERIC_REVERSAL_KEY))) {
+                        AppPreference.clearDoubleTap()
                         //   checkForPrintReversalReceipt(this@VFTransactionActivity) {
                         GlobalScope.launch(Dispatchers.Main) {
-                                    AppPreference.clearDoubleTap()
                                     checkForPrintReversalReceipt(this@VFTransactionActivity) {}
                                     syncOfflineSaleAndAskAutoSettlement(autoSettlementCheck.substring(0, 1) )
 
