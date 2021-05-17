@@ -216,6 +216,8 @@ class CompleteSecondGenAc(var cardProcessedDataModal: CardProcessedDataModal?,va
 
                     AppPreference.saveString("de_55",de55)
 
+                    //second
+
                     val tcHash = HashMap<Int, String>()
                     tlvParser(tcData, tcHash)
 

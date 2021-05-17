@@ -270,11 +270,7 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
                                                 }
 
                                                 else{
-
-                                                    transactionISOData.apply {
-                                                        additionalData["F39reversal"] = "E1"
-                                                    }
-                                                 //   clearReversal()
+                                                    clearReversal()
                                                 }
 
 
