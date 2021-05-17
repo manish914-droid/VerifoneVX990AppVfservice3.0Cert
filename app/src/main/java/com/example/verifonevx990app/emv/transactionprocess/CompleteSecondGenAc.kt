@@ -34,7 +34,7 @@ class CompleteSecondGenAc(var cardProcessedDataModal: CardProcessedDataModal?,va
         }
         val responseCode = (data.isoMap[39]?.parseRaw2String().toString())
         val field55 = data.isoMap[55]?.rawData ?: ""
-        //println("Filed55 value is --> $field55")
+        //println("Filed55 value is --> $field55")//910ADE930EAD11D6F1720014
         val f55Hash = HashMap<Int, String>()
         tlvParser(field55, f55Hash)
         val ta8A = 0x8A
@@ -112,8 +112,46 @@ class CompleteSecondGenAc(var cardProcessedDataModal: CardProcessedDataModal?,va
                   //At least 0A length for 91
                 println("Field55 value inside ---> " + Integer.toHexString(ta91) + "0A" + Utility.byte2HexStr(mba.toByteArray()) + f72)
             }
+            else if (field55 != null && field55.isNotEmpty() && (mba1.size <= 8 || mba1.size < 10)) {
+                onlineResult.putString(ConstIPBOC.inputOnlineResult.onlineResult.KEY_field55_String, Integer.toHexString(ta91) + "0A" + Utility.byte2HexStr(mba.toByteArray()) + f72)
+                //At least 0A length for 91
+                VFService.showToast("Field55 value inside ---> " + Integer.toHexString(ta91) + "0A" + Utility.byte2HexStr(mba.toByteArray()) + f72)
+                println("Field55 value inside ---> " + Integer.toHexString(ta91) + "0A" + Utility.byte2HexStr(mba.toByteArray()) + f72)
+            }
             else if (field55 != null && field55.isNotEmpty() && mba1.size >= 10) {
-                onlineResult.putString(ConstIPBOC.inputOnlineResult.onlineResult.KEY_field55_String, field55)
+
+                if(CardAid.Rupay.aid.equals(cardProcessedDataModal?.getAID())){
+
+                    val tagData8a = f55Hash[ta8A] ?: "54"
+                    try {
+                        if (tagData8a.isNotEmpty()) {
+
+                            val byteArr = tagData8a.toByteArray()
+                            var hexvalue = Utility.byte2HexStr(byteArr)
+                            println("54 hex value is --->" + hexvalue)
+                            println("54 hex to string is --->" + hexString2String(hexvalue))
+
+                            val ba = tagData8a.hexStr2ByteArr()
+
+                            var strba = ba.byteArr2HexStr()
+
+                            // rtn = EMVCallback.EMVSetTLVData(ta.toShort(), ba, ba.size)
+                            logger(VFTransactionActivity.TAG, "On setting ${Integer.toHexString(ta8A)} tag status = $", "e")
+                        }
+                    } catch (ex: Exception) {
+                        logger(VFTransactionActivity.TAG, ex.message ?: "", "e")
+                    }
+                    val byteArr = tagData8a.toByteArray()
+                    var hexvalue = Utility.byte2HexStr(byteArr)
+
+                    onlineResult.putString(ConstIPBOC.inputOnlineResult.onlineResult.KEY_field55_String, Integer.toHexString(ta91) + "0A" + Integer.toHexString(ta8A) + "02"+hexvalue)
+                    println("Field55 value insidesss ---> " + Integer.toHexString(ta91) + "0A" + Utility.byte2HexStr(mba1.toByteArray()) + Integer.toHexString(ta8A) + "02"+hexvalue)
+
+
+                }
+                else {
+                    onlineResult.putString(ConstIPBOC.inputOnlineResult.onlineResult.KEY_field55_String, field55)
+                }
                 //At least 0A length for 91
                 println("Field55 value inside ---> " + field55)
             }

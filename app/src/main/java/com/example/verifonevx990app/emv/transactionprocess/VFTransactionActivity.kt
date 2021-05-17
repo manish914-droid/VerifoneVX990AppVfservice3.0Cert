@@ -101,6 +101,7 @@ class VFTransactionActivity : BaseActivity() {
         tpt = TerminalParameterTable.selectFromSchemeTable()
         isManualEntryAllowed = tpt?.fManEntry == "1"
         globalCardProcessedModel.setTransType(transactionType)
+        globalCardProcessedModel.setProcessingCode(transactionProcessingCode)
 
 
         if (!TextUtils.isEmpty(AppPreference.getString(AppPreference.GENERIC_REVERSAL_KEY))) {
@@ -123,7 +124,7 @@ class VFTransactionActivity : BaseActivity() {
 
             issuerUpdateHandler = object : IssuerUpdateHandler.Stub()  {
                 override fun onRequestIssuerUpdate() {
-                    VFService.showToast("Request issuer update called")
+                   // VFService.showToast("Request issuer update called")
                     println("Request issuer update called")
                     GlobalScope.launch(Dispatchers.Main) {
                         getInfoDialogdoubletap(getString(R.string.alert), getString(R.string.double_tap)) { alertPositiveCallback, dialog ->
@@ -131,7 +132,7 @@ class VFTransactionActivity : BaseActivity() {
                                 globalCardProcessedModel.setDoubeTap(true)
                                 ProcessCard(issuerUpdateHandler, this@VFTransactionActivity, pinHandler, globalCardProcessedModel) { localCardProcessedData ->
                                     dialog.dismiss()
-                                    VFService.showToast("Second Tap callback")
+                                //    VFService.showToast("Second Tap callback")
                                     processDoubleTapTimeout(localCardProcessedData)
                                 }
 
@@ -189,7 +190,7 @@ class VFTransactionActivity : BaseActivity() {
                         })
                 }
             } else {
-
+                globalCardProcessedModel.setProcessingCode(transactionProcessingCode)
                 ProcessCard(issuerUpdateHandler,this, pinHandler, globalCardProcessedModel) { localCardProcessedData ->
                     localCardProcessedData.setProcessingCode(transactionProcessingCode)
                     localCardProcessedData.setTransactionAmount(transactionalAmount)
@@ -437,6 +438,7 @@ class VFTransactionActivity : BaseActivity() {
         findViewById<BHTextView>(R.id.base_amt_tv).text = amountValue
         transactionalAmount = ((transactionAmountValue.toFloat()) * 100).toLong()
         otherTransAmount = ((transactionOtherAmountValue.toFloat()) * 100).toLong()
+        globalCardProcessedModel.setProcessingCode(transactionProcessingCode)
         globalCardProcessedModel.setOtherAmount(otherTransAmount)
         globalCardProcessedModel.setTransactionAmount(transactionalAmount)
         globalCardProcessedModel.setSaleAmount(((saleAmt.toFloat()) * 100).toLong())

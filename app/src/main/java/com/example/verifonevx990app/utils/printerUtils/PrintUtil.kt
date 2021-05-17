@@ -157,7 +157,7 @@ class PrintUtil(context: Context?) {
         //  printer=null
         try {
             //  logger("PS_START", (printer?.status).toString(), "e")
-                VFService.showToast("Printing no cvm value"+printerReceiptData.nocvm)
+               // VFService.showToast("Printing no cvm value"+printerReceiptData.nocvm)
                 if(!(printerReceiptData.nocvm)) {
                      signatureMsg = if (printerReceiptData.isPinverified) {
                         "SIGNATURE NOT REQUIRED"

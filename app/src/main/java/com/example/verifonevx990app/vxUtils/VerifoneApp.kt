@@ -31,6 +31,7 @@ import io.realm.RealmConfiguration
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
+
 class VerifoneApp : Application() {
 
     companion object {
@@ -38,8 +39,9 @@ class VerifoneApp : Application() {
         lateinit var appContext: Context
         private val TAG = VerifoneApp::class.java.simpleName
 
+
         var internetConnection = false
-            private set
+            get() = isOnline(appContext)
 
         private lateinit var vxAppContext: VerifoneApp
 
@@ -50,7 +52,7 @@ class VerifoneApp : Application() {
         }
 
         fun getDeviceSerialNo(): String {
-         return "Deviceserialnumber"
+            return "Deviceserialnumber"
         }
 
         var activeActivity: String? = null
@@ -79,9 +81,9 @@ class VerifoneApp : Application() {
     }
 
     private val mConnectionReceiver by lazy {
-        Connectivity {
-            internetConnection = it
-        }
+        /*  Connectivity {
+              internetConnection = it
+          }*/
     }
 
     private val mTelephonyManager: TelephonyManager by lazy { getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager }
@@ -104,7 +106,7 @@ class VerifoneApp : Application() {
         StrictMode.setVmPolicy(builder.build())
 
 
-        registerActivityLifecycleCallbacks(object: ActivityLifecycleCallbacks{
+        registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             override fun onActivityPaused(p0: Activity) {
             }
 
@@ -142,7 +144,7 @@ class VerifoneApp : Application() {
         })
 
 
-        registerReceiver(mConnectionReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
+        //  registerReceiver(mConnectionReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
         registerReceiver(mBatteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
 
         initRealm()
@@ -160,15 +162,15 @@ class VerifoneApp : Application() {
 
             //EmvImplementation.isAidAdded = false
 
-          /*  if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
-                if (checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-                    imeiNo = mTelephonyManager.imei
-                }
-            } else {
-                if (checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-                    imeiNo = mTelephonyManager.deviceId
-                }
-            }*/
+            /*  if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+                  if (checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+                      imeiNo = mTelephonyManager.imei
+                  }
+              } else {
+                  if (checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+                      imeiNo = mTelephonyManager.deviceId
+                  }
+              }*/
 
         }
 
@@ -223,15 +225,32 @@ class VerifoneApp : Application() {
 
 
     override fun onTerminate() {
-        unregisterReceiver(mConnectionReceiver)
+        //  unregisterReceiver(mConnectionReceiver)
         unregisterReceiver(mBatteryReceiver)
         super.onTerminate()
     }
 
 
-
-
 }
+
+fun isOnline(context: Context): Boolean {
+    val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    if(null !=cm) {
+        val activeNetwork = cm.activeNetworkInfo
+        if (activeNetwork != null) {
+            // connected to the internet
+            if (activeNetwork.type == ConnectivityManager.TYPE_WIFI) {
+                return true
+            } else if (activeNetwork.type == ConnectivityManager.TYPE_MOBILE) {
+                return true
+            }
+        } else {
+            return false
+        }
+    }
+    return false
+}
+
 
 //Internet Check Class:-
 internal class Connectivity() : BroadcastReceiver() {

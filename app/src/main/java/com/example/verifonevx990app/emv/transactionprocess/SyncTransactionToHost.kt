@@ -184,7 +184,7 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
                                                 f55Hash.forEach { (key, value) -> println("$key = $value") }
 
                                                 if (f55Hash.isNotEmpty() && (f55Hash.get(7) == "40" || f55Hash.get(7) == "80")) {
-                                                    VFService.showToast("Double Tap")
+                                                  //  VFService.showToast("Double Tap")
                                                     AppPreference.saveString(AppPreference.doubletap, "doubletap")
                                                     secondTap = "doubletap"
 
@@ -219,8 +219,7 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
                                                         if (tagData8a.isNotEmpty()) {
 
                                                             val byteArr = tagData8a.toByteArray()
-                                                            var hexvalue =
-                                                                Utility.byte2HexStr(byteArr)
+                                                            var hexvalue = Utility.byte2HexStr(byteArr)
                                                             println("3030 hex value is --->" + hexvalue)
                                                             println("3030 hex to string is --->" + hexString2String(hexvalue))
 
@@ -271,7 +270,11 @@ class SyncTransactionToHost(var transactionISOByteArray: IsoDataWriter?, var car
                                                 }
 
                                                 else{
-                                                    clearReversal()
+
+                                                    transactionISOData.apply {
+                                                        additionalData["F39reversal"] = "E1"
+                                                    }
+                                                 //   clearReversal()
                                                 }
 
 

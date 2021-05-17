@@ -704,7 +704,7 @@ override fun onTransactionResult(result: Int, data: Bundle?) {
           var tcdata = iemv?.getCardData(Integer.toHexString(0x9F26).toUpperCase(Locale.ROOT))
 
           val tcValue = Utility.byte2HexStr(tcdata)
-          VFService.showToast("TC value in vfemv handler is"+tcValue)
+        //  VFService.showToast("TC value in vfemv handler is"+tcValue)
           cardProcessedDataModal?.setTC(tcValue)
 
           try {
