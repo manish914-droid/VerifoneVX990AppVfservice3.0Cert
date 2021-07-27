@@ -12,7 +12,7 @@
     <string name="app_update">Application Update</string>
     <string name="home">Home</string>
     <string name="settlement">Settlement</string>
-    <string name="dynamicLimit_error">Transaction Limit amount exceeds</string>
+    <string name="dynamicLimit_error">Card read error</string>
     <string name="bank_card_password">Enter Pin</string>
     //
     <string name="alpha_num_digits">AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789</string>
@@ -270,6 +270,7 @@
     <string name="reinitiate_trans">Please reinitiate the transaction.</string>
     <string name="switch_interface_alert">Switch Interface Error</string>
     <string name="switch_interface_error">Contactless Limit Exceeded.\nPlease Insert/Swipe Card.</string>
+    <string name="switch_interface_diners_error">Please Insert/Swipe Card.</string>
     <string name="error_hint">Error</string>
     <string name="print_customer_copy">Print Customer Copy</string>
     <string name="print_merchant_copy">Print Merchant Copy</string>
